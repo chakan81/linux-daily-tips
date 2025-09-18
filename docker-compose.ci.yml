@@ -1,0 +1,155 @@
+# Docker Compose configuration for CI/CD pipeline
+# Optimized for GitHub Actions testing environment
+
+version: '3.8'
+
+services:
+  # PostgreSQL for testing
+  postgres-test:
+    image: postgres:15-alpine
+    container_name: linux_tips_postgres_test
+    environment:
+      POSTGRES_DB: linux_daily_tips_test
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_test_password
+      POSTGRES_HOST_AUTH_METHOD: trust
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./backend/init-db:/docker-entrypoint-initdb.d:ro
+    networks:
+      - ci_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d linux_daily_tips_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Redis for testing
+  redis-test:
+    image: redis:7-alpine
+    container_name: linux_tips_redis_test
+    command: redis-server --appendonly yes --requirepass redis_test_password
+    ports:
+      - "6380:6379"
+    networks:
+      - ci_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  # Backend testing service
+  backend-test:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: testing
+    container_name: linux_tips_backend_test
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres_test_password@postgres-test:5432/linux_daily_tips_test
+      REDIS_URL: redis://:redis_test_password@redis-test:6379/0
+      ENVIRONMENT: testing
+      LOG_LEVEL: DEBUG
+      # Test-specific environment variables
+      PYTHONPATH: /app
+      COVERAGE_FILE: /app/.coverage
+    volumes:
+      - ./backend:/app
+      - backend_coverage:/app/coverage
+    networks:
+      - ci_network
+    depends_on:
+      postgres-test:
+        condition: service_healthy
+      redis-test:
+        condition: service_healthy
+    command: ["poetry", "run", "pytest", "--cov=app", "--cov-report=xml:/app/coverage/coverage.xml", "--cov-report=html:/app/coverage/html", "-v"]
+
+  # Frontend testing service
+  frontend-test:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: testing
+    container_name: linux_tips_frontend_test
+    environment:
+      NODE_ENV: test
+      CI: true
+      # Disable Next.js telemetry in CI
+      NEXT_TELEMETRY_DISABLED: 1
+    volumes:
+      - ./frontend:/app
+      - frontend_coverage:/app/coverage
+      - frontend_build:/app/.next
+    networks:
+      - ci_network
+    command: ["npm", "run", "test"]
+
+  # Backend linting and code quality
+  backend-lint:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: testing
+    container_name: linux_tips_backend_lint
+    environment:
+      PYTHONPATH: /app
+    volumes:
+      - ./backend:/app
+    networks:
+      - ci_network
+    command: ["sh", "-c", "poetry run black --check . && poetry run flake8 . && poetry run mypy . && poetry run isort --check-only ."]
+
+  # Frontend linting and code quality
+  frontend-lint:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: testing
+    container_name: linux_tips_frontend_lint
+    environment:
+      NODE_ENV: test
+      CI: true
+      NEXT_TELEMETRY_DISABLED: 1
+    volumes:
+      - ./frontend:/app
+    networks:
+      - ci_network
+    command: ["sh", "-c", "npm run lint && npm run format:check && npm run type-check"]
+
+  # Security scanning (backend)
+  backend-security:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: testing
+    container_name: linux_tips_backend_security
+    volumes:
+      - ./backend:/app
+    networks:
+      - ci_network
+    command: ["sh", "-c", "poetry run safety check --json || echo 'Security check completed with warnings'"]
+
+# Named volumes for CI artifacts
+volumes:
+  backend_coverage:
+    name: linux_tips_backend_coverage
+  frontend_coverage:
+    name: linux_tips_frontend_coverage
+  frontend_build:
+    name: linux_tips_frontend_build
+
+# CI network
+networks:
+  ci_network:
+    name: linux_tips_ci_network
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.21.0.0/16

@@ -1,0 +1,220 @@
+name: Frontend CI
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'frontend/**'
+      - 'docker-compose.ci.yml'
+      - '.github/workflows/frontend-ci.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'frontend/**'
+      - 'docker-compose.ci.yml'
+      - '.github/workflows/frontend-ci.yml'
+
+env:
+  DOCKER_BUILDKIT: 1
+  COMPOSE_DOCKER_CLI_BUILD: 1
+
+jobs:
+  frontend-quality:
+    name: Frontend Code Quality & Testing
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Cache Docker layers
+      uses: actions/cache@v3
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-buildx-frontend-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-buildx-frontend-
+
+    - name: Build frontend test image
+      run: |
+        docker-compose -f docker-compose.ci.yml build frontend-test
+        docker-compose -f docker-compose.ci.yml build frontend-lint
+
+    - name: Run ESLint
+      run: docker-compose -f docker-compose.ci.yml run --rm frontend-lint npm run lint
+
+    - name: Run Prettier format check
+      run: docker-compose -f docker-compose.ci.yml run --rm frontend-lint npm run format:check
+
+    - name: Run TypeScript type checking
+      run: docker-compose -f docker-compose.ci.yml run --rm frontend-lint npm run type-check
+
+    - name: Run unit tests with coverage
+      run: |
+        docker-compose -f docker-compose.ci.yml run --rm frontend-test npm run test:coverage
+
+    - name: Extract test coverage reports
+      run: |
+        mkdir -p ./coverage/frontend
+        docker cp $(docker-compose -f docker-compose.ci.yml ps -q frontend-test):/app/coverage/lcov.info ./coverage/frontend/ || true
+        docker cp $(docker-compose -f docker-compose.ci.yml ps -q frontend-test):/app/coverage/clover.xml ./coverage/frontend/ || true
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage/frontend/lcov.info
+        flags: frontend
+        name: frontend-coverage
+        fail_ci_if_error: false
+
+    - name: Clean up
+      if: always()
+      run: docker-compose -f docker-compose.ci.yml down -v
+
+  frontend-build-test:
+    name: Frontend Build Test
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Test multi-stage build (development)
+      run: |
+        docker build --target development -t linux-tips-frontend:dev ./frontend
+
+    - name: Test multi-stage build (testing)
+      run: |
+        docker build --target testing -t linux-tips-frontend:test ./frontend
+
+    - name: Test multi-stage build (production)
+      run: |
+        docker build --target production -t linux-tips-frontend:prod ./frontend
+
+    - name: Test production build size
+      run: |
+        docker run --rm linux-tips-frontend:prod ls -la .next/static || echo "Static files not found"
+
+  frontend-security-scan:
+    name: Frontend Security Scan
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Build frontend image for security scan
+      run: |
+        docker build -t linux-tips-frontend:latest ./frontend
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'linux-tips-frontend:latest'
+        format: 'sarif'
+        output: 'trivy-results-frontend.sarif'
+
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-results-frontend.sarif'
+
+  frontend-lighthouse:
+    name: Frontend Lighthouse Audit
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Build frontend for audit
+      run: |
+        docker build --target production -t linux-tips-frontend:audit ./frontend
+
+    - name: Start frontend for audit
+      run: |
+        docker run -d --name frontend-audit \
+          -p 3000:3000 \
+          linux-tips-frontend:audit
+
+    - name: Wait for frontend to be ready
+      run: |
+        timeout 60 bash -c 'until curl -f http://localhost:3000/api/health || curl -f http://localhost:3000; do sleep 2; done'
+
+    - name: Run Lighthouse CI
+      run: |
+        npm install -g @lhci/cli@0.12.x
+        lhci autorun --upload.target=temporary-public-storage
+      env:
+        LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+    - name: Cleanup audit container
+      if: always()
+      run: |
+        docker stop frontend-audit
+        docker rm frontend-audit
+
+  frontend-e2e:
+    name: Frontend E2E Tests
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps chromium
+
+    - name: Build and start services for E2E
+      run: |
+        docker-compose -f docker-compose.ci.yml up -d postgres-test redis-test
+        docker build --target production -t linux-tips-frontend:e2e ./frontend
+        docker build --target production -t linux-tips-backend:e2e ./backend
+
+    - name: Start application stack for E2E
+      run: |
+        docker run -d --name backend-e2e \
+          --network linux_tips_ci_network \
+          -e DATABASE_URL=postgresql+asyncpg://postgres:postgres_test_password@postgres-test:5432/linux_daily_tips_test \
+          -e REDIS_URL=redis://:redis_test_password@redis-test:6379/0 \
+          -e ENVIRONMENT=testing \
+          -p 8000:8000 \
+          linux-tips-backend:e2e
+
+        docker run -d --name frontend-e2e \
+          -e NEXT_PUBLIC_API_URL=http://localhost:8000 \
+          -p 3000:3000 \
+          linux-tips-frontend:e2e
+
+    - name: Wait for services to be ready
+      run: |
+        timeout 60 bash -c 'until curl -f http://localhost:8000/health; do sleep 2; done'
+        timeout 60 bash -c 'until curl -f http://localhost:3000; do sleep 2; done'
+
+    - name: Run Playwright tests
+      working-directory: ./frontend
+      run: npx playwright test
+
+    - name: Upload E2E test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-report
+        path: frontend/playwright-report/
+        retention-days: 30
+
+    - name: Cleanup E2E containers
+      if: always()
+      run: |
+        docker stop frontend-e2e backend-e2e || true
+        docker rm frontend-e2e backend-e2e || true
+        docker-compose -f docker-compose.ci.yml down -v

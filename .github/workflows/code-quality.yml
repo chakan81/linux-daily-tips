@@ -1,0 +1,197 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run weekly dependency security scan
+    - cron: '0 6 * * 1'
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+
+  dependency-check:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        component: [backend, frontend]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Backend - Python Security Check
+      if: matrix.component == 'backend'
+      run: |
+        cd backend
+        pip install safety bandit
+        # Check for known security vulnerabilities
+        safety check --json --output safety-report.json || true
+        # Static security analysis
+        bandit -r app/ -f json -o bandit-report.json || true
+
+    - name: Frontend - Node.js Security Check
+      if: matrix.component == 'frontend'
+      run: |
+        cd frontend
+        npm audit --audit-level=moderate --json > npm-audit.json || true
+
+    - name: Upload security reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: security-reports-${{ matrix.component }}
+        path: |
+          backend/safety-report.json
+          backend/bandit-report.json
+          frontend/npm-audit.json
+
+  code-analysis:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Shallow clones should be disabled for better analysis
+
+    - name: SonarCloud Scan
+      uses: SonarSource/sonarcloud-github-action@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  license-check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Check Python licenses
+      run: |
+        cd backend
+        pip install pip-licenses
+        pip-licenses --format=json --output-file=python-licenses.json
+
+    - name: Check Node.js licenses
+      run: |
+        cd frontend
+        npx license-checker --json --out npm-licenses.json
+
+    - name: Upload license reports
+      uses: actions/upload-artifact@v4
+      with:
+        name: license-reports
+        path: |
+          backend/python-licenses.json
+          frontend/npm-licenses.json
+
+  performance-budget:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install dependencies
+      run: |
+        cd frontend
+        npm ci
+
+    - name: Build frontend
+      run: |
+        cd frontend
+        npm run build
+
+    - name: Analyze bundle size
+      run: |
+        cd frontend
+        npx @next/bundle-analyzer
+
+    - name: Check bundle size limits
+      run: |
+        cd frontend
+        # Set bundle size limits (in bytes)
+        MAX_BUNDLE_SIZE=500000  # 500KB
+        BUNDLE_SIZE=$(stat -c%s .next/static/chunks/pages/_app-*.js 2>/dev/null || echo 0)
+
+        if [ $BUNDLE_SIZE -gt $MAX_BUNDLE_SIZE ]; then
+          echo "Bundle size ($BUNDLE_SIZE bytes) exceeds limit ($MAX_BUNDLE_SIZE bytes)"
+          exit 1
+        else
+          echo "Bundle size ($BUNDLE_SIZE bytes) is within limit ($MAX_BUNDLE_SIZE bytes)"
+        fi
+
+  docker-security:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        dockerfile: [backend/Dockerfile, frontend/Dockerfile]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Run Hadolint Dockerfile linter
+      uses: hadolint/hadolint-action@v3.1.0
+      with:
+        dockerfile: ${{ matrix.dockerfile }}
+        format: sarif
+        output-file: hadolint-${{ matrix.dockerfile }}.sarif
+
+    - name: Upload Hadolint results
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: hadolint-${{ matrix.dockerfile }}.sarif
+
+  commit-quality:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Check commit messages
+      run: |
+        # Check if commit messages follow conventional commits format
+        git log --pretty=format:"%s" origin/main..HEAD | while read commit_msg; do
+          if ! echo "$commit_msg" | grep -qE "^(feat|fix|docs|style|refactor|test|chore)(\(.+\))?: .{1,50}"; then
+            echo "Commit message does not follow conventional commits format: $commit_msg"
+            exit 1
+          fi
+        done
+
+    - name: Check for sensitive data
+      uses: trufflesecurity/trufflehog@main
+      with:
+        path: ./
+        base: main
+        head: HEAD

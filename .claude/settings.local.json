@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./scripts/dev-up.sh:*)",
+      "Bash(docker-compose:*)",
+      "Bash(./scripts/dev-down.sh:*)"
+    ]
+  },
+  "outputStyle": "korean"
+}

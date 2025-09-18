@@ -1,0 +1,98 @@
+
+services:
+  # PostgreSQL 15 - Primary Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: linux_tips_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: linux_daily_tips
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_dev_password
+      POSTGRES_HOST_AUTH_METHOD: trust
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init-db:/docker-entrypoint-initdb.d:ro
+    networks:
+      - linux_tips_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d linux_daily_tips"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Redis 7 - Cache and Session Storage
+  redis:
+    image: redis:7-alpine
+    container_name: linux_tips_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass redis_dev_password
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - linux_tips_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+
+  # FastAPI Backend (Development mode)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: linux_tips_backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres_dev_password@postgres:5432/linux_daily_tips
+      REDIS_URL: redis://:redis_dev_password@redis:6379/0
+      ENVIRONMENT: development
+      LOG_LEVEL: DEBUG
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      - /app/__pycache__
+    networks:
+      - linux_tips_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    develop:
+      watch:
+        - action: sync
+          path: ./backend
+          target: /app
+          ignore:
+            - __pycache__
+            - .pytest_cache
+            - "*.pyc"
+
+# Persistent volumes for data
+volumes:
+  postgres_data:
+    name: linux_tips_postgres_data
+    driver: local
+  redis_data:
+    name: linux_tips_redis_data
+    driver: local
+
+# Development network
+networks:
+  linux_tips_network:
+    name: linux_tips_network
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16

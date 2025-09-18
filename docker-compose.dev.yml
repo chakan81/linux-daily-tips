@@ -1,0 +1,133 @@
+
+# Development-specific Docker Compose configuration
+# Usage: docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  # Enhanced PostgreSQL for development
+  postgres:
+    environment:
+      # Enable additional logging for development
+      POSTGRES_INITDB_ARGS: "--auth-host=trust --auth-local=trust"
+    volumes:
+      # Add development SQL scripts
+      - ./backend/init-db/dev-data:/docker-entrypoint-initdb.d/dev-data:ro
+    command: >
+      postgres
+      -c log_statement=all
+      -c log_destination=stderr
+      -c log_line_prefix='%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '
+    labels:
+      - "traefik.enable=false"
+
+  # Enhanced Redis for development
+  redis:
+    volumes:
+      # Add Redis configuration for development
+      - ./backend/config/redis.dev.conf:/usr/local/etc/redis/redis.conf:ro
+    command: redis-server /usr/local/etc/redis/redis.conf
+    labels:
+      - "traefik.enable=false"
+
+  # FastAPI with development features
+  backend:
+    environment:
+      # Development-specific environment variables
+      DEBUG: "true"
+      RELOAD: "true"
+      LOG_LEVEL: DEBUG
+      CORS_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000"
+      # Database connection with detailed logging
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres_dev_password@postgres:5432/linux_daily_tips?echo=true
+      # Redis with detailed logging
+      REDIS_URL: redis://:redis_dev_password@redis:6379/0
+      # LLM API keys (for development testing)
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      # Terminal sandbox settings
+      DOCKER_HOST: unix:///var/run/docker.sock
+      TERMINAL_TIMEOUT: 30
+      TERMINAL_MAX_MEMORY: 512m
+      TERMINAL_MAX_CPU: 0.5
+    volumes:
+      # Mount Docker socket for terminal emulator
+      - /var/run/docker.sock:/var/run/docker.sock
+      # Hot reload for development
+      - ./backend:/app:delegated
+      - backend_cache:/app/.cache
+    ports:
+      # Expose debugger port
+      - "5678:5678"
+    command: >
+      uvicorn main:app
+      --host 0.0.0.0
+      --port 8000
+      --reload
+      --reload-dir /app
+      --log-level debug
+      --access-log
+    labels:
+      - "traefik.enable=false"
+
+  # pgAdmin for database management (development only)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: linux_tips_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@linuxtips.dev
+      PGADMIN_DEFAULT_PASSWORD: pgadmin_dev_password
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./backend/init-db/pgadmin-servers.json:/pgadmin4/servers.json:ro
+    networks:
+      - linux_tips_network
+    depends_on:
+      - postgres
+    labels:
+      - "traefik.enable=false"
+
+  # Redis Commander for Redis management (development only)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: linux_tips_redis_commander
+    restart: unless-stopped
+    environment:
+      REDIS_HOSTS: local:redis:6379:0:redis_dev_password
+      HTTP_USER: admin
+      HTTP_PASSWORD: redis_commander_password
+    ports:
+      - "8081:8081"
+    networks:
+      - linux_tips_network
+    depends_on:
+      - redis
+    labels:
+      - "traefik.enable=false"
+
+  # Mailhog for email testing (development only)
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: linux_tips_mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"  # SMTP server
+      - "8025:8025"  # Web UI
+    networks:
+      - linux_tips_network
+    labels:
+      - "traefik.enable=false"
+
+# Development-specific volumes
+volumes:
+  postgres_logs:
+    name: linux_tips_postgres_logs
+    driver: local
+  pgadmin_data:
+    name: linux_tips_pgadmin_data
+    driver: local
+  backend_cache:
+    name: linux_tips_backend_cache
+    driver: local

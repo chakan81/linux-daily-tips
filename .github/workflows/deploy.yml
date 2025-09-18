@@ -1,0 +1,300 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+  release:
+    types: [ published ]
+
+env:
+  DOCKER_BUILDKIT: 1
+  COMPOSE_DOCKER_CLI_BUILD: 1
+  REGISTRY: ghcr.io
+  IMAGE_NAME_BACKEND: linux-daily-tips/backend
+  IMAGE_NAME_FRONTEND: linux-daily-tips/frontend
+
+jobs:
+  build-and-push:
+    name: Build and Push Images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    outputs:
+      backend-image: ${{ steps.meta-backend.outputs.tags }}
+      frontend-image: ${{ steps.meta-frontend.outputs.tags }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract backend metadata
+      id: meta-backend
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_BACKEND }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Extract frontend metadata
+      id: meta-frontend
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME_FRONTEND }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Build and push backend image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./backend
+        file: ./backend/Dockerfile
+        target: production
+        push: true
+        tags: ${{ steps.meta-backend.outputs.tags }}
+        labels: ${{ steps.meta-backend.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64,linux/arm64
+
+    - name: Build and push frontend image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./frontend
+        file: ./frontend/Dockerfile
+        target: production
+        push: true
+        tags: ${{ steps.meta-frontend.outputs.tags }}
+        labels: ${{ steps.meta-frontend.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        platforms: linux/amd64,linux/arm64
+
+    - name: Run Trivy vulnerability scanner on backend
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ steps.meta-backend.outputs.tags }}
+        format: 'sarif'
+        output: 'trivy-results-backend.sarif'
+
+    - name: Run Trivy vulnerability scanner on frontend
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ steps.meta-frontend.outputs.tags }}
+        format: 'sarif'
+        output: 'trivy-results-frontend.sarif'
+
+    - name: Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: '.'
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: staging
+      url: https://staging.linuxdailytips.com
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Create deployment package
+      run: |
+        mkdir -p deployment
+        cp docker-compose.yml deployment/
+        cp docker-compose.prod.yml deployment/ || echo "Production compose file not found"
+
+        # Create environment-specific docker-compose override
+        cat > deployment/docker-compose.staging.yml <<EOF
+        version: '3.8'
+
+        services:
+          backend:
+            image: ${{ needs.build-and-push.outputs.backend-image }}
+            environment:
+              - ENVIRONMENT=staging
+              - LOG_LEVEL=INFO
+              - DATABASE_URL=\${STAGING_DATABASE_URL}
+              - REDIS_URL=\${STAGING_REDIS_URL}
+              - SECRET_KEY=\${STAGING_SECRET_KEY}
+
+          frontend:
+            image: ${{ needs.build-and-push.outputs.frontend-image }}
+            environment:
+              - NODE_ENV=production
+              - NEXT_PUBLIC_API_URL=\${STAGING_API_URL}
+              - NEXT_PUBLIC_APP_ENV=staging
+        EOF
+
+    - name: Deploy to staging server
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.STAGING_HOST }}
+        username: ${{ secrets.STAGING_USERNAME }}
+        key: ${{ secrets.STAGING_SSH_KEY }}
+        script: |
+          cd /opt/linux-daily-tips
+
+          # Pull latest images
+          docker-compose -f docker-compose.yml -f docker-compose.staging.yml pull
+
+          # Restart services with zero downtime
+          docker-compose -f docker-compose.yml -f docker-compose.staging.yml up -d --remove-orphans
+
+          # Clean up old images
+          docker image prune -f
+
+          # Health check
+          sleep 30
+          curl -f http://localhost:8000/health || exit 1
+          curl -f http://localhost:3000 || exit 1
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build-and-push, deploy-staging]
+    if: github.event_name == 'release'
+    environment:
+      name: production
+      url: https://linuxdailytips.com
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Create production deployment package
+      run: |
+        mkdir -p deployment
+        cp docker-compose.yml deployment/
+
+        # Create production docker-compose override
+        cat > deployment/docker-compose.production.yml <<EOF
+        version: '3.8'
+
+        services:
+          backend:
+            image: ${{ needs.build-and-push.outputs.backend-image }}
+            environment:
+              - ENVIRONMENT=production
+              - LOG_LEVEL=WARNING
+              - DATABASE_URL=\${PRODUCTION_DATABASE_URL}
+              - REDIS_URL=\${PRODUCTION_REDIS_URL}
+              - SECRET_KEY=\${PRODUCTION_SECRET_KEY}
+            deploy:
+              replicas: 2
+              resources:
+                limits:
+                  memory: 512M
+                reservations:
+                  memory: 256M
+
+          frontend:
+            image: ${{ needs.build-and-push.outputs.frontend-image }}
+            environment:
+              - NODE_ENV=production
+              - NEXT_PUBLIC_API_URL=\${PRODUCTION_API_URL}
+              - NEXT_PUBLIC_APP_ENV=production
+            deploy:
+              replicas: 2
+              resources:
+                limits:
+                  memory: 256M
+                reservations:
+                  memory: 128M
+
+          # Production-specific services
+          nginx:
+            image: nginx:alpine
+            ports:
+              - "80:80"
+              - "443:443"
+            volumes:
+              - ./nginx.conf:/etc/nginx/nginx.conf:ro
+              - ./ssl:/etc/nginx/ssl:ro
+            depends_on:
+              - backend
+              - frontend
+        EOF
+
+    - name: Deploy to production server
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.PRODUCTION_HOST }}
+        username: ${{ secrets.PRODUCTION_USERNAME }}
+        key: ${{ secrets.PRODUCTION_SSH_KEY }}
+        script: |
+          cd /opt/linux-daily-tips
+
+          # Create backup
+          docker-compose -f docker-compose.yml -f docker-compose.production.yml exec postgres pg_dump -U postgres linux_daily_tips > backup-$(date +%Y%m%d-%H%M%S).sql || true
+
+          # Pull latest images
+          docker-compose -f docker-compose.yml -f docker-compose.production.yml pull
+
+          # Deploy with rolling update
+          docker-compose -f docker-compose.yml -f docker-compose.production.yml up -d --remove-orphans
+
+          # Health check with retries
+          for i in {1..10}; do
+            if curl -f http://localhost:8000/health && curl -f http://localhost:3000; then
+              echo "Health check passed"
+              break
+            fi
+            echo "Health check failed, attempt $i/10"
+            sleep 30
+            if [ $i -eq 10 ]; then
+              echo "Health check failed after 10 attempts, rolling back"
+              docker-compose -f docker-compose.yml -f docker-compose.production.yml down
+              exit 1
+            fi
+          done
+
+          # Clean up
+          docker image prune -f
+
+    - name: Notify deployment success
+      uses: 8398a7/action-slack@v3
+      if: success()
+      with:
+        status: success
+        text: "✅ Production deployment successful for ${{ github.event.release.tag_name }}"
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    - name: Notify deployment failure
+      uses: 8398a7/action-slack@v3
+      if: failure()
+      with:
+        status: failure
+        text: "❌ Production deployment failed for ${{ github.event.release.tag_name }}"
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

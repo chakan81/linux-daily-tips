@@ -1,0 +1,183 @@
+# Linux Daily Tips - .gitignore
+
+# ===========================================
+# Frontend (Node.js / Next.js)
+# ===========================================
+
+# Dependencies
+frontend/node_modules/
+frontend/.pnp
+frontend/.pnp.js
+
+# Testing
+frontend/coverage/
+
+# Next.js
+frontend/.next/
+frontend/out/
+frontend/build/
+
+# Production
+frontend/dist/
+
+# Misc
+frontend/.DS_Store
+frontend/*.tsbuildinfo
+frontend/next-env.d.ts
+
+# Environment variables
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+!frontend/.env.template
+!frontend/.env.local.template
+
+# Vercel
+frontend/.vercel
+
+# ===========================================
+# Backend (Python / FastAPI)
+# ===========================================
+
+# Python
+backend/__pycache__/
+backend/*.py[cod]
+backend/*$py.class
+backend/*.so
+
+# Virtual environments
+backend/venv/
+backend/env/
+backend/ENV/
+backend/env.bak/
+backend/venv.bak/
+
+# Distribution / packaging
+backend/.Python
+backend/build/
+backend/develop-eggs/
+backend/dist/
+backend/downloads/
+backend/eggs/
+backend/.eggs/
+backend/lib/
+backend/lib64/
+backend/parts/
+backend/sdist/
+backend/var/
+backend/wheels/
+backend/*.egg-info/
+backend/.installed.cfg
+backend/*.egg
+backend/MANIFEST
+
+# PyInstaller
+backend/*.manifest
+backend/*.spec
+
+# Unit test / coverage reports
+backend/htmlcov/
+backend/.tox/
+backend/.nox/
+backend/.coverage
+backend/.coverage.*
+backend/.cache
+backend/nosetests.xml
+backend/coverage.xml
+backend/*.cover
+backend/.hypothesis/
+backend/.pytest_cache/
+
+# Environment variables
+backend/.env
+backend/.env.local
+backend/.env.development.local
+backend/.env.test.local
+backend/.env.production.local
+!backend/.env.template
+!backend/.env.development
+!backend/.env.production
+
+# Database
+backend/*.db
+backend/*.sqlite
+backend/*.sqlite3
+
+# Logs
+backend/*.log
+backend/logs/
+
+# ===========================================
+# Development Tools
+# ===========================================
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# ===========================================
+# Project Specific
+# ===========================================
+
+# Environment Variables (Project Root)
+.env.local
+.env.test
+.env.production
+!.env.template
+!.env.development
+
+# Docker
+*.tar
+.docker/
+
+# Secrets and configs
+secrets/
+config/local.*
+*.key
+*.pem
+
+# Data files
+data/
+uploads/
+media/
+
+# Backup files
+*.bak
+*.backup
+
+# ===========================================
+# Documentation (only ignore generated docs)
+# ===========================================
+
+# Keep markdown files but ignore generated documentation
+docs/build/
+docs/_build/
+
+# ===========================================
+# Deployment & CI/CD
+# ===========================================
+
+# Deployment configs (keep templates)
+docker-compose.override.yml
+.docker/
+
+# CI/CD secrets
+.github/secrets/

@@ -1,0 +1,15 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "Linux Daily Tips - Development",
+      "Group": "Development",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "linux_daily_tips",
+      "Username": "postgres",
+      "Password": "postgres_dev_password",
+      "SSLMode": "prefer",
+      "Comment": "Main development database for Linux Daily Tips project"
+    }
+  }
+}
