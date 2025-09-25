@@ -1,0 +1,5 @@
+export { HeroSection } from './HeroSection'
+export { TodayTipSection } from './TodayTipSection'
+export { RecentTipsSection } from './RecentTipsSection'
+export { StatsSection } from './StatsSection'
+export { CTASection } from './CTASection'

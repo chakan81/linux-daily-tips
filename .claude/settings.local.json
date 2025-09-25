@@ -3,7 +3,8 @@
     "allow": [
       "Bash(./scripts/dev-up.sh:*)",
       "Bash(docker-compose:*)",
-      "Bash(./scripts/dev-down.sh:*)"
+      "Bash(./scripts/dev-down.sh:*)",
+      "mcp__shadcn-ui__get_component"
     ]
   },
   "outputStyle": "korean"
