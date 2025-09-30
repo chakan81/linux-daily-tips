@@ -186,3 +186,5 @@ docker-compose.override.yml
 
 # CI/CD secrets
 .github/secrets/.playwright-mcp/
+.playwright-mcp/
+mcp*.json
