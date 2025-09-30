@@ -4,6 +4,8 @@ import { Inter } from 'next/font/google'
 import { Toaster } from 'react-hot-toast'
 import { ThemeProvider } from '@/components/theme-provider'
 import { Header, Footer } from '@/components/layout'
+import { QueryProvider } from '@/lib/providers'
+import { ErrorBoundary } from '@/components/common'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -12,6 +14,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'),
   title: {
     template: '%s | Linux Daily Tips',
     default: 'Linux Daily Tips - Learn Linux Command Line Every Day',
@@ -79,49 +82,53 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
       </head>
       <body className={`${inter.className} antialiased min-h-screen gradient-bg`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <div className="relative flex min-h-screen flex-col">
-            <Header />
-            <main className="flex-1">
-              {children}
-            </main>
-            <Footer />
-          </div>
-          <Toaster
-            position="bottom-right"
-            toastOptions={{
-              duration: 4000,
-              style: {
-                background: '#363636',
-                color: '#fff',
-                borderRadius: '8px',
-              },
-              success: {
-                style: {
-                  background: '#10b981',
-                },
-                iconTheme: {
-                  primary: '#fff',
-                  secondary: '#10b981',
-                },
-              },
-              error: {
-                style: {
-                  background: '#ef4444',
-                },
-                iconTheme: {
-                  primary: '#fff',
-                  secondary: '#ef4444',
-                },
-              },
-            }}
-          />
-        </ThemeProvider>
+        <ErrorBoundary>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <QueryProvider>
+              <div className="relative flex min-h-screen flex-col">
+                <Header />
+                <main className="flex-1">
+                  {children}
+                </main>
+                <Footer />
+              </div>
+              <Toaster
+                position="bottom-right"
+                toastOptions={{
+                  duration: 4000,
+                  style: {
+                    background: '#363636',
+                    color: '#fff',
+                    borderRadius: '8px',
+                  },
+                  success: {
+                    style: {
+                      background: '#10b981',
+                    },
+                    iconTheme: {
+                      primary: '#fff',
+                      secondary: '#10b981',
+                    },
+                  },
+                  error: {
+                    style: {
+                      background: '#ef4444',
+                    },
+                    iconTheme: {
+                      primary: '#fff',
+                      secondary: '#ef4444',
+                    },
+                  },
+                }}
+              />
+            </QueryProvider>
+          </ThemeProvider>
+        </ErrorBoundary>
       </body>
     </html>
   )

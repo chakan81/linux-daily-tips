@@ -85,3 +85,35 @@ Backend API 서버
 - 구글 애드센스 최적 배치
 - 사용자 경험 저해 최소화
 - 월 방문자 10,000명, 수익 $500+ 목표
+
+## 📊 현재 개발 상태
+
+### Phase 1 (MVP) 진행률: 26% (17/65 작업 완료)
+
+#### ✅ Week 1 완료 (Day 1-7)
+**프론트엔드 인프라 100% 완료**
+- 프로젝트 초기 설정 (Docker Compose, CI/CD)
+- Next.js 15 + TypeScript + Tailwind CSS + shadcn/ui
+- 상태 관리 시스템 (Zustand + React Query)
+- API 클라이언트 (Axios + 25+ endpoints)
+- 에러 처리 및 로딩 컴포넌트
+- 다크모드 및 반응형 레이아웃
+
+#### ⏳ Week 2 예정 (Day 8-14)
+**백엔드 API 개발**
+- FastAPI 프로젝트 구조 설계
+- PostgreSQL 데이터베이스 스키마 및 ORM
+- Tips API 개발 (CRUD)
+- Redis 캐싱 및 JWT 인증
+
+#### ⏳ Week 3-4 예정
+- 터미널 에뮬레이터 (xterm.js + WebSocket + Docker)
+- 시스템 통합 및 성능 최적화
+- 테스트 및 문서화
+
+### 📂 주요 문서
+- `docs/requirements.md`: 전체 서비스 요구사항 정의서
+- `docs/service-planning.md`: 기술 설계 및 아키텍처
+- `docs/phase1-tasks.md`: Phase 1 상세 개발 계획
+- `frontend/CLAUDE.md`: 프론트엔드 개발 가이드
+- `frontend/docs/`: Day 7 완료 보고서 및 사용 예시

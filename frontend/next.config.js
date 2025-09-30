@@ -1,17 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    // Turbopack support for faster development builds
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
-      },
-    },
-  },
-
   // Enable standalone build for Docker
   output: 'standalone',
 
@@ -90,13 +78,7 @@ const nextConfig = {
 
   // Redirect configuration
   async redirects() {
-    return [
-      {
-        source: '/admin',
-        destination: '/admin/dashboard',
-        permanent: true,
-      },
-    ];
+    return [];
   },
 };
 

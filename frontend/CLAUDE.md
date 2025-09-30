@@ -6,7 +6,7 @@
 
 **프로젝트명**: Linux Daily Tips Frontend
 **기술 스택**: Next.js 15 + TypeScript + Tailwind CSS + shadcn/ui
-**개발 상태**: Day 3-4 완료 (컴포넌트 분리 및 접근성 개선 포함)
+**개발 상태**: Week 1 완료 (Day 1-7, 상태 관리 시스템 포함)
 
 ## 🛠 기술 스택 및 설정
 
@@ -192,26 +192,41 @@ export type ApiError = NetworkError | ValidationError | ...
 - Props 인터페이스 명시적 정의
 - 런타임 에러 최소화
 
-## 📦 상태 관리 계획 (Day 7 예정)
+## 📦 상태 관리 시스템 (Day 7 완료)
 
-### 예정된 라이브러리
-- **Zustand**: 클라이언트 상태 관리
-- **React Query (TanStack Query)**: 서버 상태 관리
-- **Context API**: 테마 및 전역 설정
+### 설치된 라이브러리
+- **Zustand 4.5.7**: 클라이언트 상태 관리
+- **React Query 5.90.2**: 서버 상태 관리 및 캐싱
+- **Axios 1.12.2**: HTTP 클라이언트
 
-## 🚀 다음 단계 (Day 5-6)
+### 구현된 Stores
+- **themeStore**: light/dark/system 테마 관리 (영속화)
+- **userStore**: 사용자 인증 상태 (영속화)
+- **appStore**: 전역 UI 상태 (sidebar, terminal, loading)
 
-### shadcn/ui 통합 계획
-1. **shadcn/ui CLI 설치 및 설정**
-2. **기본 컴포넌트 추가**: Input, Layout, Navigation 등
-3. **다크모드 설정**
-4. **반응형 레이아웃 컴포넌트 개발**
+### Custom Hooks
+- `useTodayTip()`, `useRecentTips()`, `useTip()`, `useTipsList()`, `useSearchTips()`, `useLikeTip()`
 
-### 완료 기준
-- [ ] shadcn/ui 기본 컴포넌트 설치 완료
-- [ ] 헤더, 사이드바, 푸터 레이아웃 완성
-- [ ] 다크모드 토글 기능 구현
-- [ ] 반응형 디자인 검증
+### 공통 컴포넌트
+- **ErrorBoundary**: React 에러 처리
+- **LoadingSpinner**: 로딩 상태 (sm/md/lg/xl)
+- **ErrorMessage**: 에러 메시지 (error/warning/info/critical)
+
+자세한 내용은 [Day 7 완료 보고서](./docs/DAY7_COMPLETION_REPORT.md) 참고
+
+## 🚀 다음 단계 (Week 2: Day 8-14)
+
+### Day 8-9: 백엔드 API 연동
+1. **FastAPI 서버 구현**: PostgreSQL 연동, CRUD API
+2. **Frontend ↔ Backend 통합**: 실제 데이터 연동
+
+### Day 10-11: Terminal Emulator
+1. **xterm.js 통합**: 웹 터미널 컴포넌트
+2. **Docker Sandbox**: 안전한 격리 환경
+
+### Day 12-14: LLM 연동
+1. **OpenAI/Claude API**: 주간 Draft 자동 생성
+2. **관리자 워크플로우**: Draft 승인/거절 UI
 
 ## ⚠️ 주의사항
 
@@ -226,21 +241,35 @@ export type ApiError = NetworkError | ValidationError | ...
 - 코드 분할 (Code Splitting) 적용 예정
 - 번들 크기 최적화 예정
 
-## 📊 현재 상태 요약
+## 📊 현재 상태 요약 (Day 7 완료)
 
-### ✅ 완료된 작업
-- [x] Next.js 15 + TypeScript 프로젝트 설정
+### ✅ 완료된 작업 (Day 1-7)
+- [x] Next.js 15 + React 19 + TypeScript 프로젝트 설정
 - [x] Tailwind CSS + Awwwards 테마 적용
-- [x] shadcn/ui 기본 컴포넌트 (Button, Card) 설치
+- [x] shadcn/ui 컴포넌트 시스템 통합
 - [x] 컴포넌트 파일 분리 및 구조화
-- [x] TypeScript 타입 시스템 구축
-- [x] 접근성 개선 (WCAG 2.1 AA 수준)
+- [x] TypeScript 타입 시스템 구축 (100% 커버리지)
+- [x] 접근성 개선 (WCAG 2.1 AA 수준, 9.0+/10)
 - [x] Hot Reload < 2초 성능 달성
+- [x] **Zustand 상태 관리 시스템 (3개 stores)**
+- [x] **React Query 데이터 페칭 (6개 hooks)**
+- [x] **Axios API 클라이언트 (25+ endpoints)**
+- [x] **에러 처리 및 로딩 컴포넌트**
+- [x] **Layout 통합 (ErrorBoundary, QueryProvider)**
 
-### 🔄 다음 작업
-- [ ] shadcn/ui 추가 컴포넌트 설치
-- [ ] 레이아웃 컴포넌트 개발
-- [ ] 다크모드 구현
-- [ ] 상태 관리 시스템 설정
+### 🔄 다음 작업 (Week 2: Day 8-14)
+- [ ] FastAPI 백엔드 구현 (PostgreSQL 연동)
+- [ ] Frontend ↔ Backend API 통합
+- [ ] Terminal Emulator (xterm.js)
+- [ ] Docker Sandbox 환경
+- [ ] LLM 연동 (OpenAI/Claude API)
+- [ ] 관리자 대시보드 구현
+
+### 📈 프로젝트 진행률
+- **Phase 1 (MVP)**: 26% 완료 (17/65 작업)
+  - ✅ Week 1 Frontend: 100% 완료 (17/17 작업)
+  - ⏳ Week 2 Backend API: 0% (0/16 작업)
+  - ⏳ Week 3 Terminal Emulator: 0% (0/16 작업)
+  - ⏳ Week 4 통합 및 최적화: 0% (0/16 작업)
 
 이 문서는 프로젝트 진행에 따라 지속적으로 업데이트됩니다.
