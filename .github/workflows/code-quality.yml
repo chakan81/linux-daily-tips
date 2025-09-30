@@ -168,13 +168,14 @@ jobs:
       with:
         dockerfile: ${{ matrix.dockerfile }}
         format: sarif
-        output-file: hadolint-${{ matrix.dockerfile }}.sarif
+        output-file: hadolint-results.sarif
 
     - name: Upload Hadolint results
       uses: github/codeql-action/upload-sarif@v3
       if: always()
       with:
-        sarif_file: hadolint-${{ matrix.dockerfile }}.sarif
+        sarif_file: hadolint-results.sarif
+        category: hadolint-${{ matrix.dockerfile }}
 
   commit-quality:
     runs-on: ubuntu-latest
