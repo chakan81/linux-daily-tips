@@ -1,18 +1,21 @@
 name: Backend CI
 
+# NOTE: Auto-triggers disabled until Week 2 (Backend development starts)
+# Uncomment push/pull_request triggers after backend implementation begins
 on:
-  push:
-    branches: [ main, dev ]
-    paths:
-      - 'backend/**'
-      - 'docker-compose.ci.yml'
-      - '.github/workflows/backend-ci.yml'
-  pull_request:
-    branches: [ main, dev ]
-    paths:
-      - 'backend/**'
-      - 'docker-compose.ci.yml'
-      - '.github/workflows/backend-ci.yml'
+  # push:
+  #   branches: [ main, dev ]
+  #   paths:
+  #     - 'backend/**'
+  #     - 'docker-compose.ci.yml'
+  #     - '.github/workflows/backend-ci.yml'
+  # pull_request:
+  #   branches: [ main, dev ]
+  #   paths:
+  #     - 'backend/**'
+  #     - 'docker-compose.ci.yml'
+  #     - '.github/workflows/backend-ci.yml'
+  workflow_dispatch:  # Manual trigger only
 
 env:
   DOCKER_BUILDKIT: 1

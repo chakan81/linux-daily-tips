@@ -1,18 +1,21 @@
 name: Frontend CI
 
+# NOTE: Auto-triggers disabled until Phase 1 completion (Day 26-27)
+# Uncomment push/pull_request triggers after Docker integration is complete
 on:
-  push:
-    branches: [ main, dev ]
-    paths:
-      - 'frontend/**'
-      - 'docker-compose.ci.yml'
-      - '.github/workflows/frontend-ci.yml'
-  pull_request:
-    branches: [ main, dev ]
-    paths:
-      - 'frontend/**'
-      - 'docker-compose.ci.yml'
-      - '.github/workflows/frontend-ci.yml'
+  # push:
+  #   branches: [ main, dev ]
+  #   paths:
+  #     - 'frontend/**'
+  #     - 'docker-compose.ci.yml'
+  #     - '.github/workflows/frontend-ci.yml'
+  # pull_request:
+  #   branches: [ main, dev ]
+  #   paths:
+  #     - 'frontend/**'
+  #     - 'docker-compose.ci.yml'
+  #     - '.github/workflows/frontend-ci.yml'
+  workflow_dispatch:  # Manual trigger only
 
 env:
   DOCKER_BUILDKIT: 1
