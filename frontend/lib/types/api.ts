@@ -248,8 +248,8 @@ export type ExtractApiData<T> = T extends ApiResponse<infer U> ? U : never
 export type ExtractPaginatedData<T> = T extends PaginatedResponse<infer U> ? U : never
 
 // Optional fields를 위한 유틸리티 타입
-export type PartialExcept<T, K extends keyof T> = Partial<T> & Pick<T, K>
+export type PartialExcept<T, K extends string> = Partial<T> & Pick<T, K & keyof T>
 
 // API 요청을 위해 timestamp 등을 제외한 타입
 export type ApiCreateRequest<T> = Omit<T, 'id' | 'createdAt' | 'updatedAt' | 'publishedAt'>
-export type ApiUpdateRequest<T> = PartialExcept<ApiCreateRequest<T>, 'id'>
+export type ApiUpdateRequest<T> = Partial<ApiCreateRequest<T>> & { id: T extends { id: infer I } ? I : never }

@@ -9,11 +9,11 @@ export function CTASection() {
           <Zap className="w-10 h-10 text-accent-600" aria-hidden="true" />
         </div>
 
-        <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+        <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
           Ready to Master Linux?
         </h2>
 
-        <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+        <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
           Join thousands of developers and system administrators who are improving their
           Linux skills one command at a time.
         </p>
@@ -31,7 +31,7 @@ export function CTASection() {
 
           <Link
             href="/about"
-            className="inline-flex items-center justify-center gap-2 bg-white/70 backdrop-blur-sm text-gray-900 px-8 py-4 rounded-2xl font-semibold border border-gray-200 hover:bg-white hover:shadow-card-hover transition-all duration-200 interactive"
+            className="inline-flex items-center justify-center gap-2 bg-secondary text-secondary-foreground px-8 py-4 rounded-2xl font-semibold hover:bg-secondary/80 transition-all duration-200 interactive"
             aria-label="Linux Daily Tips 서비스에 대해 더 자세히 알아보기"
           >
             <Code className="w-5 h-5" aria-hidden="true" />

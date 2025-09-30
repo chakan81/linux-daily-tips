@@ -26,10 +26,10 @@ export function TodayTipSection() {
     <section id="today-tip" className="container-awwwards py-16" aria-labelledby="todays-tip-heading">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <h2 id="todays-tip-heading" className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2 id="todays-tip-heading" className="text-3xl md:text-4xl font-bold text-foreground mb-4">
             Today&apos;s Linux Tip
           </h2>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-muted-foreground">
             Master a new command every day with practical examples
           </p>
         </div>
@@ -39,23 +39,23 @@ export function TodayTipSection() {
             <div>
               <div className="flex items-center gap-3 mb-3">
                 <div className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  todaysTip.difficulty === 'Beginner' ? 'bg-green-100 text-green-700' :
-                  todaysTip.difficulty === 'Intermediate' ? 'bg-yellow-100 text-yellow-700' :
-                  'bg-red-100 text-red-700'
+                  todaysTip.difficulty === 'Beginner' ? 'bg-green-200 dark:bg-green-900/30 text-green-800 dark:text-green-400' :
+                  todaysTip.difficulty === 'Intermediate' ? 'bg-yellow-200 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400' :
+                  'bg-red-200 dark:bg-red-900/30 text-red-800 dark:text-red-400'
                 }`}>
                   {todaysTip.difficulty}
                 </div>
-                <span className="text-sm text-gray-500">{todaysTip.category}</span>
+                <span className="text-sm text-muted-foreground">{todaysTip.category}</span>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
+              <h3 className="text-2xl font-bold text-foreground mb-2">
                 {todaysTip.title}
               </h3>
-              <p className="text-gray-600 leading-relaxed">
+              <p className="text-muted-foreground leading-relaxed">
                 {todaysTip.description}
               </p>
             </div>
 
-            <div className="flex items-center gap-2 text-sm text-gray-500 ml-6">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground ml-6">
               <Clock className="w-4 h-4" aria-hidden="true" />
               <span aria-label={`예상 소요시간 ${todaysTip.estimatedTime}`}>{todaysTip.estimatedTime}</span>
             </div>
@@ -90,7 +90,7 @@ export function TodayTipSection() {
 
             <Link
               href={`/tips/${todaysTip.id}`}
-              className="flex-1 inline-flex items-center justify-center gap-2 bg-gray-100 text-gray-900 px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 transition-all duration-200 interactive"
+              className="flex-1 inline-flex items-center justify-center gap-2 bg-secondary text-secondary-foreground px-6 py-3 rounded-xl font-semibold hover:bg-secondary/80 transition-all duration-200 interactive"
               aria-label={`${todaysTip.title} 전체 가이드 읽기`}
             >
               <BookOpen className="w-5 h-5" aria-hidden="true" />

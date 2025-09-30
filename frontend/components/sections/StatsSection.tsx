@@ -30,30 +30,30 @@ export function StatsSection() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-accent-100 rounded-2xl mb-4" aria-hidden="true">
             <BookOpen className="w-8 h-8 text-accent-600" aria-hidden="true" />
           </div>
-          <div className="text-3xl font-bold text-gray-900 mb-2">
+          <div className="text-3xl font-bold text-foreground mb-2">
             {stats.totalTips.toLocaleString()}+
           </div>
-          <p className="text-gray-600">Linux Tips & Commands</p>
+          <p className="text-muted-foreground">Linux Tips & Commands</p>
         </div>
 
         <div className="text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-accent-100 rounded-2xl mb-4" aria-hidden="true">
             <Users className="w-8 h-8 text-accent-600" aria-hidden="true" />
           </div>
-          <div className="text-3xl font-bold text-gray-900 mb-2">
+          <div className="text-3xl font-bold text-foreground mb-2">
             {stats.activeUsers.toLocaleString()}+
           </div>
-          <p className="text-gray-600">Active Learners</p>
+          <p className="text-muted-foreground">Active Learners</p>
         </div>
 
         <div className="text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-accent-100 rounded-2xl mb-4" aria-hidden="true">
             <TrendingUp className="w-8 h-8 text-accent-600" aria-hidden="true" />
           </div>
-          <div className="text-3xl font-bold text-gray-900 mb-2">
+          <div className="text-3xl font-bold text-foreground mb-2">
             {stats.completionRate}%
           </div>
-          <p className="text-gray-600">Success Rate</p>
+          <p className="text-muted-foreground">Success Rate</p>
         </div>
       </div>
     </section>

@@ -5,9 +5,9 @@ export function HeroSection() {
   return (
     <section className="container-awwwards py-16 md:py-24" aria-labelledby="hero-heading">
       <div className="max-w-4xl mx-auto text-center">
-        <div className="inline-flex items-center gap-2 bg-white/60 backdrop-blur-sm px-4 py-2 rounded-full border border-gray-200 mb-8">
+        <div className="inline-flex items-center gap-2 bg-secondary/60 backdrop-blur-sm px-4 py-2 rounded-full border border-border mb-8">
           <Star className="w-4 h-4 text-yellow-500 fill-current" aria-hidden="true" />
-          <span className="text-sm font-medium text-gray-700">Daily Linux Learning</span>
+          <span className="text-sm font-medium text-foreground">Daily Linux Learning</span>
           <Star className="w-4 h-4 text-yellow-500 fill-current" aria-hidden="true" />
         </div>
 
@@ -17,7 +17,7 @@ export function HeroSection() {
           <span className="text-accent-600">One Command at a Time</span>
         </h1>
 
-        <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
+        <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
           Learn essential Linux commands through daily tips, interactive terminal practice,
           and hands-on tutorials. Perfect for developers, sysadmins, and Linux enthusiasts.
         </p>
@@ -35,7 +35,7 @@ export function HeroSection() {
 
           <Link
             href="#today-tip"
-            className="inline-flex items-center justify-center gap-2 bg-white/70 backdrop-blur-sm text-gray-900 px-8 py-4 rounded-2xl font-semibold border border-gray-200 hover:bg-white hover:shadow-card-hover transition-all duration-200 interactive"
+            className="inline-flex items-center justify-center gap-2 bg-secondary text-secondary-foreground px-8 py-4 rounded-2xl font-semibold hover:bg-secondary/80 transition-all duration-200 interactive"
             aria-label="오늘의 리눅스 팁 보기"
           >
             <Play className="w-5 h-5" aria-hidden="true" />

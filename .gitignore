@@ -163,6 +163,11 @@ media/
 *.bak
 *.backup
 
+# macOS auto-generated duplicate files
+*\ 2.*
+*\ copy.*
+*\ Copy.*
+
 # ===========================================
 # Documentation (only ignore generated docs)
 # ===========================================
@@ -180,4 +185,4 @@ docker-compose.override.yml
 .docker/
 
 # CI/CD secrets
-.github/secrets/
+.github/secrets/.playwright-mcp/
