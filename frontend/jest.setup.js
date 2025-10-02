@@ -51,8 +51,10 @@ jest.mock('next/navigation', () => ({
 
 // Mock environment variables
 process.env.NEXT_PUBLIC_API_URL = 'http://localhost:8000';
+process.env.NEXT_PUBLIC_BASE_URL = 'http://localhost:3000';
 process.env.NEXT_PUBLIC_WS_URL = 'ws://localhost:8000';
 process.env.NEXT_PUBLIC_APP_URL = 'http://localhost:3000';
+process.env.NODE_ENV = 'test';
 
 // Mock IntersectionObserver
 global.IntersectionObserver = class IntersectionObserver {

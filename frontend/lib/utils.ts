@@ -44,16 +44,21 @@ export function truncate(text: string, length: number): string {
   return text.substring(0, length).replace(/\s+\S*$/, '') + '...'
 }
 
-export function getDifficultyColor(difficulty: string) {
+/**
+ * 난이도에 따른 Tailwind CSS 클래스를 반환합니다 (다크모드 지원)
+ * @param difficulty - 'Beginner', 'Intermediate', 'Advanced'
+ * @returns Tailwind CSS 클래스 문자열
+ */
+export function getDifficultyColor(difficulty: string): string {
   switch (difficulty.toLowerCase()) {
     case 'beginner':
-      return 'bg-green-100 text-green-700'
+      return 'bg-green-200 dark:bg-green-900/30 text-green-800 dark:text-green-400'
     case 'intermediate':
-      return 'bg-yellow-100 text-yellow-700'
+      return 'bg-yellow-200 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400'
     case 'advanced':
-      return 'bg-red-100 text-red-700'
+      return 'bg-red-200 dark:bg-red-900/30 text-red-800 dark:text-red-400'
     default:
-      return 'bg-gray-100 text-gray-700'
+      return 'bg-gray-200 dark:bg-gray-900/30 text-gray-800 dark:text-gray-400'
   }
 }
 

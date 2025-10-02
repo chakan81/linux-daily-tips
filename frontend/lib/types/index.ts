@@ -22,6 +22,23 @@ import type {
 
 import type { AdminLoginRequest } from './api'
 
+// ===== 공통 타입 =====
+export type {
+  CustomError,
+  IconComponent,
+  Activity,
+  BatchReviewData,
+  TerminalMessageData,
+  TerminalCommandData,
+  TerminalOutputData,
+  TerminalStatusData,
+  TerminalHeartbeatData,
+  TerminalErrorData,
+  QueryParams,
+  QueryParamValue,
+  ErrorDetails,
+} from './common'
+
 // ===== 핵심 데이터 타입 =====
 export type {
   DifficultyLevel,

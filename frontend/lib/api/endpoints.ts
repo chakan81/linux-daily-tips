@@ -4,6 +4,8 @@
  * Centralized API endpoint definitions for type safety and maintainability.
  */
 
+import { QueryParams } from '@/lib/types/common'
+
 export const API_ENDPOINTS = {
   // Tips endpoints
   TIPS: {
@@ -40,6 +42,15 @@ export const API_ENDPOINTS = {
     ME: '/api/auth/me',
   },
 
+  // Admin endpoints
+  ADMIN: {
+    STATS: '/api/admin/stats',
+    PENDING_TIPS: '/api/admin/tips/pending',
+    RECENT_ACTIVITY: '/api/admin/activity/recent',
+    APPROVE_TIP: (id: string) => `/api/admin/tips/${id}/approve`,
+    REJECT_TIP: (id: string) => `/api/admin/tips/${id}/reject`,
+  },
+
   // Terminal endpoints
   TERMINAL: {
     CREATE_SESSION: '/api/terminal/session',
@@ -51,12 +62,12 @@ export const API_ENDPOINTS = {
 /**
  * Helper function to build URLs with query parameters
  */
-export function buildUrl(endpoint: string, params?: Record<string, any>): string {
+export function buildUrl(endpoint: string, params?: QueryParams): string {
   if (!params) return endpoint;
 
   const queryString = Object.entries(params)
     .filter(([_, value]) => value !== undefined && value !== null)
-    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
     .join('&');
 
   return queryString ? `${endpoint}?${queryString}` : endpoint;

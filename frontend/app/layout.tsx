@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/components/theme-provider'
 import { Header, Footer } from '@/components/layout'
 import { QueryProvider } from '@/lib/providers'
 import { ErrorBoundary } from '@/components/common'
+import { env } from '@/lib/env'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -14,7 +15,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'),
+  metadataBase: new URL(env.NEXT_PUBLIC_BASE_URL),
   title: {
     template: '%s | Linux Daily Tips',
     default: 'Linux Daily Tips - Learn Linux Command Line Every Day',
@@ -57,9 +58,9 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
-  verification: {
-    google: 'your-google-verification-code',
-  },
+  verification: env.NEXT_PUBLIC_GOOGLE_VERIFICATION ? {
+    google: env.NEXT_PUBLIC_GOOGLE_VERIFICATION,
+  } : undefined,
   alternates: {
     canonical: 'https://linuxdailytips.com',
   },

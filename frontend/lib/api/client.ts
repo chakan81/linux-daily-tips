@@ -1,4 +1,6 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { CustomError } from '@/lib/types/common';
+import { env } from '@/lib/env';
 
 /**
  * API Error Types
@@ -12,7 +14,7 @@ export interface ApiErrorResponse {
 /**
  * API Client Configuration
  */
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE_URL = env.NEXT_PUBLIC_API_URL;
 const API_TIMEOUT = 30000; // 30 seconds
 
 /**
@@ -39,7 +41,7 @@ const createAxiosInstance = (): AxiosInstance => {
       }
 
       // Log request in development
-      if (process.env.NODE_ENV === 'development') {
+      if (env.NODE_ENV === 'development') {
         // eslint-disable-next-line no-console
         console.log('🚀 API Request:', {
           method: config.method?.toUpperCase(),
@@ -60,7 +62,7 @@ const createAxiosInstance = (): AxiosInstance => {
   instance.interceptors.response.use(
     (response: AxiosResponse) => {
       // Log response in development
-      if (process.env.NODE_ENV === 'development') {
+      if (env.NODE_ENV === 'development') {
         // eslint-disable-next-line no-console
         console.log('✅ API Response:', {
           status: response.status,
@@ -157,8 +159,8 @@ export function handleApiError(error: unknown): Error {
         errorMessage += ` - ${errorDetails}`;
       }
 
-      const error = new Error(errorMessage);
-      (error as any).statusCode = statusCode;
+      const error: CustomError = new Error(errorMessage);
+      error.statusCode = statusCode;
       return error;
     }
 
