@@ -5,6 +5,7 @@ Linux Daily Tips Backend API의 메인 애플리케이션입니다.
 CORS, 라우터 등록, 애플리케이션 라이프사이클 이벤트를 관리합니다.
 """
 
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -12,6 +13,12 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.v1.api import api_router
 from app.core.config import settings
+from app.core.exceptions import setup_exception_handlers
+from app.core.logging_config import setup_logging
+
+# 로깅 시스템 초기화 (앱 생성 전)
+setup_logging()
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -30,35 +37,34 @@ async def lifespan(app: FastAPI):
         - Day 14에서 Redis 연결 초기화 추가 예정
     """
     # 애플리케이션 시작 시
-    print(f"🚀 Starting {settings.PROJECT_NAME} v{settings.VERSION}")
-    print(f"📝 Environment: {settings.ENVIRONMENT}")
-    print(f"🔒 Debug mode: {settings.DEBUG}")
-    print(f"🌐 CORS origins: {settings.CORS_ORIGINS}")
+    logger.info(f"🚀 Starting {settings.PROJECT_NAME} v{settings.VERSION}")
+    logger.info(f"📝 Environment: {settings.ENVIRONMENT}")
+    logger.info(f"🔒 Debug mode: {settings.DEBUG}")
 
     # TODO: Day 10-11에서 데이터베이스 연결 초기화
-    # print("🗄️  Initializing database connection...")
+    # logger.info("🗄️  Initializing database connection...")
     # await init_db()
 
     # TODO: Day 14에서 Redis 연결 초기화
-    # print("📦 Initializing Redis connection...")
+    # logger.info("📦 Initializing Redis connection...")
     # await init_redis()
 
-    print("✅ Application startup complete")
+    logger.info("✅ Application startup complete")
 
     yield
 
     # 애플리케이션 종료 시
-    print(f"👋 Shutting down {settings.PROJECT_NAME}")
+    logger.info(f"👋 Shutting down {settings.PROJECT_NAME}")
 
     # TODO: Day 10-11에서 데이터베이스 연결 종료
-    # print("🗄️  Closing database connection...")
+    # logger.info("🗄️  Closing database connection...")
     # await close_db()
 
     # TODO: Day 14에서 Redis 연결 종료
-    # print("📦 Closing Redis connection...")
+    # logger.info("📦 Closing Redis connection...")
     # await close_redis()
 
-    print("✅ Application shutdown complete")
+    logger.info("✅ Application shutdown complete")
 
 
 # FastAPI 애플리케이션 생성
@@ -71,10 +77,16 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS 미들웨어 설정
+# 전역 예외 핸들러 등록
+setup_exception_handlers(app)
+
+# CORS 미들웨어 설정 (환경별 origins 자동 선택)
+cors_origins = settings.cors_origins_list
+logger.info(f"CORS origins 설정: {cors_origins}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -82,6 +94,8 @@ app.add_middleware(
 
 # API v1 라우터 등록
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+logger.info("FastAPI 애플리케이션 설정 완료")
 
 
 @app.get("/", tags=["root"])

@@ -6,6 +6,7 @@ Pydantic Settings V2를 사용하여 환경 변수를 타입 안전하게 관리
 """
 
 import json
+import secrets
 from typing import Any
 
 from pydantic import Field, field_validator
@@ -56,7 +57,7 @@ class Settings(BaseSettings):
 
     # 보안 설정
     SECRET_KEY: str = Field(
-        default="your-secret-key-here-change-in-production",
+        default="",  # 빈 문자열로 설정하여 validator에서 처리
         description="JWT 토큰 서명용 시크릿 키 (최소 32자 이상)",
     )
     ALGORITHM: str = Field(
@@ -75,7 +76,13 @@ class Settings(BaseSettings):
     # CORS 설정
     CORS_ORIGINS: list[str] = Field(
         default=["http://localhost:3000", "http://localhost:8000"],
-        description="CORS 허용 origin 목록",
+        description="CORS 허용 origin 목록 (개발 환경 기본값)",
+    )
+
+    # 프로덕션 전용 CORS Origins (환경 변수로 설정 필수)
+    CORS_ORIGINS_PRODUCTION: list[str] = Field(
+        default=[],
+        description="프로덕션 CORS 허용 origin 목록 (예: https://yourdomain.com)",
     )
 
     # Cookie 보안 설정
@@ -102,7 +109,7 @@ class Settings(BaseSettings):
         description="데이터베이스 최소 연결 수",
     )
 
-    @field_validator("CORS_ORIGINS", mode="before")
+    @field_validator("CORS_ORIGINS", "CORS_ORIGINS_PRODUCTION", mode="before")
     @classmethod
     def parse_cors_origins(cls, v: Any) -> list[str]:
         """
@@ -118,6 +125,9 @@ class Settings(BaseSettings):
             파싱된 origin 리스트
         """
         if isinstance(v, str):
+            # 빈 문자열은 빈 리스트로 변환
+            if not v.strip():
+                return []
             try:
                 # JSON 문자열을 리스트로 파싱
                 parsed = json.loads(v)
@@ -125,28 +135,59 @@ class Settings(BaseSettings):
                     return parsed
             except json.JSONDecodeError:
                 # JSON이 아닌 경우 쉼표로 구분된 문자열로 간주
-                return [origin.strip() for origin in v.split(",")]
-        return v
+                return [origin.strip() for origin in v.split(",") if origin.strip()]
+        return v if v else []
 
-    @field_validator("SECRET_KEY")
+    @field_validator("SECRET_KEY", mode="before")
     @classmethod
-    def validate_secret_key(cls, v: str) -> str:
+    def validate_secret_key(cls, v: str, info) -> str:
         """
-        시크릿 키 길이를 검증합니다.
+        시크릿 키 검증 및 자동 생성
 
-        프로덕션 환경에서는 최소 32자 이상의 강력한 시크릿 키가 필요합니다.
+        - 프로덕션 환경: 환경 변수 필수, 최소 32자 이상
+        - 개발 환경: 환경 변수 없으면 자동 생성 (보안 경고)
 
         Args:
             v: 시크릿 키
+            info: ValidationInfo (환경 변수 접근용)
 
         Returns:
-            검증된 시크릿 키
+            검증된 또는 생성된 시크릿 키
 
         Raises:
-            ValueError: 시크릿 키가 32자 미만인 경우
+            ValueError: 프로덕션에서 SECRET_KEY 미설정 또는 길이 부족
         """
+        # 환경 변수 확인 (프로덕션 감지용)
+        environment = info.data.get("ENVIRONMENT", "development").lower()
+        is_production = environment == "production"
+
+        # SECRET_KEY가 없거나 빈 문자열인 경우
+        if not v or v == "":
+            if is_production:
+                raise ValueError(
+                    "🚨 프로덕션 환경에서는 SECRET_KEY 환경 변수가 필수입니다. "
+                    "최소 32자 이상의 강력한 시크릿 키를 설정하세요."
+                )
+            else:
+                # 개발 환경: 안전한 랜덤 키 자동 생성
+                generated_key = secrets.token_urlsafe(32)  # 43자 생성 (Base64 인코딩)
+                print("⚠️  WARNING: SECRET_KEY 환경 변수가 설정되지 않았습니다.")
+                print(f"⚠️  개발용 임시 키를 자동 생성했습니다: {generated_key[:20]}...")
+                print("⚠️  프로덕션 배포 시 반드시 환경 변수로 설정하세요!")
+                return generated_key
+
+        # SECRET_KEY가 제공된 경우 길이 검증
         if len(v) < 32:
-            raise ValueError("SECRET_KEY는 최소 32자 이상이어야 합니다.")
+            if is_production:
+                raise ValueError(
+                    "🚨 SECRET_KEY는 최소 32자 이상이어야 합니다. "
+                    "현재 길이: {}자".format(len(v))
+                )
+            else:
+                print("⚠️  WARNING: SECRET_KEY가 32자 미만입니다. (현재: {}자)".format(len(v)))
+                print("⚠️  보안을 위해 최소 32자 이상의 키를 사용하세요.")
+                # 개발 환경에서는 경고만 출력하고 진행
+
         return v
 
     model_config = SettingsConfigDict(
@@ -165,6 +206,30 @@ class Settings(BaseSettings):
     def is_development(self) -> bool:
         """개발 환경 여부를 반환합니다."""
         return self.ENVIRONMENT.lower() == "development"
+
+    @property
+    def cors_origins_list(self) -> list[str]:
+        """
+        환경에 따른 CORS origins를 반환합니다.
+
+        - 프로덕션: CORS_ORIGINS_PRODUCTION 사용 (환경 변수 필수)
+        - 개발: CORS_ORIGINS 사용 (기본값 허용)
+
+        Returns:
+            list[str]: CORS 허용 origin 리스트
+
+        Raises:
+            ValueError: 프로덕션에서 CORS_ORIGINS_PRODUCTION 미설정
+        """
+        if self.is_production:
+            if not self.CORS_ORIGINS_PRODUCTION:
+                raise ValueError(
+                    "🚨 프로덕션 환경에서는 CORS_ORIGINS_PRODUCTION 환경 변수가 필수입니다. "
+                    "예: CORS_ORIGINS_PRODUCTION='[\"https://yourdomain.com\"]'"
+                )
+            return self.CORS_ORIGINS_PRODUCTION
+        else:
+            return self.CORS_ORIGINS
 
     @property
     def fastapi_kwargs(self) -> dict[str, Any]:

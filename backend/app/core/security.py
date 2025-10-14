@@ -5,7 +5,7 @@ JWT 토큰 생성/검증 및 패스워드 해싱 기능을 제공합니다.
 OAuth + JWT + Redis 블랙리스트 패턴을 지원합니다.
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, Optional
 
 from jose import JWTError, jwt
@@ -66,19 +66,18 @@ def create_access_token(
     """
     to_encode = data.copy()
 
-    # 만료 시간 설정
+    # 만료 시간 설정 (timezone-aware datetime 사용)
+    now = datetime.now(timezone.utc)
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = now + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(
-            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
-        )
+        expire = now + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
 
     # JWT 표준 클레임 추가
     to_encode.update(
         {
             "exp": expire,  # 만료 시간
-            "iat": datetime.utcnow(),  # 발급 시간
+            "iat": now,  # 발급 시간
         }
     )
 
@@ -131,7 +130,7 @@ def decode_access_token(token: str) -> Optional[Dict[str, Any]]:
 #     payload = decode_access_token(token)
 #     if payload:
 #         exp = payload.get("exp")
-#         ttl = exp - datetime.utcnow().timestamp()
+#         ttl = exp - datetime.now(timezone.utc).timestamp()
 #         await redis_client.setex(f"blacklist:{token}", int(ttl), "1")
 #
 #

@@ -111,8 +111,14 @@ Backend API 서버
   - 보안 아키텍처 (JWT + OAuth 준비)
   - Mock Tips API 구현 (daily, list, detail)
   - Swagger UI 자동 문서
-- ⏳ PostgreSQL 데이터베이스 스키마 및 ORM (Day 10-11 예정)
-- ⏳ Tips API 개발 (CRUD) (Day 12-13 예정)
+- ✅ PostgreSQL 데이터베이스 스키마 및 ORM (Day 10-11 완료!)
+  - SQLAlchemy 2.0 Async 완전 구현
+  - 6개 모델 + Pydantic 스키마
+  - **129개 pytest 테스트 100% 통과** ✨
+  - ULID + 프리픽스 ID 시스템
+  - **코드 품질 평가 및 리팩토링 완료** (8.3 → 9.0/10)
+  - AppException + 구조화 로깅 시스템
+- ⏳ Tips API 개발 (CRUD) (Day 12-13 예정 - TDD 적용)
 - ⏳ Redis 캐싱 및 JWT 인증 (Day 14 예정)
 
 #### ⏳ Week 3-4 예정
@@ -123,6 +129,59 @@ Backend API 서버
 ### 📂 주요 문서
 - `docs/requirements.md`: 전체 서비스 요구사항 정의서
 - `docs/service-planning.md`: 기술 설계 및 아키텍처
-- `docs/phase1-tasks.md`: Phase 1 상세 개발 계획
+- `docs/phase1-tasks.md`: Phase 1 상세 개발 계획 (리팩토링 반영)
 - `frontend/CLAUDE.md`: 프론트엔드 개발 가이드
-- `frontend/docs/`: Day 7 완료 보고서 및 사용 예시
+- `backend/CLAUDE.md`: 백엔드 개발 가이드 (uv, TDD, Error Handling 포함)
+- `frontend/docs/`: Day 7 완료 보고서
+- `backend/docs/`: Day 8-9, 10-11 완료 보고서, 코드 리팩토링 보고서, 모델 사용 가이드
+
+---
+
+## 🧪 테스트 전략 (도메인별 차별화)
+
+### 백엔드: TDD 필수 ⭐⭐⭐⭐⭐
+
+**Day 12-13부터 엄격한 TDD 적용**
+- **RED → GREEN → REFACTOR** 사이클 준수
+- Day 10-11에서 129개 테스트 100% 통과로 효과 검증
+- API, 비즈니스 로직, 데이터베이스 계층 모두 TDD
+
+**이유**:
+- 명확한 입출력과 API 계약
+- 버그 비용이 높음 (데이터 손실, 보안 이슈)
+- 순수 함수가 많아 테스트 작성 용이
+
+**상세 가이드**: `backend/CLAUDE.md` 참조
+
+### 프론트엔드: 선택적 TDD ⭐⭐⭐
+
+**영역별 차별화**:
+- ✅ **유틸리티 함수/hooks**: TDD 권장
+  - 날짜 포맷팅, 데이터 변환, 커스텀 hooks 등
+- ✅ **복잡한 상태 관리**: 복잡한 로직만 TDD
+  - Zustand store의 복잡한 액션/selector
+- ⚠️ **UI 컴포넌트**: 시각적 개발 우선, 필요시 테스트 추가
+  - 디자인 변경이 잦아 TDD 효율 낮음
+- ⚠️ **E2E 테스트**: 주요 기능 완성 후 작성 (Playwright)
+
+**이유**:
+- UI는 시각적 피드백이 중요
+- 디자인 반복이 많아 테스트 선작성 비효율적
+- Week 1 경험: TDD 없이도 빠른 프론트엔드 구축 성공
+
+### 터미널/WebSocket: 선택적 TDD ⭐⭐⭐⭐
+
+**영역별 차별화**:
+- ✅ **메시지 파싱/상태 관리**: TDD 권장
+- ✅ **WebSocket 프로토콜 로직**: TDD 권장
+- ⚠️ **xterm.js UI 연동**: 통합 테스트만
+- ⚠️ **Docker 샌드박스**: 실행 확인으로 충분
+
+### 인프라/설정: 테스트 불필요 ⭐
+
+- Docker, CI/CD: 실행 확인이 테스트보다 직관적
+- 환경 설정: 한 번 설정하고 끝
+
+---
+
+**핵심 원칙**: 효율과 품질의 균형. 백엔드는 엄격한 TDD, 프론트엔드는 실용적 접근.
