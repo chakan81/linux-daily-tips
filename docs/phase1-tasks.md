@@ -62,14 +62,23 @@
 
 ### 🛠 Week 2: 백엔드 API 및 데이터베이스 (7일)
 
-#### Day 8-9: FastAPI 프로젝트 구조 설계
+#### Day 8-9: FastAPI 프로젝트 구조 설계 ✅
 **백엔드 초기화**
-- [ ] FastAPI 프로젝트 구조 생성 → **backend-code-writer**
-- [ ] Python 3.12 가상환경 및 의존성 관리 (pipenv 사용) → **backend-code-writer**
-- [ ] 비동기 설정 및 uvicorn 서버 구성 → **backend-code-writer**
-- [ ] API 문서 자동 생성 설정 (Swagger UI) → **backend-code-writer**
+- [x] FastAPI 프로젝트 구조 생성 → **backend-code-writer** ✅
+- [x] Python 3.12 패키지 관리 (uv 사용) → **backend-code-writer** ✅
+- [x] 비동기 설정 및 uvicorn 서버 구성 → **backend-code-writer** ✅
+- [x] API 문서 자동 생성 설정 (Swagger UI) → **backend-code-writer** ✅
 
-**완료 기준**: FastAPI 서버 실행 및 자동 문서 생성 확인
+**완료 기준**: FastAPI 서버 실행 및 자동 문서 생성 확인 ✅
+
+**현재 상태**: **Day 8-9 완료! 🎉**
+- uv 기반 패키지 관리 완료 (10-100배 빠른 설치)
+- Docker 환경 최적화 (가상환경 제거)
+- **완전한 프로젝트 구조 구축** (core, api, models, schemas, services)
+- **보안 아키텍처 구현** (JWT + 패스워드 해싱 + OAuth 준비)
+- **Mock Tips API 구현** (daily, list, detail, categories)
+- **Swagger UI 자동 문서** (http://localhost:8000/docs)
+- **모든 엔드포인트 동작 확인** (테스트 완료)
 
 #### Day 10-11: 데이터베이스 스키마 및 ORM 설정
 **데이터베이스 구축**
@@ -89,14 +98,32 @@
 
 **완료 기준**: Postman/Insomnia로 모든 API 엔드포인트 테스트 성공
 
-#### Day 14: Redis 캐싱 및 인증 시스템
+#### Day 14: Redis 캐싱 및 Google OAuth 통합
 **성능 및 보안**
-- [ ] Redis 연결 및 캐싱 미들웨어 구현 → **backend-code-writer**
-- [ ] JWT 기반 인증 시스템 구현 → **backend-code-writer**
-- [ ] 관리자 로그인 API (`POST /api/admin/auth/login`) → **backend-code-writer**
-- [ ] API 속도 제한 (Rate Limiting) 설정 → **backend-code-writer**
+- [ ] Redis 연결 및 기본 설정 → **backend-code-writer**
+- [ ] Google OAuth 2.0 설정 (Client ID/Secret 발급) → **backend-code-writer**
+- [ ] OAuth 로그인/콜백 API 구현 (`GET /api/auth/login`, `GET /api/auth/callback`) → **backend-code-writer**
+- [ ] 세션 정보 Redis 저장 (TTL: 1시간) → **backend-code-writer**
+- [ ] JWT 발급 및 검증 미들웨어 → **backend-code-writer**
+- [ ] API Rate Limiting (Redis 기반) → **backend-code-writer**
 
-**완료 기준**: Redis 캐싱 동작 및 JWT 토큰 인증 확인
+**인증 아키텍처 패턴**:
+```
+Google OAuth → 사용자 정보 획득 → PostgreSQL 저장 (영구)
+           → 세션 생성 → Redis 저장 (임시, 1시간 TTL)
+           → JWT 발급 → 클라이언트 반환
+
+API 요청 → JWT 검증 → Redis 세션 확인 → 권한 체크
+```
+
+**데이터 저장 구조**:
+- **PostgreSQL**: 사용자 계정 정보 (email, google_id, role, created_at)
+- **Redis**: 세션 정보 (user_id, role, expires_at), API 캐싱, Rate Limiting
+
+**완료 기준**:
+- Google 계정으로 로그인 성공
+- 세션 정보 Redis 저장 확인
+- 보호된 API 엔드포인트 접근 제어 동작
 
 ---
 
@@ -348,7 +375,7 @@
 
 ---
 
-## 📊 실시간 진행률 추적 (최종 업데이트: 2025-10-01)
+## 📊 실시간 진행률 추적 (최종 업데이트: 2025-10-14)
 
 ### 🎯 Week 1: 기본 인프라 및 프론트엔드 기반 (7일) ✅
 - **Day 1-2**: 4/4 작업 완료 (100%) ✅
@@ -356,9 +383,11 @@
 - **Day 5-6**: 5/5 작업 완료 (100%) ✅
 - **Day 7**: 4/4 작업 완료 (100%) ✅
 - **Week 1 전체**: 17/17 작업 완료 (100%) 🎉
+- **추가 완료**: uv 전환 및 백엔드 인프라 최적화 ✅
 
-### 🛠 Week 2: 백엔드 API 및 데이터베이스 (7일)
-- **전체 진행률**: 0/16 작업 완료 (0%) ⏳
+### 🛠 Week 2: 백엔드 API 및 데이터베이스 (7일) 🔄
+- **Day 8-9**: 4/4 작업 완료 (100%) ✅
+- **전체 진행률**: 4/16 작업 완료 (25%) 🔄
 
 ### 🖥 Week 3: 터미널 에뮬레이터 MVP (7일)
 - **전체 진행률**: 0/16 작업 완료 (0%) ⏳
@@ -367,18 +396,21 @@
 - **전체 진행률**: 0/16 작업 완료 (0%) ⏳
 
 ### 📈 전체 Phase 1 진행률
-**현재 상태**: 17/65 작업 완료 (**26%**) 🚀
+**현재 상태**: 21/65 작업 완료 (**32%**) 🚀
 
 **마일스톤 달성률**:
 - Week 1 마일스톤: 100% 달성 ✅ 🎉
-- 추가 성과: 접근성, 컴포넌트 분리, 타입 시스템 구축, 다크모드 완성, Header/Footer 반응형 레이아웃, 상태 관리, API 클라이언트, 에러/로딩 처리
+- Week 2 Day 8-9: 100% 달성 ✅ 🎉
+- 추가 성과:
+  - 프론트엔드: 접근성, 컴포넌트 분리, 타입 시스템, 다크모드, 상태 관리, API 클라이언트
+  - 백엔드: uv 전환 (10-100배 빠름), Docker 최적화, 완전한 프로젝트 구조, JWT 보안, Mock API
 
 **다음 우선순위 작업**:
-1. ✅ ~~상태 관리 시스템 설정 (Zustand, React Query)~~ - Day 7 **완료!**
-2. FastAPI 백엔드 프로젝트 구조 설계 - Day 8-9
-3. PostgreSQL 데이터베이스 스키마 설계 - Day 10-11
+1. ✅ ~~uv 전환 및 백엔드 인프라 최적화~~ **완료!**
+2. ✅ ~~FastAPI 프로젝트 구조 설계 - Day 8-9~~ **완료!**
+3. ⏳ PostgreSQL 데이터베이스 스키마 설계 - Day 10-11 **다음 작업**
 
-**예상 일정**: Week 1 완료! Week 2 백엔드 개발 시작 준비 완료 ✅
+**예상 일정**: Week 1 완료! Week 2 Day 8-9 완료! ✅
 
 ---
 

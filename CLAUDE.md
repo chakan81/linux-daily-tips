@@ -88,7 +88,7 @@ Backend API 서버
 
 ## 📊 현재 개발 상태
 
-### Phase 1 (MVP) 진행률: 26% (17/65 작업 완료)
+### Phase 1 (MVP) 진행률: 32% (21/65 작업 완료)
 
 #### ✅ Week 1 완료 (Day 1-7)
 **프론트엔드 인프라 100% 완료**
@@ -99,12 +99,21 @@ Backend API 서버
 - 에러 처리 및 로딩 컴포넌트
 - 다크모드 및 반응형 레이아웃
 
-#### ⏳ Week 2 예정 (Day 8-14)
+**추가 완료: 백엔드 인프라 최적화**
+- Poetry → **uv** 전환 완료 (10-100배 빠른 패키지 설치)
+- Docker 가상환경 최적화 (불필요한 venv 제거)
+- FastAPI 기본 앱 실행 확인
+
+#### 🔄 Week 2 진행 중 (Day 8-14)
 **백엔드 API 개발**
-- FastAPI 프로젝트 구조 설계
-- PostgreSQL 데이터베이스 스키마 및 ORM
-- Tips API 개발 (CRUD)
-- Redis 캐싱 및 JWT 인증
+- ✅ FastAPI 프로젝트 구조 설계 (Day 8-9 완료!)
+  - 완전한 프로젝트 구조 (core, api, models, schemas, services)
+  - 보안 아키텍처 (JWT + OAuth 준비)
+  - Mock Tips API 구현 (daily, list, detail)
+  - Swagger UI 자동 문서
+- ⏳ PostgreSQL 데이터베이스 스키마 및 ORM (Day 10-11 예정)
+- ⏳ Tips API 개발 (CRUD) (Day 12-13 예정)
+- ⏳ Redis 캐싱 및 JWT 인증 (Day 14 예정)
 
 #### ⏳ Week 3-4 예정
 - 터미널 에뮬레이터 (xterm.js + WebSocket + Docker)

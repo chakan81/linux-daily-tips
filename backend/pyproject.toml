@@ -1,9 +1,57 @@
+[project]
+name = "linux-daily-tips-backend"
+version = "0.1.0"
+description = "Backend API for Linux Daily Tips web service"
+authors = [{name = "Linux Daily Tips Team", email = "team@linuxdailytips.com"}]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "sqlalchemy>=2.0.23",
+    "alembic>=1.12.1",
+    "asyncpg>=0.29.0",
+    "redis>=5.0.1",
+    "pydantic[email]>=2.4.2",
+    "pydantic-settings>=2.0.3",
+    "python-jose[cryptography]>=3.3.0",
+    "passlib[bcrypt]>=1.7.4",
+    "python-multipart>=0.0.6",
+    "aiofiles>=23.2.1",
+    "httpx>=0.25.2",
+    "openai>=1.3.5",
+    "celery>=5.3.4",
+    "flower>=2.0.1",
+    "sentry-sdk[fastapi]>=1.38.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black>=23.10.1",
+    "flake8>=6.1.0",
+    "mypy>=1.7.0",
+    "isort>=5.12.0",
+    "pre-commit>=3.5.0",
+    "safety>=3.0.0",
+    "bandit>=1.7.5",
+]
+test = [
+    "pytest>=7.4.3",
+    "pytest-asyncio>=0.21.1",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.12.0",
+    "httpx>=0.25.2",
+    "factory-boy>=3.3.0",
+    "faker>=20.1.0",
+]
+
 [tool.poetry]
 name = "linux-daily-tips-backend"
 version = "0.1.0"
 description = "Backend API for Linux Daily Tips web service"
 authors = ["Linux Daily Tips Team <team@linuxdailytips.com>"]
 readme = "README.md"
+packages = [{include = "app"}]
 
 [tool.poetry.dependencies]
 python = "^3.12"
