@@ -171,7 +171,8 @@ def extract_timestamp(id_with_prefix: str) -> Optional[int]:
     try:
         _, ulid_str = parse_id(id_with_prefix)
         ulid_obj = ULID.from_str(ulid_str)
-        return ulid_obj.timestamp().int  # 밀리초 단위 타임스탬프
+        # timestamp는 초 단위 float, 밀리초로 변환
+        return int(ulid_obj.timestamp * 1000)
     except (ValueError, AttributeError):
         return None
 
