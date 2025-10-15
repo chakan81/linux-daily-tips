@@ -52,10 +52,33 @@ services:
     container_name: linux_tips_backend
     restart: unless-stopped
     environment:
+      # Database Configuration
       DATABASE_URL: postgresql+asyncpg://postgres:postgres_dev_password@postgres:5432/linux_daily_tips
+      POSTGRES_DB: linux_daily_tips
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_dev_password
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      # Redis Configuration
       REDIS_URL: redis://:redis_dev_password@redis:6379/0
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: 0
+      REDIS_PASSWORD: redis_dev_password
+      # FastAPI Configuration
       ENVIRONMENT: development
+      DEBUG: "true"
       LOG_LEVEL: DEBUG
+      # Security Configuration
+      SECRET_KEY: dev-secret-key-change-in-production-min-32-chars-long-12345678
+      JWT_SECRET_KEY: dev-jwt-secret-key-change-in-production-min-32-chars-long
+      JWT_ALGORITHM: HS256
+      JWT_ACCESS_TOKEN_EXPIRE_MINUTES: 60
+      JWT_REFRESH_TOKEN_EXPIRE_DAYS: 7
+      # Admin Configuration
+      ADMIN_EMAIL: admin@linuxtips.dev
+      ADMIN_PASSWORD: admin_dev_password_change_in_production
+      ADMIN_USERNAME: admin
     ports:
       - "8000:8000"
     volumes:

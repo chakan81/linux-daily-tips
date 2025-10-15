@@ -87,8 +87,9 @@ class DatabaseConfig:
         # Use NullPool for testing to avoid connection issues
         if settings.is_testing:
             engine_config["poolclass"] = NullPool
-        else:
-            engine_config["poolclass"] = QueuePool
+        # For async engine, do not specify poolclass (uses AsyncAdaptedQueuePool by default)
+        # else:
+        #     engine_config["poolclass"] = QueuePool  # This causes error with async engine
 
         engine = create_async_engine(**engine_config)
 

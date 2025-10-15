@@ -42,6 +42,10 @@ class Settings(BaseSettings):
         default=True,
         description="디버그 모드 활성화 여부",
     )
+    LOG_LEVEL: str = Field(
+        default="INFO",
+        description="로그 레벨 (DEBUG/INFO/WARNING/ERROR/CRITICAL)",
+    )
 
     # 데이터베이스 설정
     DATABASE_URL: str = Field(

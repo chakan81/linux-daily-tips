@@ -8,7 +8,8 @@ and third-party service integrations.
 
 import os
 from typing import List, Optional, Any, Dict
-from pydantic import BaseSettings, validator, Field
+from pydantic import validator, Field
+from pydantic_settings import BaseSettings
 from pydantic.networks import AnyHttpUrl
 from functools import lru_cache
 
@@ -331,20 +332,15 @@ class Settings(BaseSettings):
     # =============================================================================
     # PYDANTIC CONFIGURATION
     # =============================================================================
-    class Config:
-        """Pydantic configuration."""
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = False
-
-        # Allow arbitrary types for complex configurations
-        arbitrary_types_allowed = True
-
-        # Validate assignment to catch configuration changes
-        validate_assignment = True
-
-        # Use enum values instead of names
-        use_enum_values = True
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+        "case_sensitive": False,
+        "extra": "ignore",  # 정의되지 않은 환경 변수 무시
+        "arbitrary_types_allowed": True,
+        "validate_assignment": True,
+        "use_enum_values": True,
+    }
 
 
 @lru_cache()

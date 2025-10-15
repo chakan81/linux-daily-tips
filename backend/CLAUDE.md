@@ -184,9 +184,32 @@ docker-compose exec backend pytest tests/ --lf
 - `docs/models-usage-guide.md` - SQLAlchemy 사용 가이드 (리팩토링 반영)
 - `docs/code-refactoring-report.md` - 코드 품질 평가 보고서
 - `docs/day10-11-completion-report.md` - Day 10-11 완료 보고서
+- `docs/day12-13-completion-report.md` - Day 12-13 완료 보고서 (TDD, Service 계층, 성능 인덱스)
 
 ---
 
 **핵심 원칙**:
 - **TDD**: 구현 전에 테스트를 작성하라! 🧪
-- **코드 품질**: 8.3 → 9.0/10 (리팩토링 완료) 🔧
+- **코드 품질**: 9.2/10 (Day 10-11: 9.0/10 → Day 12-13: 9.2/10) 🔧
+- **성능 최적화**: 데이터베이스 인덱스 전략 (복합 인덱스, GIN 인덱스) ⚡
+
+---
+
+## 🤖 백엔드 에이전트 활용 (TDD 필수)
+
+**자주 사용할 에이전트**:
+- `backend-code-writer`: FastAPI 엔드포인트, SQLAlchemy 모델, 서비스 로직, 인증, WebSocket
+- `unit-test-generator`: 모든 계층의 테스트 작성 (TDD의 RED 단계) ⭐⭐⭐⭐⭐
+- `code-quality-evaluator`: 코드 품질 평가, 보안 점검
+- `code-refactoring-specialist`: 코드 개선 (TDD의 REFACTOR 단계)
+- `service-planner`: 시스템 아키텍처 설계
+- `general-purpose`: 함수/클래스 사용처 검색, 패턴 분석
+
+**TDD 워크플로우 (Day 12-13부터 필수)**:
+1. unit-test-generator: 실패하는 테스트 작성 (RED)
+2. backend-code-writer: 테스트 통과하는 최소 코드 구현 (GREEN)
+3. pytest 실행 → 통과 확인
+4. code-refactoring-specialist: 코드 개선 (REFACTOR)
+5. pytest 재실행 → 여전히 통과 확인
+
+**핵심**: 테스트를 먼저 작성하고 구현하세요! (Day 10-11: 129개 테스트 100% 통과 실증)

@@ -32,6 +32,32 @@ from app.core.config import settings
 logger = logging.getLogger(__name__)
 
 
+class AppException(Exception):
+    """
+    애플리케이션 비즈니스 로직 예외
+
+    Service 레이어에서 발생하는 비즈니스 로직 에러를 표현합니다.
+    HTTP 상태 코드와 함께 에러 메시지를 포함합니다.
+
+    Attributes:
+        status_code: HTTP 상태 코드 (404, 409, 422 등)
+        detail: 에러 상세 메시지
+
+    Example:
+        ```python
+        raise AppException(
+            status_code=404,
+            detail="해당 팁을 찾을 수 없습니다"
+        )
+        ```
+    """
+
+    def __init__(self, status_code: int, detail: str):
+        self.status_code = status_code
+        self.detail = detail
+        super().__init__(detail)
+
+
 class ErrorResponse:
     """
     표준화된 에러 응답 구조
@@ -71,6 +97,35 @@ def setup_exception_handlers(app: FastAPI) -> None:
     Args:
         app: FastAPI 애플리케이션 인스턴스
     """
+
+    @app.exception_handler(AppException)
+    async def app_exception_handler(
+        request: Request, exc: AppException
+    ) -> JSONResponse:
+        """
+        AppException 핸들러 (비즈니스 로직 에러)
+
+        Service 레이어에서 발생하는 AppException을 처리합니다.
+        """
+        logger.warning(
+            f"AppException: {exc.status_code} - {exc.detail}",
+            extra={
+                "status_code": exc.status_code,
+                "path": request.url.path,
+                "method": request.method,
+            },
+        )
+
+        error_response = ErrorResponse(
+            status_code=exc.status_code,
+            error_type="business_error",
+            message=exc.detail,
+        )
+
+        return JSONResponse(
+            status_code=exc.status_code,
+            content=error_response.to_dict(),
+        )
 
     @app.exception_handler(StarletteHTTPException)
     async def http_exception_handler(

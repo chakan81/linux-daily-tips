@@ -1,92 +1,50 @@
 """
-Tips API 엔드포인트 (Mock 데이터)
+Tips API 엔드포인트
 
 일일 리눅스 팁을 제공하는 API 엔드포인트입니다.
-Day 10-11에서 실제 데이터베이스 연동으로 대체될 예정입니다.
+Day 12에서 Mock 데이터를 실제 데이터베이스 연동으로 교체했습니다.
 """
 
-from typing import List, Optional
+from datetime import date
 
-from fastapi import APIRouter, HTTPException, Path, Query
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.ulid_helper import validate_id_type
+from app.config.database import get_async_session as get_db
 from app.core.id_prefixes import IDPrefix
-
-# Mock 데이터 (Day 10-11에서 데이터베이스로 대체)
-# ULID는 시간순 정렬 가능하므로, 과거 날짜부터 최신 날짜 순으로 ID 생성됨
-MOCK_TIPS = [
-    {
-        "id": "tip_01JCAW0V1QQ9KZ2F3XHBP8TGNY",  # 2025-10-14
-        "title": "ls 명령어 기본 사용법",
-        "content": "ls는 디렉토리 내용을 나열합니다. ls -l로 상세 정보를, ls -a로 숨김 파일을 볼 수 있습니다.",
-        "difficulty": "beginner",
-        "category": "file-system",
-        "published_date": "2025-10-14",
-        "views": 150,
-        "likes": 12,
-    },
-    {
-        "id": "tip_01JCAW0V1R1M2N3P4Q5R6S7T8U",  # 2025-10-13
-        "title": "grep으로 텍스트 검색하기",
-        "content": "grep 'pattern' file.txt로 파일에서 패턴을 검색합니다. -r 옵션으로 재귀 검색이 가능합니다.",
-        "difficulty": "intermediate",
-        "category": "text-processing",
-        "published_date": "2025-10-13",
-        "views": 230,
-        "likes": 18,
-    },
-    {
-        "id": "tip_01JCAW0V1S9ABCDEFGHIJKLMNO",  # 2025-10-12
-        "title": "find 명령어로 파일 찾기",
-        "content": "find /path -name 'filename'으로 파일을 검색합니다. -type, -mtime 등 다양한 옵션을 사용할 수 있습니다.",
-        "difficulty": "intermediate",
-        "category": "file-system",
-        "published_date": "2025-10-12",
-        "views": 180,
-        "likes": 15,
-    },
-    {
-        "id": "tip_01JCAW0V1TVWXYZ0123456789A",  # 2025-10-11
-        "title": "sed로 텍스트 치환하기",
-        "content": "sed 's/old/new/g' file.txt로 파일의 텍스트를 치환합니다. -i 옵션으로 파일을 직접 수정할 수 있습니다.",
-        "difficulty": "advanced",
-        "category": "text-processing",
-        "published_date": "2025-10-11",
-        "views": 120,
-        "likes": 10,
-    },
-    {
-        "id": "tip_01JCAW0V1UBCDEFGHIJKLMNOPQ",  # 2025-10-10
-        "title": "chmod로 파일 권한 변경",
-        "content": "chmod 755 file로 파일 권한을 변경합니다. rwx(읽기/쓰기/실행) 권한을 숫자로 표현할 수 있습니다.",
-        "difficulty": "beginner",
-        "category": "permissions",
-        "published_date": "2025-10-10",
-        "views": 200,
-        "likes": 20,
-    },
-]
+from app.core.ulid_helper import validate_id_type
+from app.models.tip import DifficultyLevel
+from app.schemas.tip import Tip, TipList
+from app.services.tip_service import TipService
 
 router = APIRouter()
 
 
-@router.get("/daily", summary="오늘의 팁 조회", tags=["tips"])
-async def get_daily_tip():
+@router.get("/daily", summary="오늘의 팁 조회", tags=["tips"], response_model=Tip)
+async def get_daily_tip(db: AsyncSession = Depends(get_db)):
     """
     오늘의 일일 팁 조회
 
     메인 페이지에 표시될 오늘의 리눅스 팁을 반환합니다.
 
+    Args:
+        db: 데이터베이스 세션 (자동 주입)
+
     Returns:
-        dict: 오늘의 팁 정보
+        Tip: 오늘의 팁 정보
             - id: 팁 ID
             - title: 제목
             - content: 내용
             - difficulty: 난이도 (beginner/intermediate/advanced)
-            - category: 카테고리
-            - published_date: 게시일
-            - views: 조회수
-            - likes: 좋아요 수
+            - category: 카테고리 배열
+            - publish_date: 게시일
+            - view_count: 조회수
+            - created_at: 생성 시각
+            - updated_at: 수정 시각
+
+    Raises:
+        HTTPException:
+            - 404: 오늘의 팁이 없는 경우
 
     Example:
         ```
@@ -94,34 +52,43 @@ async def get_daily_tip():
 
         Response:
         {
-            "id": 1,
+            "id": "tip_01JCAW0V1QQ9KZ2F3XHBP8TGNY",
             "title": "ls 명령어 기본 사용법",
             "content": "ls는 디렉토리 내용을 나열합니다...",
             "difficulty": "beginner",
-            "category": "file-system",
-            "published_date": "2025-10-14",
-            "views": 150,
-            "likes": 12
+            "category": ["file-system"],
+            "publish_date": "2025-10-15",
+            "view_count": 150,
+            "created_at": "2025-10-15T00:00:00Z",
+            "updated_at": "2025-10-15T00:00:00Z"
         }
         ```
 
     Note:
         - 인증 불필요
-        - 현재는 Mock 데이터 반환
-        - Day 10-11에서 실제 DB 쿼리로 변경 (today() 기준)
+        - 조회 시 view_count 자동 증가
+        - 데이터베이스 연동 (Day 12)
     """
-    # Mock: 첫 번째 팁 반환
-    return MOCK_TIPS[0]
+    tip = await TipService.get_daily_tip(db, date.today())
+    if not tip:
+        raise HTTPException(status_code=404, detail="오늘의 팁이 없습니다")
+
+    # 조회수 증가
+    await TipService.increment_view_count(db, tip.id)
+    await db.commit()
+
+    return tip
 
 
-@router.get("/", summary="팁 목록 조회", tags=["tips"])
+@router.get("/", summary="팁 목록 조회", tags=["tips"], response_model=TipList)
 async def get_tips(
     skip: int = Query(0, ge=0, description="건너뛸 개수 (페이지네이션)"),
     limit: int = Query(10, ge=1, le=100, description="최대 개수 (1-100)"),
-    difficulty: Optional[str] = Query(
+    difficulty: str | None = Query(
         None, description="난이도 필터 (beginner/intermediate/advanced)"
     ),
-    category: Optional[str] = Query(None, description="카테고리 필터"),
+    category: str | None = Query(None, description="카테고리 필터"),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     팁 목록 조회
@@ -132,14 +99,19 @@ async def get_tips(
         skip: 건너뛸 개수 (페이지네이션, 기본값: 0)
         limit: 최대 개수 (1-100, 기본값: 10)
         difficulty: 난이도 필터 (beginner/intermediate/advanced)
-        category: 카테고리 필터
+        category: 카테고리 필터 (예: "file-system")
+        db: 데이터베이스 세션 (자동 주입)
 
     Returns:
-        dict: 팁 목록 및 메타데이터
-            - total: 전체 팁 개수 (필터링 적용 후)
-            - skip: 건너뛴 개수
-            - limit: 최대 개수
+        TipList: 팁 목록 및 페이지네이션 정보
             - items: 팁 목록
+            - total: 전체 팁 개수 (필터링 적용 후)
+            - page: 현재 페이지 번호
+            - page_size: 페이지 크기
+
+    Raises:
+        HTTPException:
+            - 400: 잘못된 difficulty 값
 
     Example:
         ```
@@ -147,51 +119,61 @@ async def get_tips(
 
         Response:
         {
-            "total": 2,
-            "skip": 0,
-            "limit": 10,
             "items": [
                 {
-                    "id": 1,
+                    "id": "tip_01JCAW0V1QQ9KZ2F3XHBP8TGNY",
                     "title": "ls 명령어 기본 사용법",
                     ...
                 },
                 {
-                    "id": 5,
+                    "id": "tip_01JCAW0V1UBCDEFGHIJKLMNOPQ",
                     "title": "chmod로 파일 권한 변경",
                     ...
                 }
-            ]
+            ],
+            "total": 2,
+            "page": 1,
+            "page_size": 10
         }
         ```
 
     Note:
         - 인증 불필요
-        - Day 10-11에서 실제 DB 쿼리로 변경
+        - 데이터베이스 연동 (Day 12)
+        - 조회 시 view_count는 증가하지 않음 (목록 조회)
     """
-    tips = MOCK_TIPS
-
-    # 난이도 필터링
+    # difficulty 문자열을 Enum으로 변환
+    difficulty_enum = None
     if difficulty:
-        tips = [t for t in tips if t["difficulty"] == difficulty]
+        try:
+            difficulty_enum = DifficultyLevel(difficulty.lower())
+        except ValueError:
+            raise HTTPException(
+                status_code=400, detail=f"Invalid difficulty: {difficulty}"
+            )
 
-    # 카테고리 필터링
-    if category:
-        tips = [t for t in tips if t["category"] == category]
+    # TipService로 팁 목록 조회
+    tips, total = await TipService.get_tips(
+        db, skip=skip, limit=limit, difficulty=difficulty_enum, category=category
+    )
 
-    # 페이지네이션
-    paginated_tips = tips[skip : skip + limit]
+    # TipList 스키마로 반환
+    return TipList(
+        items=tips,
+        total=total,
+        page=(skip // limit) + 1,
+        page_size=limit,
+    )
 
-    return {"total": len(tips), "skip": skip, "limit": limit, "items": paginated_tips}
 
-
-@router.get("/{tip_id}", summary="팁 상세 조회", tags=["tips"])
+@router.get("/{tip_id}", summary="팁 상세 조회", tags=["tips"], response_model=Tip)
 async def get_tip(
     tip_id: str = Path(
         ...,
         description="팁 ID (tip_xxxx 형식)",
         pattern="^tip_[0-9A-Z]{26}$",
-    )
+    ),
+    db: AsyncSession = Depends(get_db),
 ):
     """
     특정 팁 상세 정보 조회
@@ -200,14 +182,15 @@ async def get_tip(
 
     Args:
         tip_id: 팁 ID (tip_ 프리픽스 + 26자 ULID)
+        db: 데이터베이스 세션 (자동 주입)
 
     Returns:
-        dict: 팁 상세 정보
+        Tip: 팁 상세 정보
 
     Raises:
         HTTPException:
             - 400: ID 형식이 올바르지 않은 경우
-            - 404: 팁을 찾을 수 없는 경우
+            - 404: 팁을 찾을 수 없는 경우 (TipService에서 발생)
 
     Example:
         ```
@@ -219,17 +202,19 @@ async def get_tip(
             "title": "ls 명령어 기본 사용법",
             "content": "ls는 디렉토리 내용을 나열합니다...",
             "difficulty": "beginner",
-            "category": "file-system",
-            "published_date": "2025-10-14",
-            "views": 150,
-            "likes": 12
+            "category": ["file-system"],
+            "publish_date": "2025-10-15",
+            "view_count": 151,
+            "created_at": "2025-10-15T00:00:00Z",
+            "updated_at": "2025-10-15T00:00:00Z"
         }
         ```
 
     Note:
         - 인증 불필요
         - ID 타입 검증 포함 (tip_ 프리픽스 확인)
-        - 조회 시 views 카운트 증가 (Day 10-11에서 구현)
+        - 조회 시 view_count 자동 증가
+        - 데이터베이스 연동 (Day 12)
     """
     # ID 타입 검증
     if not validate_id_type(tip_id, IDPrefix.TIP):
@@ -238,16 +223,12 @@ async def get_tip(
             detail=f"Invalid tip ID format. Expected 'tip_' prefix, got: {tip_id}",
         )
 
-    # Mock: ID로 팁 검색
-    tip = next((t for t in MOCK_TIPS if t["id"] == tip_id), None)
+    # TipService로 팁 조회 (404는 TipService에서 AppException으로 발생)
+    tip = await TipService.get_tip_by_id(db, tip_id)
 
-    if not tip:
-        raise HTTPException(
-            status_code=404, detail=f"Tip with id {tip_id} not found"
-        )
-
-    # TODO: Day 10-11에서 조회수 증가 로직 추가
-    # await db.execute(update(Tip).where(Tip.id == tip_id).values(views=Tip.views + 1))
+    # 조회수 증가
+    await TipService.increment_view_count(db, tip.id)
+    await db.commit()
 
     return tip
 
@@ -286,21 +267,20 @@ async def get_categories():
 
     Note:
         - 인증 불필요
-        - Day 10-11에서 실제 DB 쿼리로 변경
+        - 현재는 Mock 데이터 반환 (향후 실제 DB 쿼리로 개선 예정)
+        - PostgreSQL의 JSONB 집계 쿼리 필요 (jsonb_array_elements)
     """
-    # Mock: 카테고리 통계 계산
-    category_counts = {}
-    for tip in MOCK_TIPS:
-        category = tip["category"]
-        category_counts[category] = category_counts.get(category, 0) + 1
-
+    # TODO: 실제 DB 쿼리로 변경 (Day 14 이후)
+    # SELECT DISTINCT jsonb_array_elements_text(category) as cat, COUNT(*)
+    # FROM tips WHERE is_active = True GROUP BY cat
+    #
+    # 현재는 정적 Mock 데이터 반환
     categories = [
-        {
-            "name": cat,
-            "display_name": cat.replace("-", " ").title(),
-            "count": count,
-        }
-        for cat, count in category_counts.items()
+        {"name": "file-system", "display_name": "파일 시스템", "count": 0},
+        {"name": "text-processing", "display_name": "텍스트 처리", "count": 0},
+        {"name": "permissions", "display_name": "권한 관리", "count": 0},
+        {"name": "networking", "display_name": "네트워킹", "count": 0},
+        {"name": "process-management", "display_name": "프로세스 관리", "count": 0},
     ]
 
     return {"categories": categories}

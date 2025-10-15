@@ -273,3 +273,19 @@ export type ApiError = NetworkError | ValidationError | ...
   - ⏳ Week 4 통합 및 최적화: 0% (0/16 작업)
 
 이 문서는 프로젝트 진행에 따라 지속적으로 업데이트됩니다.
+
+---
+
+## 🤖 프론트엔드 에이전트 활용
+
+**자주 사용할 에이전트**:
+- `ui-ux-designer`: 페이지/컴포넌트 설계, 사용자 플로우 최적화, 접근성 개선
+- `frontend-code-writer`: React/Next.js 컴포넌트 작성, 상태 관리, API 연동, 스타일링
+- `unit-test-generator`: 유틸리티 함수, hooks, 상태 관리 로직 테스트 (선택적)
+- `code-refactoring-specialist`: 컴포넌트 분리, Props drilling 해결, 성능 최적화
+- `general-purpose`: 컴포넌트 사용처 검색, 전역 리네이밍
+
+**추천 워크플로우**:
+1. ui-ux-designer로 설계 → 2. frontend-code-writer로 구현 → 3. 브라우저 확인 (필수)
+
+**주의**: UI는 반드시 실제 브라우저에서 시각적으로 확인하세요!

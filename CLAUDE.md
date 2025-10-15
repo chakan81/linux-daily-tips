@@ -118,7 +118,11 @@ Backend API 서버
   - ULID + 프리픽스 ID 시스템
   - **코드 품질 평가 및 리팩토링 완료** (8.3 → 9.0/10)
   - AppException + 구조화 로깅 시스템
-- ⏳ Tips API 개발 (CRUD) (Day 12-13 예정 - TDD 적용)
+- ✅ Tips API 개발 (Day 12-13 완료!)
+  - TDD 방식 개발 (21개 테스트 100% 통과)
+  - Service 계층 완성, Alembic 마이그레이션
+  - 성능 인덱스 추가 (3개)
+  - **코드 품질: 9.2/10** (Day 10-11 대비 +0.2)
 - ⏳ Redis 캐싱 및 JWT 인증 (Day 14 예정)
 
 #### ⏳ Week 3-4 예정
@@ -185,3 +189,31 @@ Backend API 서버
 ---
 
 **핵심 원칙**: 효율과 품질의 균형. 백엔드는 엄격한 TDD, 프론트엔드는 실용적 접근.
+
+---
+
+## 🤖 에이전트(Agent) 적극 활용 가이드
+
+### 복잡한 작업은 에이전트에게 위임하세요
+
+**에이전트 사용이 필수인 상황**:
+- 여러 파일에 걸친 검색/수정 작업
+- 전문 도메인 지식이 필요한 코드 작성 (UI/UX, 백엔드, 프론트엔드)
+- 코드 품질 평가 및 리팩토링
+- 종합적인 테스트 작성
+- 시스템 레벨 아키텍처 설계
+
+**주요 에이전트**:
+- `general-purpose`: 코드 검색, 분석, 다단계 작업
+- `ui-ux-designer`: UI/UX 설계, 디자인 시스템
+- `frontend-code-writer`: React/Next.js 코드 작성
+- `backend-code-writer`: FastAPI/Django 코드 작성
+- `code-quality-evaluator`: 코드 품질 평가
+- `code-refactoring-specialist`: 리팩토링
+- `unit-test-generator`: 테스트 작성
+- `service-planner`: 아키텍처 설계
+
+**활용 원칙**:
+- 독립적인 작업은 여러 에이전트를 병렬 실행
+- 구체적인 작업 설명으로 자율적 실행 유도
+- 에이전트 완료 후 결과 검토 필수

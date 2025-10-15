@@ -11,6 +11,7 @@ dependencies = [
     "sqlalchemy>=2.0.23",
     "alembic>=1.12.1",
     "asyncpg>=0.29.0",
+    "psycopg2-binary>=2.9.0",
     "redis>=5.0.1",
     "pydantic[email]>=2.4.2",
     "pydantic-settings>=2.0.3",
@@ -61,6 +62,7 @@ uvicorn = {extras = ["standard"], version = "^0.24.0"}
 sqlalchemy = "^2.0.23"
 alembic = "^1.12.1"
 asyncpg = "^0.29.0"
+psycopg2-binary = "^2.9.0"
 redis = "^5.0.1"
 pydantic = {extras = ["email"], version = "^2.4.2"}
 pydantic-settings = "^2.0.3"

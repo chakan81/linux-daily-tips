@@ -14,10 +14,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.api import api_router
 from app.core.config import settings
 from app.core.exceptions import setup_exception_handlers
-from app.core.logging_config import setup_logging
 
-# 로깅 시스템 초기화 (앱 생성 전)
-setup_logging()
+# 로깅 시스템 초기화 (기본 logging 설정)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 

@@ -102,14 +102,23 @@
   - AppException 및 구조화 로깅 시스템 추가
 - Alembic은 Day 12-13에서 구현 예정
 
-#### Day 12-13: Tips API 개발
+#### Day 12-13: Tips API 개발 ✅
 **핵심 API 구현**
-- [ ] 일일 팁 조회 API (`GET /api/tips/daily`) → **backend-code-writer**
-- [ ] 팁 목록 API (`GET /api/tips/history`) → **backend-code-writer**
-- [ ] 팁 상세 조회 API (`GET /api/tips/{id}`) → **backend-code-writer**
-- [ ] Pydantic 모델 정의 및 검증 → **backend-code-writer**
+- [x] 일일 팁 조회 API (`GET /api/tips/daily`) → **backend-code-writer** ✅
+- [x] 팁 목록 API (`GET /api/tips/history`) → **backend-code-writer** ✅
+- [x] 팁 상세 조회 API (`GET /api/tips/{id}`) → **backend-code-writer** ✅
+- [x] Pydantic 모델 정의 및 검증 → **backend-code-writer** ✅
 
-**완료 기준**: Postman/Insomnia로 모든 API 엔드포인트 테스트 성공
+**완료 기준**: Postman/Insomnia로 모든 API 엔드포인트 테스트 성공 ✅
+
+**현재 상태**: **Day 12-13 완료! 🎉**
+- TDD 방식으로 Tips Service 개발 (21개 테스트 100% 통과)
+- Mock 데이터 제거 및 실제 DB 연동
+- Alembic 마이그레이션 설정 완료 (Baseline + Performance Indexes)
+- 데이터베이스 성능 인덱스 추가 (3개: publish_date+is_active, difficulty, category GIN)
+- 7일치 테스트 데이터 시딩
+- 전체 150개 테스트 100% 통과 (모델 90 + 스키마 39 + 서비스 21)
+- **코드 품질 평가**: 9.2/10 (Day 10-11 대비 +0.2 상승)
 
 #### Day 14: Redis 캐싱 및 Google OAuth 통합
 **성능 및 보안**
@@ -401,7 +410,8 @@ API 요청 → JWT 검증 → Redis 세션 확인 → 권한 체크
 ### 🛠 Week 2: 백엔드 API 및 데이터베이스 (7일) 🔄
 - **Day 8-9**: 4/4 작업 완료 (100%) ✅
 - **Day 10-11**: 4/4 작업 완료 (100%) ✅
-- **전체 진행률**: 8/16 작업 완료 (50%) 🔄
+- **Day 12-13**: 4/4 작업 완료 (100%) ✅
+- **전체 진행률**: 12/16 작업 완료 (75%) 🔄
 
 ### 🖥 Week 3: 터미널 에뮬레이터 MVP (7일)
 - **전체 진행률**: 0/16 작업 완료 (0%) ⏳
@@ -410,24 +420,27 @@ API 요청 → JWT 검증 → Redis 세션 확인 → 권한 체크
 - **전체 진행률**: 0/16 작업 완료 (0%) ⏳
 
 ### 📈 전체 Phase 1 진행률
-**현재 상태**: 25/65 작업 완료 (**38%**) 🚀
+**현재 상태**: 29/65 작업 완료 (**45%**) 🚀
 
 **마일스톤 달성률**:
 - Week 1 마일스톤: 100% 달성 ✅ 🎉
 - Week 2 Day 8-9: 100% 달성 ✅ 🎉
 - Week 2 Day 10-11: 100% 달성 ✅ 🎉
+- Week 2 Day 12-13: 100% 달성 ✅ 🎉
 - 추가 성과:
   - 프론트엔드: 접근성, 컴포넌트 분리, 타입 시스템, 다크모드, 상태 관리, API 클라이언트
   - 백엔드: uv 전환 (10-100배 빠름), Docker 최적화, 완전한 프로젝트 구조, JWT 보안, Mock API
   - 데이터베이스: SQLAlchemy 2.0 Async, ULID 시스템, 6개 모델, 129개 테스트 100% 통과
-  - 코드 품질: 평가 및 리팩토링 (9.0/10), AppException, 구조화 로깅, 보안 강화
+  - 코드 품질: 평가 및 리팩토링 (9.0/10 → 9.2/10), AppException, 구조화 로깅, 보안 강화
+  - **Tips API**: TDD 개발 (21개 신규 테스트), Service 계층 완성, Alembic 마이그레이션, 성능 인덱스
 
 **다음 우선순위 작업**:
 1. ✅ ~~uv 전환 및 백엔드 인프라 최적화~~ **완료!**
 2. ✅ ~~FastAPI 프로젝트 구조 설계 - Day 8-9~~ **완료!**
 3. ✅ ~~PostgreSQL 데이터베이스 스키마 설계 - Day 10-11~~ **완료!**
 4. ✅ ~~코드 품질 평가 및 리팩토링~~ **완료!** (8.3 → 9.0/10)
-5. ⏳ Tips API 구현 & Alembic 마이그레이션 - Day 12-13 **다음 작업** (TDD 적용)
+5. ✅ ~~Tips API 구현 & Alembic 마이그레이션 - Day 12-13~~ **완료!** (TDD, 150개 테스트 100% 통과)
+6. ⏳ Redis 캐싱 및 JWT 인증 - Day 14 **다음 작업**
 
 **예상 일정**: Week 1 완료! Week 2 Day 8-9, 10-11 완료! ✅
 
