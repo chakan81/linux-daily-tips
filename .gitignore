@@ -180,6 +180,9 @@ docs/_build/
 docs/server-migration-guide.md
 docs/server-migration-guide.pdf
 
+# Git workflow documentation (개인 메모, 공유 불필요)
+docs/git-workflow-guide.md
+
 # ===========================================
 # Deployment & CI/CD
 # ===========================================
