@@ -79,6 +79,10 @@ services:
       ADMIN_EMAIL: admin@linuxtips.dev
       ADMIN_PASSWORD: admin_dev_password_change_in_production
       ADMIN_USERNAME: admin
+      # Google OAuth 2.0 Configuration
+      GOOGLE_CLIENT_ID: "your-google-client-id.apps.googleusercontent.com"
+      GOOGLE_CLIENT_SECRET: "your-google-client-secret"
+      GOOGLE_REDIRECT_URI: "http://localhost:8000/api/v1/auth/callback"
     ports:
       - "8000:8000"
     volumes:

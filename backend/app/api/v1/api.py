@@ -7,7 +7,7 @@ API v1 라우터 통합
 
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import health, tips
+from app.api.v1.endpoints import admin, auth, health, tips
 
 # API v1 메인 라우터
 api_router = APIRouter()
@@ -20,7 +20,13 @@ api_router.include_router(health.router, tags=["health"])
 # /api/v1/tips/... 로 접근
 api_router.include_router(tips.router, prefix="/tips", tags=["tips"])
 
-# TODO: Day 12-14에서 추가될 엔드포인트들
-# api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
-# api_router.include_router(admin.router, prefix="/admin", tags=["admin"])
+# Admin 엔드포인트
+# /api/v1/admin/... 로 접근
+api_router.include_router(admin.router, tags=["admin"])
+
+# Auth 엔드포인트 (Google OAuth 2.0)
+# /api/v1/auth/... 로 접근
+api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
+
+# TODO: Day 15+에서 추가될 엔드포인트들
 # api_router.include_router(terminal.router, prefix="/terminal", tags=["terminal"])

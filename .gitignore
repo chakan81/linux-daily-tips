@@ -176,6 +176,10 @@ media/
 docs/build/
 docs/_build/
 
+# Generated PDF and server migration docs
+docs/server-migration-guide.md
+docs/server-migration-guide.pdf
+
 # ===========================================
 # Deployment & CI/CD
 # ===========================================

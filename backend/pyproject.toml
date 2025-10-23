@@ -25,6 +25,7 @@ dependencies = [
     "flower>=2.0.1",
     "sentry-sdk[fastapi]>=1.38.0",
     "python-ulid>=2.2.0",
+    "slowapi>=0.1.9",
 ]
 
 [project.optional-dependencies]

@@ -44,8 +44,9 @@ class TestTipServiceGetMethods:
         async_db_session.add(tip)
         await async_db_session.flush()
 
-        # Act: 오늘 날짜 팁 조회
-        result = await TipService.get_daily_tip(async_db_session, today)
+        # Act: 오늘 날짜 팁 조회 (캐시 없이)
+        service = TipService()  # 캐시 없이 인스턴스화
+        result = await service.get_daily_tip(async_db_session, today)
 
         # Assert: 팁이 반환되어야 함
         assert result is not None, "오늘 날짜 팁이 반환되어야 합니다"
@@ -68,7 +69,8 @@ class TestTipServiceGetMethods:
         await async_db_session.flush()
 
         # Act: 오늘 날짜 팁 조회 (존재하지 않음)
-        result = await TipService.get_daily_tip(async_db_session, date.today())
+        service = TipService()
+        result = await service.get_daily_tip(async_db_session, date.today())
 
         # Assert: None 반환
         assert result is None, "팁이 없는 날짜는 None을 반환해야 합니다"
@@ -89,7 +91,8 @@ class TestTipServiceGetMethods:
         await async_db_session.flush()
 
         # Act: 오늘 날짜 팁 조회
-        result = await TipService.get_daily_tip(async_db_session, today)
+        service = TipService()
+        result = await service.get_daily_tip(async_db_session, today)
 
         # Assert: 비활성화 팁은 반환되지 않음
         assert result is None, "비활성화된 팁은 조회되지 않아야 합니다"
@@ -108,7 +111,8 @@ class TestTipServiceGetMethods:
         await async_db_session.refresh(tip)
 
         # Act: ID로 팁 조회
-        result = await TipService.get_tip_by_id(async_db_session, tip.id)
+        service = TipService()
+        result = await service.get_tip_by_id(async_db_session, tip.id)
 
         # Assert: 정확한 팁 반환
         assert result is not None
@@ -125,8 +129,9 @@ class TestTipServiceGetMethods:
         # Act & Assert: AppException(404) 발생 예상
         from app.core.exceptions import AppException
 
+        service = TipService()
         with pytest.raises(AppException) as exc_info:
-            await TipService.get_tip_by_id(async_db_session, non_existent_id)
+            await service.get_tip_by_id(async_db_session, non_existent_id)
 
         assert exc_info.value.status_code == 404
         assert "not found" in str(exc_info.value.detail).lower()
@@ -147,7 +152,8 @@ class TestTipServiceGetMethods:
         await async_db_session.flush()
 
         # Act: 전체 팁 조회 (skip=0, limit=10)
-        result_tips, total_count = await TipService.get_tips(
+        service = TipService()
+        result_tips, total_count = await service.get_tips(
             async_db_session, skip=0, limit=10
         )
 
@@ -174,7 +180,8 @@ class TestTipServiceGetMethods:
         await async_db_session.flush()
 
         # Act: 초급 난이도만 필터링
-        result_tips, total_count = await TipService.get_tips(
+        service = TipService()
+        result_tips, total_count = await service.get_tips(
             async_db_session, skip=0, limit=10, difficulty="beginner"
         )
 
@@ -201,7 +208,8 @@ class TestTipServiceGetMethods:
         await async_db_session.flush()
 
         # Act: file-system 카테고리만 필터링
-        result_tips, total_count = await TipService.get_tips(
+        service = TipService()
+        result_tips, total_count = await service.get_tips(
             async_db_session, skip=0, limit=10, category="file-system"
         )
 
@@ -223,7 +231,8 @@ class TestTipServiceGetMethods:
         await async_db_session.flush()
 
         # Act: skip=2, limit=2로 조회 (3번째, 4번째 팁)
-        result_tips, total_count = await TipService.get_tips(
+        service = TipService()
+        result_tips, total_count = await service.get_tips(
             async_db_session, skip=2, limit=2
         )
 
@@ -249,7 +258,8 @@ class TestTipServiceCreateMethod:
         )
 
         # Act: 팁 생성
-        created_tip = await TipService.create_tip(async_db_session, tip_data)
+        service = TipService()
+        created_tip = await service.create_tip(async_db_session, tip_data)
 
         # Assert: 팁이 정상 생성됨
         assert created_tip is not None
@@ -285,7 +295,8 @@ class TestTipServiceCreateMethod:
         from app.core.exceptions import AppException
 
         with pytest.raises(AppException) as exc_info:
-            await TipService.create_tip(async_db_session, tip_data)
+            service = TipService()
+            await service.create_tip(async_db_session, tip_data)
 
         assert exc_info.value.status_code == 409
         assert "이미 존재" in str(exc_info.value.detail)
@@ -302,7 +313,8 @@ class TestTipServiceCreateMethod:
         )
 
         # Act: 팁 생성
-        created_tip = await TipService.create_tip(async_db_session, tip_data)
+        service = TipService()
+        created_tip = await service.create_tip(async_db_session, tip_data)
 
         # Assert: 오늘 날짜로 설정됨
         assert created_tip.publish_date == date.today()
@@ -333,7 +345,8 @@ class TestTipServiceUpdateMethod:
         )
 
         # Act: 팁 수정
-        updated_tip = await TipService.update_tip(
+        service = TipService()
+        updated_tip = await service.update_tip(
             async_db_session, tip_id, update_data
         )
 
@@ -352,7 +365,8 @@ class TestTipServiceUpdateMethod:
         from app.core.exceptions import AppException
 
         with pytest.raises(AppException) as exc_info:
-            await TipService.update_tip(
+            service = TipService()
+            await service.update_tip(
                 async_db_session, non_existent_id, update_data
             )
 
@@ -377,7 +391,8 @@ class TestTipServiceUpdateMethod:
         update_data = TipUpdate(category=["network", "security"])
 
         # Act: 팁 수정
-        updated_tip = await TipService.update_tip(
+        service = TipService()
+        updated_tip = await service.update_tip(
             async_db_session, tip.id, update_data
         )
 
@@ -406,12 +421,14 @@ class TestTipServiceDeleteMethod:
         tip_id = tip.id
 
         # Act: 팁 삭제 (soft delete)
-        result = await TipService.delete_tip(async_db_session, tip_id)
+        service = TipService()
+        result = await service.delete_tip(async_db_session, tip_id)
 
         # Assert: 삭제 성공 (is_active=False로 변경)
         assert result is True
         # 데이터베이스에서 다시 조회하여 확인
-        deleted_tip = await TipService.get_tip_by_id(async_db_session, tip_id)
+        service = TipService()
+        deleted_tip = await service.get_tip_by_id(async_db_session, tip_id)
         assert deleted_tip.is_active is False, "Soft delete는 is_active를 False로 설정합니다"
 
     async def test_delete_tip_not_found(self, async_db_session: AsyncSession) -> None:
@@ -423,7 +440,8 @@ class TestTipServiceDeleteMethod:
         from app.core.exceptions import AppException
 
         with pytest.raises(AppException) as exc_info:
-            await TipService.delete_tip(async_db_session, non_existent_id)
+            service = TipService()
+            await service.delete_tip(async_db_session, non_existent_id)
 
         assert exc_info.value.status_code == 404
 
@@ -442,7 +460,8 @@ class TestTipServiceDeleteMethod:
         await async_db_session.refresh(tip)
 
         # Act: 재삭제 시도
-        result = await TipService.delete_tip(async_db_session, tip.id)
+        service = TipService()
+        result = await service.delete_tip(async_db_session, tip.id)
 
         # Assert: 성공 반환 (멱등성)
         assert result is True
@@ -469,7 +488,8 @@ class TestTipServiceIncrementViewCount:
         initial_count = tip.view_count
 
         # Act: 조회수 증가
-        updated_tip = await TipService.increment_view_count(
+        service = TipService()
+        updated_tip = await service.increment_view_count(
             async_db_session, tip.id
         )
 
@@ -492,7 +512,8 @@ class TestTipServiceIncrementViewCount:
 
         # Act: 3번 조회
         for _ in range(3):
-            updated_tip = await TipService.increment_view_count(
+            service = TipService()
+            updated_tip = await service.increment_view_count(
                 async_db_session, tip.id
             )
 
@@ -510,6 +531,7 @@ class TestTipServiceIncrementViewCount:
         from app.core.exceptions import AppException
 
         with pytest.raises(AppException) as exc_info:
-            await TipService.increment_view_count(async_db_session, non_existent_id)
+            service = TipService()
+            await service.increment_view_count(async_db_session, non_existent_id)
 
         assert exc_info.value.status_code == 404

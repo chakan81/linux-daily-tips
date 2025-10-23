@@ -6,14 +6,17 @@ Tip 비즈니스 로직 서비스
 - 팁 목록 필터링 (난이도, 카테고리)
 - 팁 생성/수정/삭제 (soft delete)
 - 조회수 증가
+- Redis 캐싱 (Day 14)
 """
 
 import logging
 from datetime import date
+from typing import Optional
 
 from sqlalchemy import and_, func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.cache import CacheService
 from app.core.exceptions import AppException
 from app.models.tip import DifficultyLevel, Tip
 from app.schemas.tip import TipCreate, TipUpdate
@@ -27,13 +30,29 @@ class TipService:
     Tip 비즈니스 로직 서비스 계층
 
     데이터베이스 접근 및 비즈니스 규칙을 처리합니다.
-    모든 메서드는 정적 메서드로 구현되어 있습니다.
+    Redis 캐싱을 통한 성능 최적화를 지원합니다.
+
+    Attributes:
+        cache: Redis 캐시 서비스 (선택적, None이면 캐싱 비활성화)
     """
 
-    @staticmethod
-    async def get_daily_tip(db: AsyncSession, target_date: date) -> Tip | None:
+    def __init__(self, cache: Optional[CacheService] = None) -> None:
         """
-        특정 날짜의 활성화된 팁 조회
+        TipService 초기화
+
+        Args:
+            cache: Redis 캐시 서비스 (선택적)
+        """
+        self.cache = cache
+
+    async def get_daily_tip(self, db: AsyncSession, target_date: date) -> Tip | None:
+        """
+        특정 날짜의 활성화된 팁 조회 (캐싱 적용)
+
+        캐싱 전략:
+        - Key: "tip:daily:{YYYY-MM-DD}"
+        - TTL: 86400초 (24시간)
+        - 이유: 일일 팁은 하루에 한 번만 바뀜
 
         Args:
             db: 데이터베이스 세션
@@ -44,13 +63,23 @@ class TipService:
 
         Example:
             ```python
-            tip = await TipService.get_daily_tip(db, date.today())
+            service = TipService(cache)
+            tip = await service.get_daily_tip(db, date.today())
             if tip:
                 print(f"Today's tip: {tip.title}")
             ```
         """
         try:
-            # publish_date == target_date AND is_active = True
+            # 1. 캐시 확인 (캐시 서비스가 있는 경우만)
+            cache_key = f"tip:daily:{target_date}"
+            if self.cache:
+                cached_tip = await self.cache.get(cache_key)
+                if cached_tip:
+                    logger.info(f"캐시 HIT for daily tip: {cache_key}")
+                    return Tip(**cached_tip)
+                logger.info(f"캐시 MISS for daily tip: {cache_key}")
+
+            # 2. 캐시 MISS 또는 캐시 비활성 → DB 조회
             stmt = select(Tip).where(
                 and_(Tip.publish_date == target_date, Tip.is_active == True)  # noqa: E712
             )
@@ -59,6 +88,23 @@ class TipService:
 
             if tip:
                 logger.info(f"Retrieved daily tip for {target_date}: {tip.id}")
+                # 3. 캐싱 (24시간 TTL)
+                if self.cache:
+                    # Pydantic V2: model_dump() 사용
+                    tip_dict = {
+                        "id": tip.id,
+                        "title": tip.title,
+                        "content": tip.content,
+                        "difficulty": tip.difficulty.value,
+                        "category": tip.category,
+                        "publish_date": tip.publish_date.isoformat(),
+                        "view_count": tip.view_count,
+                        "is_active": tip.is_active,
+                        "terminal_setup": tip.terminal_setup,
+                        "created_at": tip.created_at.isoformat(),
+                        "updated_at": tip.updated_at.isoformat(),
+                    }
+                    await self.cache.set(cache_key, tip_dict, ttl=86400)
             else:
                 logger.info(f"No active tip found for {target_date}")
 
@@ -71,10 +117,14 @@ class TipService:
             )
             raise
 
-    @staticmethod
-    async def get_tip_by_id(db: AsyncSession, tip_id: str) -> Tip:
+    async def get_tip_by_id(self, db: AsyncSession, tip_id: str) -> Tip:
         """
-        ID로 팁 조회
+        ID로 팁 조회 (캐싱 적용)
+
+        캐싱 전략:
+        - Key: "tip:detail:{tip_id}"
+        - TTL: 3600초 (1시간)
+        - 이유: 관리자가 수정할 수 있어 짧은 TTL
 
         Args:
             db: 데이터베이스 세션
@@ -89,12 +139,23 @@ class TipService:
         Example:
             ```python
             try:
-                tip = await TipService.get_tip_by_id(db, "tip_01JCAW0V1QQ9KZ2F3XHBP8TGNY")
+                service = TipService(cache)
+                tip = await service.get_tip_by_id(db, "tip_01JCAW0V1QQ9KZ2F3XHBP8TGNY")
             except AppException as e:
                 print(f"Tip not found: {e.detail}")
             ```
         """
         try:
+            # 1. 캐시 확인
+            cache_key = f"tip:detail:{tip_id}"
+            if self.cache:
+                cached_tip = await self.cache.get(cache_key)
+                if cached_tip:
+                    logger.info(f"캐시 HIT for tip detail: {cache_key}")
+                    return Tip(**cached_tip)
+                logger.info(f"캐시 MISS for tip detail: {cache_key}")
+
+            # 2. 캐시 MISS 또는 캐시 비활성 → DB 조회
             stmt = select(Tip).where(Tip.id == tip_id)
             result = await db.execute(stmt)
             tip = result.scalar_one_or_none()
@@ -104,6 +165,24 @@ class TipService:
                 raise AppException(status_code=404, detail="Tip not found")
 
             logger.info(f"Retrieved tip: {tip.id}")
+
+            # 3. 캐싱 (1시간 TTL)
+            if self.cache:
+                tip_dict = {
+                    "id": tip.id,
+                    "title": tip.title,
+                    "content": tip.content,
+                    "difficulty": tip.difficulty.value,
+                    "category": tip.category,
+                    "publish_date": tip.publish_date.isoformat(),
+                    "view_count": tip.view_count,
+                    "is_active": tip.is_active,
+                    "terminal_setup": tip.terminal_setup,
+                    "created_at": tip.created_at.isoformat(),
+                    "updated_at": tip.updated_at.isoformat(),
+                }
+                await self.cache.set(cache_key, tip_dict, ttl=3600)
+
             return tip
 
         except AppException:
@@ -115,8 +194,8 @@ class TipService:
             )
             raise
 
-    @staticmethod
     async def get_tips(
+        self,
         db: AsyncSession,
         skip: int = 0,
         limit: int = 10,
@@ -124,7 +203,12 @@ class TipService:
         category: str | None = None,
     ) -> tuple[list[Tip], int]:
         """
-        필터링 및 페이지네이션된 팁 목록 조회
+        필터링 및 페이지네이션된 팁 목록 조회 (캐싱 적용)
+
+        캐싱 전략:
+        - Key: "tips:list:page-{page}:size-{limit}:diff-{difficulty}:cat-{category}"
+        - TTL: 600초 (10분)
+        - 이유: 새 팁 추가 시 빠른 반영
 
         Args:
             db: 데이터베이스 세션
@@ -139,13 +223,35 @@ class TipService:
         Example:
             ```python
             # 초급 난이도만 조회 (페이지 1, 10개)
-            tips, total = await TipService.get_tips(
+            service = TipService(cache)
+            tips, total = await service.get_tips(
                 db, skip=0, limit=10, difficulty="beginner"
             )
             print(f"Found {total} beginner tips, showing first {len(tips)}")
             ```
         """
         try:
+            # 1. 캐시 키 생성
+            page = (skip // limit) + 1
+            # difficulty가 문자열이거나 Enum일 수 있음
+            if difficulty:
+                diff_str = difficulty.value if isinstance(difficulty, DifficultyLevel) else difficulty
+            else:
+                diff_str = "all"
+            cat_str = category or "all"
+            cache_key = f"tips:list:page-{page}:size-{limit}:diff-{diff_str}:cat-{cat_str}"
+
+            # 2. 캐시 확인
+            if self.cache:
+                cached_result = await self.cache.get(cache_key)
+                if cached_result:
+                    logger.info(f"캐시 HIT for tips list: {cache_key}")
+                    tips = [Tip(**t) for t in cached_result["tips"]]
+                    total = cached_result["total"]
+                    return tips, total
+                logger.info(f"캐시 MISS for tips list: {cache_key}")
+
+            # 3. 캐시 MISS 또는 캐시 비활성 → DB 조회
             # 기본 쿼리
             conditions = []
 
@@ -183,6 +289,29 @@ class TipService:
                 f"difficulty: {difficulty}, category: {category})"
             )
 
+            # 4. 캐싱 (10분 TTL)
+            if self.cache:
+                cache_data = {
+                    "tips": [
+                        {
+                            "id": t.id,
+                            "title": t.title,
+                            "content": t.content,
+                            "difficulty": t.difficulty.value,
+                            "category": t.category,
+                            "publish_date": t.publish_date.isoformat(),
+                            "view_count": t.view_count,
+                            "is_active": t.is_active,
+                            "terminal_setup": t.terminal_setup,
+                            "created_at": t.created_at.isoformat(),
+                            "updated_at": t.updated_at.isoformat(),
+                        }
+                        for t in tips
+                    ],
+                    "total": total_count,
+                }
+                await self.cache.set(cache_key, cache_data, ttl=600)
+
             return tips, total_count
 
         except Exception as e:
@@ -192,8 +321,7 @@ class TipService:
             )
             raise
 
-    @staticmethod
-    async def create_tip(db: AsyncSession, tip_data: TipCreate) -> Tip:
+    async def create_tip(self, db: AsyncSession, tip_data: TipCreate) -> Tip:
         """
         새 팁 생성
 
@@ -209,12 +337,13 @@ class TipService:
 
         Example:
             ```python
+            service = TipService(cache)
             tip_data = TipCreate(
                 title="파일 검색하기",
                 content="find 명령어 사용법...",
                 difficulty=DifficultyLevel.BEGINNER,
             )
-            tip = await TipService.create_tip(db, tip_data)
+            tip = await service.create_tip(db, tip_data)
             ```
         """
         try:
@@ -222,7 +351,7 @@ class TipService:
             publish_date = tip_data.publish_date or date.today()
 
             # 중복 날짜 체크 (비즈니스 규칙: 하루에 하나의 팁만)
-            existing_tip = await TipService.get_daily_tip(db, publish_date)
+            existing_tip = await self.get_daily_tip(db, publish_date)
             if existing_tip:
                 logger.warning(
                     f"Tip already exists for date {publish_date}: {existing_tip.id}"
@@ -259,9 +388,8 @@ class TipService:
             )
             raise
 
-    @staticmethod
     async def update_tip(
-        db: AsyncSession, tip_id: str, tip_data: TipUpdate
+        self, db: AsyncSession, tip_id: str, tip_data: TipUpdate
     ) -> Tip:
         """
         팁 수정 (부분 업데이트)
@@ -279,13 +407,14 @@ class TipService:
 
         Example:
             ```python
+            service = TipService(cache)
             update_data = TipUpdate(title="새로운 제목", difficulty="advanced")
-            tip = await TipService.update_tip(db, "tip_01JCAW...", update_data)
+            tip = await service.update_tip(db, "tip_01JCAW...", update_data)
             ```
         """
         try:
             # 팁 존재 여부 확인
-            tip = await TipService.get_tip_by_id(db, tip_id)
+            tip = await self.get_tip_by_id(db, tip_id)
 
             # 업데이트할 필드만 추출 (None이 아닌 필드만)
             update_data = tip_data.model_dump(exclude_unset=True)
@@ -301,6 +430,9 @@ class TipService:
             await db.flush()
             await db.refresh(tip)
 
+            # 캐시 무효화 (stale 데이터 방지)
+            await self.invalidate_tip_cache(tip_id, tip.publish_date)
+
             logger.info(f"Updated tip {tip_id}: {list(update_data.keys())}")
             return tip
 
@@ -313,8 +445,7 @@ class TipService:
             )
             raise
 
-    @staticmethod
-    async def delete_tip(db: AsyncSession, tip_id: str) -> bool:
+    async def delete_tip(self, db: AsyncSession, tip_id: str) -> bool:
         """
         팁 삭제 (soft delete: is_active=False)
 
@@ -333,18 +464,22 @@ class TipService:
 
         Example:
             ```python
-            success = await TipService.delete_tip(db, "tip_01JCAW...")
+            service = TipService(cache)
+            success = await service.delete_tip(db, "tip_01JCAW...")
             if success:
                 print("Tip deleted successfully")
             ```
         """
         try:
             # 팁 존재 여부 확인 (없으면 AppException 404)
-            tip = await TipService.get_tip_by_id(db, tip_id)
+            tip = await self.get_tip_by_id(db, tip_id)
 
             # Soft delete: is_active를 False로 설정
             tip.is_active = False
             await db.flush()
+
+            # 캐시 무효화 (삭제된 팁이 캐시에서 계속 조회되는 것 방지)
+            await self.invalidate_tip_cache(tip_id, tip.publish_date)
 
             logger.info(f"Soft deleted tip: {tip_id}")
             return True
@@ -358,8 +493,7 @@ class TipService:
             )
             raise
 
-    @staticmethod
-    async def increment_view_count(db: AsyncSession, tip_id: str) -> Tip:
+    async def increment_view_count(self, db: AsyncSession, tip_id: str) -> Tip:
         """
         조회수 1 증가
 
@@ -375,18 +509,22 @@ class TipService:
 
         Example:
             ```python
-            tip = await TipService.increment_view_count(db, "tip_01JCAW...")
+            service = TipService(cache)
+            tip = await service.increment_view_count(db, "tip_01JCAW...")
             print(f"View count: {tip.view_count}")
             ```
         """
         try:
             # 팁 존재 여부 확인
-            tip = await TipService.get_tip_by_id(db, tip_id)
+            tip = await self.get_tip_by_id(db, tip_id)
 
             # 조회수 1 증가
             tip.view_count += 1
             await db.flush()
             await db.refresh(tip)
+
+            # 캐시 무효화 (조회수 변경 반영)
+            await self.invalidate_tip_cache(tip_id, tip.publish_date)
 
             logger.info(f"Incremented view count for tip {tip_id}: {tip.view_count}")
             return tip
@@ -399,3 +537,46 @@ class TipService:
                 exc_info=True,
             )
             raise
+
+    async def invalidate_tip_cache(self, tip_id: str, publish_date: date) -> None:
+        """
+        팁 관련 캐시 무효화 (관리자가 팁 수정/삭제 시 사용)
+
+        팁이 수정되거나 삭제될 때 관련된 모든 캐시를 삭제합니다.
+
+        Args:
+            tip_id: 팁 ID
+            publish_date: 팁 게시 날짜
+
+        Example:
+            ```python
+            service = TipService(cache)
+            await service.invalidate_tip_cache("tip_01JCAW...", date(2024, 1, 1))
+            ```
+        """
+        if not self.cache:
+            logger.info("캐시 서비스가 없어 무효화를 건너뜁니다")
+            return
+
+        try:
+            # 1. 상세 캐시 삭제
+            detail_key = f"tip:detail:{tip_id}"
+            await self.cache.delete(detail_key)
+
+            # 2. 일일 팁 캐시 삭제
+            daily_key = f"tip:daily:{publish_date}"
+            await self.cache.delete(daily_key)
+
+            # 3. 목록 캐시 전체 삭제 (패턴 매칭)
+            deleted_count = await self.cache.clear_pattern("tips:list:*")
+
+            logger.info(
+                f"캐시 무효화 완료 for tip: {tip_id} "
+                f"(상세, 일일, 목록 {deleted_count}개)"
+            )
+
+        except Exception as e:
+            logger.warning(
+                f"캐시 무효화 실패 (계속 진행): {str(e)}",
+                exc_info=True,
+            )

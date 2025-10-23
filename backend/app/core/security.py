@@ -118,6 +118,79 @@ def decode_access_token(token: str) -> Optional[Dict[str, Any]]:
         return None
 
 
+def create_refresh_token(data: Dict[str, Any]) -> str:
+    """
+    JWT Refresh Token을 생성합니다.
+
+    리프레시 토큰은 액세스 토큰보다 긴 만료 시간(7일)을 가집니다.
+    새로운 액세스 토큰 발급에 사용됩니다.
+
+    Args:
+        data: 토큰에 포함할 페이로드 데이터 (예: {"user_id": "...", "email": "..."})
+
+    Returns:
+        str: 생성된 JWT 리프레시 토큰
+
+    Example:
+        >>> refresh_token = create_refresh_token({"user_id": "user_01JCAW...", "email": "admin@example.com"})
+    """
+    to_encode = data.copy()
+
+    # 만료 시간 설정 (7일)
+    now = datetime.now(timezone.utc)
+    expire = now + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+
+    # JWT 표준 클레임 추가
+    to_encode.update(
+        {
+            "exp": expire,  # 만료 시간
+            "iat": now,  # 발급 시간
+            "token_type": "refresh",  # 토큰 타입 구분
+        }
+    )
+
+    # JWT 생성 (HS256 알고리즘 사용)
+    encoded_jwt = jwt.encode(
+        to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM
+    )
+
+    return encoded_jwt
+
+
+def verify_token(token: str) -> Dict[str, Any]:
+    """
+    JWT 토큰 검증 (예외 발생 버전)
+
+    토큰이 유효하지 않으면 AppException을 발생시킵니다.
+    인증 미들웨어에서 사용됩니다.
+
+    Args:
+        token: JWT 토큰 문자열
+
+    Returns:
+        Dict[str, Any]: 디코딩된 페이로드
+
+    Raises:
+        JWTError: 토큰 검증 실패 시
+
+    Example:
+        >>> try:
+        >>>     payload = verify_token(token)
+        >>>     user_id = payload["user_id"]
+        >>> except JWTError:
+        >>>     # 401 Unauthorized 처리
+        >>>     pass
+    """
+    try:
+        payload = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+        )
+        return payload
+    except JWTError as e:
+        # 토큰이 유효하지 않거나 만료됨
+        raise e
+
+
 # TODO: Day 14에서 구현 예정
 # async def add_token_to_blacklist(token: str, redis_client) -> None:
 #     """

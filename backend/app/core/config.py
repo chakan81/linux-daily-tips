@@ -6,11 +6,16 @@ Pydantic Settings V2를 사용하여 환경 변수를 타입 안전하게 관리
 """
 
 import json
+import logging
 import secrets
-from typing import Any
+from typing import Any, Literal
 
-from pydantic import Field, field_validator
+from cryptography.fernet import Fernet
+from pydantic import Field, ValidationInfo, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# 로거 인스턴스
+logger = logging.getLogger(__name__)
 
 
 class Settings(BaseSettings):
@@ -58,6 +63,10 @@ class Settings(BaseSettings):
         default="redis://localhost:6379/0",
         description="Redis 연결 URL",
     )
+    REDIS_ENCRYPTION_KEY: str = Field(
+        default="",
+        description="Redis 세션 데이터 암호화 키 (Fernet 키, 44자 Base64 인코딩)",
+    )
 
     # 보안 설정
     SECRET_KEY: str = Field(
@@ -98,9 +107,33 @@ class Settings(BaseSettings):
         default=True,
         description="Cookie HttpOnly 플래그 (XSS 방어)",
     )
-    COOKIE_SAMESITE: str = Field(
+    COOKIE_SAMESITE: Literal["lax", "strict", "none"] = Field(
         default="lax",
         description="Cookie SameSite 정책 (CSRF 방어)",
+    )
+
+    # Google OAuth 2.0 설정
+    GOOGLE_CLIENT_ID: str = Field(
+        default="",
+        description="Google OAuth 2.0 Client ID",
+    )
+    GOOGLE_CLIENT_SECRET: str = Field(
+        default="",
+        description="Google OAuth 2.0 Client Secret",
+    )
+    GOOGLE_REDIRECT_URI: str = Field(
+        default="http://localhost:8000/api/v1/auth/callback",
+        description="Google OAuth 2.0 Redirect URI",
+    )
+
+    # 프론트엔드 URL 설정
+    FRONTEND_URL: str = Field(
+        default="http://localhost:3000",
+        description="프론트엔드 애플리케이션 URL (OAuth 리다이렉트용)",
+    )
+    ALLOWED_FRONTEND_URLS: list[str] = Field(
+        default=["http://localhost:3000", "http://localhost:3001"],
+        description="허용된 프론트엔드 URL 화이트리스트 (보안: Open Redirect 방지)",
     )
 
     # 데이터베이스 연결 풀 설정
@@ -144,7 +177,7 @@ class Settings(BaseSettings):
 
     @field_validator("SECRET_KEY", mode="before")
     @classmethod
-    def validate_secret_key(cls, v: str, info) -> str:
+    def validate_secret_key(cls, v: str, info: ValidationInfo) -> str:
         """
         시크릿 키 검증 및 자동 생성
 
@@ -175,9 +208,11 @@ class Settings(BaseSettings):
             else:
                 # 개발 환경: 안전한 랜덤 키 자동 생성
                 generated_key = secrets.token_urlsafe(32)  # 43자 생성 (Base64 인코딩)
-                print("⚠️  WARNING: SECRET_KEY 환경 변수가 설정되지 않았습니다.")
-                print(f"⚠️  개발용 임시 키를 자동 생성했습니다: {generated_key[:20]}...")
-                print("⚠️  프로덕션 배포 시 반드시 환경 변수로 설정하세요!")
+                logger.warning(
+                    "SECRET_KEY 환경 변수 미설정. 개발용 임시 키 생성: %s... "
+                    "프로덕션 배포 전 필수 설정!",
+                    generated_key[:20]
+                )
                 return generated_key
 
         # SECRET_KEY가 제공된 경우 길이 검증
@@ -188,11 +223,97 @@ class Settings(BaseSettings):
                     "현재 길이: {}자".format(len(v))
                 )
             else:
-                print("⚠️  WARNING: SECRET_KEY가 32자 미만입니다. (현재: {}자)".format(len(v)))
-                print("⚠️  보안을 위해 최소 32자 이상의 키를 사용하세요.")
+                logger.warning(
+                    "SECRET_KEY가 32자 미만입니다 (현재: %d자). "
+                    "보안을 위해 최소 32자 이상의 키를 사용하세요.",
+                    len(v)
+                )
                 # 개발 환경에서는 경고만 출력하고 진행
 
         return v
+
+    @field_validator("REDIS_ENCRYPTION_KEY", mode="before")
+    @classmethod
+    def validate_encryption_key(cls, v: str, info: ValidationInfo) -> str:
+        """
+        Redis 암호화 키 검증 및 자동 생성
+
+        - 프로덕션 환경: 환경 변수 필수 (Fernet 키 형식)
+        - 개발 환경: 환경 변수 없으면 자동 생성
+
+        Args:
+            v: 암호화 키
+            info: ValidationInfo (환경 변수 접근용)
+
+        Returns:
+            검증된 또는 생성된 Fernet 키
+
+        Raises:
+            ValueError: 프로덕션에서 REDIS_ENCRYPTION_KEY 미설정
+        """
+        environment = info.data.get("ENVIRONMENT", "development").lower()
+        is_production = environment == "production"
+
+        # 키가 없거나 빈 문자열인 경우
+        if not v or v == "":
+            if is_production:
+                raise ValueError(
+                    "🚨 프로덕션 환경에서는 REDIS_ENCRYPTION_KEY 환경 변수가 필수입니다. "
+                    "Fernet.generate_key()로 생성한 키를 설정하세요."
+                )
+            else:
+                # 개발 환경: Fernet 키 자동 생성
+                generated_key = Fernet.generate_key().decode()
+                logger.warning(
+                    "REDIS_ENCRYPTION_KEY 환경 변수 미설정. "
+                    "개발용 임시 암호화 키 생성: %s... "
+                    "프로덕션 배포 전 필수 설정!",
+                    generated_key[:20]
+                )
+                return generated_key
+
+        # 키가 제공된 경우 Fernet 키 형식 검증
+        try:
+            Fernet(v.encode())  # 유효한 Fernet 키인지 확인
+        except Exception:
+            if is_production:
+                raise ValueError(
+                    "🚨 REDIS_ENCRYPTION_KEY가 유효하지 않습니다. "
+                    "Fernet.generate_key()로 생성한 올바른 키를 설정하세요."
+                )
+            else:
+                logger.warning(
+                    "REDIS_ENCRYPTION_KEY가 유효하지 않습니다. "
+                    "새로운 키를 자동 생성합니다."
+                )
+                return Fernet.generate_key().decode()
+
+        return v
+
+    @field_validator("ALLOWED_FRONTEND_URLS", mode="before")
+    @classmethod
+    def parse_allowed_frontend_urls(cls, v: Any) -> list[str]:
+        """
+        허용된 프론트엔드 URL 목록 파싱
+
+        환경 변수가 JSON 문자열 형태인 경우 파싱하여 리스트로 변환합니다.
+
+        Args:
+            v: 프론트엔드 URL 목록 (문자열 또는 리스트)
+
+        Returns:
+            파싱된 URL 리스트
+        """
+        if isinstance(v, str):
+            if not v.strip():
+                return []
+            try:
+                parsed = json.loads(v)
+                if isinstance(parsed, list):
+                    return parsed
+            except json.JSONDecodeError:
+                return [url.strip() for url in v.split(",") if url.strip()]
+        return v if v else []
 
     model_config = SettingsConfigDict(
         env_file=".env",
