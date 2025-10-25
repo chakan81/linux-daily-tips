@@ -346,10 +346,10 @@ export const handlers = [
   // POST /api/admin/tips/:id/reject - 팁 거절
   http.post(`${API_BASE_URL}/api/admin/tips/:id/reject`, async ({ params, request }) => {
     const { id } = params
-    const body = await request.json()
+    const body = (await request.json()) as { reason?: string } | null
     return HttpResponse.json({
       success: true,
-      message: `Tip ${id} rejected: ${body.reason || 'No reason provided'}`,
+      message: `Tip ${id} rejected: ${body?.reason || 'No reason provided'}`,
     })
   }),
 
