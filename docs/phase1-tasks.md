@@ -245,6 +245,10 @@ API 요청 → JWT 검증 → Redis 세션 확인 → 권한 체크
 - [ ] 개발/프로덕션 환경 일치성 검증 → **frontend-code-writer**
 - [ ] 전체 스택 원클릭 실행 환경 완성 (`docker-compose up`) → **service-planner**
 - [ ] 환경 변수 및 네트워크 설정 최적화 → **backend-code-writer**
+- [ ] Playwright 테스트 서비스 추가 (docker-compose.yml) → **frontend-code-writer**
+  - Headless 모드 Playwright 컨테이너 구성
+  - E2E 테스트 자동 실행 환경
+  - CI/CD 연동 준비
 
 **품질 보증 및 테스트 (병렬 진행)**
 - [ ] 유닛 테스트 작성 (주요 기능) → **unit-test-generator**
@@ -256,6 +260,7 @@ API 요청 → JWT 검증 → Redis 세션 확인 → 권한 체크
 - 완전한 도커화 환경에서 모든 기능 정상 동작
 - 모든 테스트 통과 (유닛/통합/E2E)
 - 성능 목표 달성 (로딩 < 3초, API < 800ms, 터미널 < 2초)
+- Playwright 테스트가 Docker 환경에서 자동 실행
 
 #### Day 28: MVP 완성 및 문서화
 **프로젝트 마무리**
