@@ -299,52 +299,46 @@ npm run dev
 
 ---
 
-#### 6. Tailwind CSS 3.3.5 → 4.0.0
+#### 6. Tailwind CSS 3.3.5 → 4.0.0 ⚠️ **보류 (3.4.17 유지)**
 
-**이유**:
+**현재 상태**: **3.4.17로 유지** (2025-10-25)
 
-- **빌드 속도 5배 향상**: Rust 기반 엔진으로 재작성
-- **CSS-first 설정**: JavaScript 설정 파일 불필요
-- **개선된 에디터 지원**: IntelliSense 성능 향상
+**보류 이유**:
 
-**영향도**: 중간 (설정 파일 마이그레이션 필요)
+- **호환성 문제**: Tailwind CSS 4.0의 새로운 CSS-first 구조가 현재 프로젝트의 복잡한 커스텀 CSS(`@apply`, `@layer`)와 충돌
+- **Next.js 16 Turbopack으로 충분한 성능**: 개발 서버 274ms로 이미 7-8배 빠름
+- **우선순위**: 안정성 우선, 빌드 속도는 이미 목표 달성
 
-**Breaking Changes**:
-
-- `tailwind.config.js` → `tailwind.config.css` (CSS 기반 설정)
-- 일부 deprecated 유틸리티 클래스 제거
-- 색상 팔레트 기본값 변경
-
-**실행 계획**:
+**시도했던 내용**:
 
 ```bash
-cd frontend
+# 업그레이드 시도
+npm install tailwindcss@next @tailwindcss/postcss@next
 
-# 1. 업그레이드
-npm install tailwindcss@4 @tailwindcss/vite@4
+# 에러 발생
+# Error: Cannot apply unknown utility class `bg-background`
+# 원인: @layer base에서 CSS 변수 기반 유틸리티 클래스 인식 불가
 
-# 2. 마이그레이션 도구 실행
-npx @tailwindcss/upgrade@next
-
-# 3. 수동 설정 확인
-# - tailwind.config.js 변환 확인
-# - globals.css의 @tailwind 지시문 확인
-
-# 4. 컴포넌트별 스타일 검증
-npm run dev
-# 브라우저에서 모든 페이지 시각적 확인 필수!
+# 롤백
+npm install tailwindcss@^3.4.0
 ```
 
-**검증 방법**:
+**향후 계획** (별도 작업):
 
-- 전체 페이지 렌더링 정상 여부 (시각적 확인)
-- 빌드 시간 비교 (5배 빠름 예상)
-- Hot Reload 속도 체감 (기존 2초 → 0.5초 목표)
+- **Phase 2 이후 재시도**: 커스텀 CSS 구조 단순화 후 재도전
+- **마이그레이션 작업**:
+  1. `@apply` 사용 최소화
+  2. CSS 변수 → Tailwind 4.0 네이티브 변수로 변환
+  3. 컴포넌트별 스타일 검증 필수
+- **예상 소요 시간**: 2-3시간 (별도 작업으로 분리)
 
-**리스크**:
+**대안**:
 
-- 시각적 스타일 깨짐 가능성 (수동 확인 필수)
-- 커스텀 플러그인 호환성 문제 가능
+- Tailwind CSS 3.4.x는 2026년까지 지원 예정
+- Next.js 16 Turbopack만으로도 충분한 성능 개선 달성
+- 급하지 않으므로 프로젝트 안정화 후 진행
+
+**참고**: Phase 1에서는 **Tailwind CSS 4.0 업그레이드 건너뛰고** Python/백엔드 업그레이드에 집중
 
 ---
 
@@ -678,13 +672,13 @@ docker compose up -d postgres
 - [x] PostgreSQL 15 → 18 업그레이드
 - [x] **검증**: 전체 스택 정상 동작 확인, PostgreSQL 18 I/O 성능 테스트
 
-### Phase 1: Week 3 시작 전
+### Phase 1: Week 3 시작 전 ✅ (완료: 2025-10-25)
 
-- [ ] Next.js 16.0.0 업그레이드 (정식 출시 버전)
-- [ ] Tailwind CSS 4.0 업그레이드
-- [ ] Python 3.14.0 업그레이드
-- [ ] 백엔드 패키지 업데이트 (FastAPI 0.119.1, SQLAlchemy 2.0.44)
-- [ ] **검증**: Turbopack 빌드 속도 측정, 테스트 129개 100% 통과
+- [x] Next.js 16.0.0 업그레이드 (정식 출시 버전) ✅
+- [x] ~~Tailwind CSS 4.0 업그레이드~~ ⚠️ **보류** (3.4.17 유지, 별도 작업 예정)
+- [x] Python 3.14.0 업그레이드 ✅
+- [x] 백엔드 패키지 업데이트 (FastAPI 0.119, SQLAlchemy 2.0.44, Pydantic 2.10, pytest 8.4) ✅
+- [x] **검증**: Turbopack 빌드 2.9초, 테스트 230개 통과 ✅
 
 ### Phase 2: 프로덕션 배포 전
 
