@@ -47,12 +47,14 @@ interface UseTerminalWebSocketConfig {
   pingInterval?: number; // Ping interval in milliseconds (default: 30000)
   reconnectAttempts?: number; // Max reconnection attempts (default: 3)
   reconnectDelay?: number; // Delay between reconnection attempts in ms (default: 1000)
+  onMessage?: (message: WebSocketMessage) => void; // Callback for immediate message handling
 }
 
-const DEFAULT_CONFIG: Required<UseTerminalWebSocketConfig> = {
+const DEFAULT_CONFIG: UseTerminalWebSocketConfig = {
   pingInterval: 30000, // 30 seconds
   reconnectAttempts: 3,
   reconnectDelay: 1000,
+  onMessage: undefined,
 };
 
 /**
@@ -187,7 +189,15 @@ export function useTerminalWebSocket(
 
       ws.onmessage = (event) => {
         try {
+          console.log('[WS] Raw message received:', event.data);
           const message: WebSocketMessage = JSON.parse(event.data);
+          console.log('[WS] Parsed message:', message);
+
+          // Call onMessage callback immediately if provided
+          if (mergedConfig.onMessage) {
+            mergedConfig.onMessage(message);
+          }
+
           setLastMessage(message);
 
           // Handle different message types

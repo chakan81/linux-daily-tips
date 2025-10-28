@@ -322,10 +322,14 @@ async def websocket_terminal(
                         if result.stderr:
                             output += f"\n{result.stderr}"
 
+                        logger.info(f"WebSocket 전송 준비: stdout='{result.stdout}', stderr='{result.stderr}', output='{output}'")
+
                         output_msg = WSOutputMessage(
                             data=output, exit_code=result.exit_code
                         )
-                        await websocket.send_text(output_msg.model_dump_json())
+                        json_msg = output_msg.model_dump_json()
+                        logger.info(f"WebSocket 전송: {json_msg}")
+                        await websocket.send_text(json_msg)
 
                         # 프롬프트 다시 전송 (다음 명령어 대기)
                         prompt_msg = WSOutputMessage(

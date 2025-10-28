@@ -397,6 +397,7 @@ class DockerService:
                             stdout=True,
                             stderr=True,
                             demux=True,  # stdout과 stderr 분리
+                            workdir="/home/linuxuser",  # 명시적 working directory 설정
                         ),
                     ),
                     timeout=exec_timeout,

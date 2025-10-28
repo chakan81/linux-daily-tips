@@ -8,7 +8,7 @@
  * an interactive command-line interface in the browser.
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Terminal } from '@xterm/xterm';
 import { FitAddon } from '@xterm/addon-fit';
 import { useTerminalWebSocket, WebSocketMessage } from '@/lib/hooks';
@@ -85,8 +85,29 @@ export function TerminalEmulator({ sessionId, wsUrl, onSessionEnd }: TerminalEmu
   // State
   const [isReady, setIsReady] = useState(false);
 
+  // WebSocket message handler callback
+  const handleMessage = useCallback((message: any) => {
+    if (!xtermRef.current) return;
+
+    const terminal = xtermRef.current;
+    console.log('[Terminal] Handling message:', message.type, message.data);
+
+    switch (message.type) {
+      case 'output':
+        if (message.data) {
+          terminal.write(message.data);
+        }
+        break;
+      case 'error':
+        terminal.writeln(`\r\n\x1b[1;31mError: ${message.message || 'Unknown error'}\x1b[0m\r\n`);
+        break;
+    }
+  }, []);
+
   // WebSocket connection
-  const { isConnected, isConnecting, error, sendCommand, disconnect, lastMessage } = useTerminalWebSocket(wsUrl);
+  const { isConnected, isConnecting, error, sendCommand, disconnect, lastMessage } = useTerminalWebSocket(wsUrl, {
+    onMessage: handleMessage,
+  });
 
   // Update sendCommand ref whenever it changes
   sendCommandRef.current = sendCommand;
@@ -183,34 +204,6 @@ export function TerminalEmulator({ sessionId, wsUrl, onSessionEnd }: TerminalEmu
       fitAddonRef.current = null;
     };
   }, []); // ✅ 빈 배열: 터미널은 한 번만 초기화
-
-  /**
-   * Handle WebSocket messages
-   */
-  useEffect(() => {
-    if (!lastMessage || !xtermRef.current) return;
-
-    const terminal = xtermRef.current;
-
-    switch (lastMessage.type) {
-      case 'output':
-        if (lastMessage.data) {
-          terminal.write(lastMessage.data);
-        }
-        break;
-
-      case 'error':
-        terminal.writeln(`\r\n\x1b[1;31mError: ${lastMessage.message || 'Unknown error'}\x1b[0m\r\n`);
-        break;
-
-      case 'pong':
-        // Ignore pong messages
-        break;
-
-      default:
-        console.warn('Unknown message type:', lastMessage.type);
-    }
-  }, [lastMessage]);
 
   /**
    * Handle connection status changes
