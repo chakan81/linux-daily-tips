@@ -5,13 +5,13 @@
 ## 📋 프로젝트 개요
 
 **프로젝트명**: Linux Daily Tips Frontend
-**기술 스택**: Next.js 15 + TypeScript + Tailwind CSS + shadcn/ui
+**기술 스택**: Next.js 16 + TypeScript + Tailwind CSS + shadcn/ui
 **개발 상태**: Week 1 완료 (Day 1-7, 상태 관리 시스템 포함)
 
 ## 🛠 기술 스택 및 설정
 
 ### 핵심 기술
-- **Next.js 15**: App Router, Turbopack 활성화
+- **Next.js 16**: App Router, Turbopack (stable), React Compiler 지원, React 19.2
 - **TypeScript**: Strict 모드 활성화
 - **Tailwind CSS**: 커스텀 테마 (Awwwards 스타일 적용)
 - **shadcn/ui**: 기본 UI 컴포넌트 시스템
@@ -19,12 +19,12 @@
 ### 주요 라이브러리
 ```json
 {
-  "next": "^15.0.0",
-  "react": "^19.0.0",
-  "typescript": "^5.6.3",
-  "tailwindcss": "^3.4.15",
-  "lucide-react": "^0.456.0",
-  "@tailwindcss/typography": "^0.5.15"
+  "next": "^16.0.0",
+  "react": "^19.2.0",
+  "typescript": "5.9.3",
+  "tailwindcss": "^3.4.18",
+  "lucide-react": "^0.548.0",
+  "@tailwindcss/typography": "^0.5.10"
 }
 ```
 
@@ -231,7 +231,7 @@ export type ApiError = NetworkError | ValidationError | ...
 ## ⚠️ 주의사항
 
 ### 개발 시 고려사항
-1. **Next.js 15**: 최신 버전으로 예상치 못한 이슈 가능성 있음
+1. **Next.js 16**: 최신 안정 버전 (Turbopack stable, React Compiler 지원)
 2. **컴포넌트 분리**: 각 섹션의 독립성 유지 필수
 3. **접근성**: 새로운 컴포넌트 추가 시 접근성 검증 필수
 4. **타입 동기화**: 백엔드 스키마 변경 시 타입 업데이트 필요
@@ -244,7 +244,7 @@ export type ApiError = NetworkError | ValidationError | ...
 ## 📊 현재 상태 요약 (Day 7 완료)
 
 ### ✅ 완료된 작업 (Day 1-7)
-- [x] Next.js 15 + React 19 + TypeScript 프로젝트 설정
+- [x] Next.js 16 + React 19.2 + TypeScript 프로젝트 설정
 - [x] Tailwind CSS + Awwwards 테마 적용
 - [x] shadcn/ui 컴포넌트 시스템 통합
 - [x] 컴포넌트 파일 분리 및 구조화
