@@ -7,7 +7,7 @@ API v1 라우터 통합
 
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import admin, auth, health, tips
+from app.api.v1.endpoints import admin, auth, health, terminal, tips
 
 # API v1 메인 라우터
 api_router = APIRouter()
@@ -28,5 +28,6 @@ api_router.include_router(admin.router, tags=["admin"])
 # /api/v1/auth/... 로 접근
 api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
 
-# TODO: Day 15+에서 추가될 엔드포인트들
-# api_router.include_router(terminal.router, prefix="/terminal", tags=["terminal"])
+# Terminal 엔드포인트 (WebSocket + REST API)
+# /api/v1/terminal/... 로 접근
+api_router.include_router(terminal.router, prefix="/terminal", tags=["terminal"])

@@ -53,9 +53,9 @@ export const API_ENDPOINTS = {
 
   // Terminal endpoints
   TERMINAL: {
-    CREATE_SESSION: '/api/terminal/session',
-    EXECUTE: (sessionId: string) => `/api/terminal/session/${sessionId}/execute`,
-    DESTROY: (sessionId: string) => `/api/terminal/session/${sessionId}`,
+    CREATE_SESSION: '/api/v1/terminal/session',
+    DESTROY: (sessionId: string) => `/api/v1/terminal/session/${sessionId}`,
+    WS: (sessionId: string) => `/api/v1/terminal/ws/${sessionId}`,
   },
 } as const;
 

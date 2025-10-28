@@ -181,41 +181,45 @@ API 요청 → JWT 검증 → Redis 세션 확인 → 권한 체크
 
 ### 🖥 Week 3: 터미널 에뮬레이터 MVP (7일)
 
-#### Day 15-16: xterm.js 터미널 UI 구현
+#### Day 15-16: xterm.js 터미널 UI 구현 ✅
 **프론트엔드 터미널**
-- [ ] xterm.js 라이브러리 설치 및 설정 → **frontend-code-writer**
-- [ ] 터미널 React 컴포넌트 개발 → **frontend-code-writer**
-- [ ] 터미널 크기 조정 및 반응형 처리 → **frontend-code-writer**
-- [ ] shadcn/ui와 터미널 UI 통합 → **ui-ux-designer + frontend-code-writer**
+- [x] xterm.js 라이브러리 설치 및 설정 → **frontend-code-writer**
+- [x] 터미널 React 컴포넌트 개발 → **frontend-code-writer**
+- [x] 터미널 크기 조정 및 반응형 처리 → **frontend-code-writer**
+- [x] shadcn/ui와 터미널 UI 통합 → **ui-ux-designer + frontend-code-writer**
 
-**완료 기준**: 브라우저에서 터미널 UI 정상 렌더링
+**완료 기준**: 브라우저에서 터미널 UI 정상 렌더링 ✅
+**현재 상태**: xterm.js 5.6.0 통합, 브라우저에서 터미널 UI 표시 확인
 
-#### Day 17-18: WebSocket 실시간 통신
+#### Day 17-18: WebSocket 실시간 통신 ✅
 **실시간 통신 구현**
-- [ ] FastAPI WebSocket 엔드포인트 구현 → **backend-code-writer**
-- [ ] 프론트엔드 WebSocket 클라이언트 연결 → **frontend-code-writer**
-- [ ] 메시지 송수신 및 연결 관리 → **frontend-code-writer + backend-code-writer**
-- [ ] 연결 끊김 시 재연결 로직 → **frontend-code-writer**
+- [x] FastAPI WebSocket 엔드포인트 구현 → **backend-code-writer**
+- [x] 프론트엔드 WebSocket 클라이언트 연결 → **frontend-code-writer**
+- [x] 메시지 송수신 및 연결 관리 → **frontend-code-writer + backend-code-writer**
+- [x] 연결 끊김 시 재연결 로직 → **frontend-code-writer**
 
-**완료 기준**: 웹소켓을 통한 실시간 메시지 송수신 확인
+**완료 기준**: 웹소켓을 통한 실시간 메시지 송수신 확인 ✅
+**현재 상태**: WebSocket 연결 및 명령어 I/O 정상 작동, Playwright 검증 완료
 
-#### Day 19-20: Docker 컨테이너 관리
+#### Day 19-20: Docker 컨테이너 관리 ✅
 **터미널 샌드박스**
-- [ ] Docker Python SDK 설치 및 설정 → **backend-code-writer**
-- [ ] 터미널용 Docker 이미지 생성 (Ubuntu 기반) → **backend-code-writer**
-- [ ] 컨테이너 생성/삭제 비동기 관리 → **backend-code-writer**
-- [ ] 컨테이너 리소스 제한 설정 → **backend-code-writer**
+- [x] Docker Python SDK 설치 및 설정 → **backend-code-writer**
+- [x] 터미널용 Docker 이미지 생성 (Ubuntu 기반) → **backend-code-writer**
+- [x] 컨테이너 생성/삭제 비동기 관리 → **backend-code-writer**
+- [x] 컨테이너 리소스 제한 설정 → **backend-code-writer**
 
-**완료 기준**: Docker 컨테이너 생성 및 명령어 실행 확인
+**완료 기준**: Docker 컨테이너 생성 및 명령어 실행 확인 ✅
+**현재 상태**: Ubuntu 24.04 샌드박스, 명령어 실행(ls, pwd, cat, ./hello.sh) 브라우저 검증 완료
 
 #### Day 21: 터미널 보안 및 최적화
 **보안 및 성능**
 - [ ] 컨테이너 네트워크 격리 설정 → **backend-code-writer**
-- [ ] 세션 타임아웃 (30초) 구현 → **backend-code-writer**
+- [ ] 세션 타임아웃 (30분) 구현 → **backend-code-writer**
 - [ ] 컨테이너 정리 및 리소스 관리 → **backend-code-writer**
 - [ ] 터미널 응답 속도 최적화 → **backend-code-writer**
 
 **완료 기준**: 보안 설정 적용 및 < 2초 응답 시간 달성
+**현재 상태**: 네트워크 격리(network_disabled=True), 세션 타임아웃(30분), 리소스 제한 코드 작성 완료, 브라우저 검증 필요
 
 ---
 
@@ -336,16 +340,21 @@ API 요청 → JWT 검증 → Redis 세션 확인 → 권한 체크
 
 **위험 신호**: 데이터베이스 연결 문제 지속 시
 
-### 🚩 Week 3 마일스톤
+### 🚩 Week 3 마일스톤 ✅ (75% 완료, Day 15-20)
 **검증 항목**
-- [ ] 브라우저에서 터미널 UI 표시
-- [ ] WebSocket 실시간 통신 동작
-- [ ] Docker 컨테이너 생성/삭제 정상
-- [ ] 기본 Linux 명령어 실행 가능
+- [x] 브라우저에서 터미널 UI 표시
+- [x] WebSocket 실시간 통신 동작
+- [x] Docker 컨테이너 생성/삭제 정상
+- [x] 기본 Linux 명령어 실행 가능
 
-**완료 시 커밋**: `feat: Complete Week 3 milestone - Terminal emulator with Docker sandbox integration`
+**완료 시 커밋**: `feat: Complete Week 3 Day 15-20 - Terminal emulator with Docker sandbox integration` ✅
 
-**위험 신호**: 터미널 응답 시간 > 3초
+**현재 상태**:
+- xterm.js 5.6.0 터미널 UI 브라우저 렌더링 완료
+- WebSocket 실시간 명령어 I/O 검증 완료
+- Docker 샌드박스 명령어 실행 확인 (ls, pwd, cat, ./hello.sh)
+- Playwright 자동화 테스트 통과
+- Day 21 보안/최적화 작업 남음
 
 ### 🚩 Week 4 마일스톤 (MVP 완성)
 **검증 항목**
@@ -459,27 +468,32 @@ API 요청 → JWT 검증 → Redis 세션 확인 → 권한 체크
   - Phase 4 (검증/문서화): 3/3 완료 ✅
 - **Week 2 전체**: 26/26 작업 완료 (100%) 🎉
 
-### 🖥 Week 3: 터미널 에뮬레이터 MVP (7일)
-- **전체 진행률**: 0/16 작업 완료 (0%) ⏳
+### 🖥 Week 3: 터미널 에뮬레이터 MVP (7일) 🔄
+- **Day 15-16 (xterm.js UI)**: 4/4 작업 완료 (100%) ✅
+- **Day 17-18 (WebSocket 통신)**: 4/4 작업 완료 (100%) ✅
+- **Day 19-20 (Docker 샌드박스)**: 4/4 작업 완료 (100%) ✅
+- **Day 21 (보안/최적화)**: 0/4 작업 완료 (0%) ⏳
+- **Week 3 전체**: 12/16 작업 완료 (75%) 🔄
 
 ### 🔄 Week 4: 시스템 통합 및 최적화 (7일)
-- **전체 진행률**: 0/16 작업 완료 (0%) ⏳
+- **전체 진행률**: 0/21 작업 완료 (0%) ⏳
 
 ### 📈 전체 Phase 1 진행률
-**현재 상태**: 43/75 작업 완료 (**57%**) 🚀
+**현재 상태**: 55/80 작업 완료 (**69%**) 🚀
 
 **이전 대비 변화**:
-- 작업 수: 75개 (Day 14 세부 작업 포함)
-- 완료 작업: 41 → 43 (+2개, Phase 4 완료)
-- 진행률: 55% → 57% (+2%p)
+- 작업 수: 80개 (Week 3-4 세부 작업 재계산)
+- 완료 작업: 43 → 55 (+12개, Week 3 Day 15-20 완료)
+- 진행률: 57% → 69% (+12%p)
 
 **마일스톤 달성률**:
 - Week 1 마일스톤: 100% 달성 ✅ 🎉
 - Week 2 Day 8-9: 100% 달성 ✅ 🎉
 - Week 2 Day 10-11: 100% 달성 ✅ 🎉
 - Week 2 Day 12-13: 100% 달성 ✅ 🎉
-- **Week 2 Day 14: 100% 달성 ✅ 🎉🎉🎉**
+- Week 2 Day 14: 100% 달성 ✅ 🎉🎉🎉
 - **Week 2 완전 달성: 100% ✅ 🏆**
+- **Week 3 Day 15-20: 75% 달성 ✅ 🔥** (터미널 에뮬레이터 MVP 완성)
 - 추가 성과:
   - 프론트엔드: 접근성, 컴포넌트 분리, 타입 시스템, 다크모드, 상태 관리, API 클라이언트
   - 백엔드: uv 전환 (10-100배 빠름), Docker 최적화, 완전한 프로젝트 구조, JWT 보안, Mock API
@@ -487,6 +501,7 @@ API 요청 → JWT 검증 → Redis 세션 확인 → 권한 체크
   - 코드 품질: 평가 및 리팩토링 (9.0/10 → 9.2/10 → 9.1/10), AppException, 구조화 로깅, 보안 강화
   - **Tips API**: TDD 개발 (21개 신규 테스트), Service 계층 완성, Alembic 마이그레이션, 성능 인덱스
   - **Day 14**: Redis 캐싱 (90% 성능 개선), OAuth 인증, Rate Limiting, 234개 테스트 98.3% 통과
+  - **Week 3 터미널**: xterm.js 5.6.0 통합, WebSocket 실시간 I/O, Docker 샌드박스(Ubuntu 24.04), Playwright 검증
 
 **다음 우선순위 작업**:
 1. ✅ ~~uv 전환 및 백엔드 인프라 최적화~~ **완료!**
@@ -495,10 +510,12 @@ API 요청 → JWT 검증 → Redis 세션 확인 → 권한 체크
 4. ✅ ~~코드 품질 평가 및 리팩토링~~ **완료!** (8.3 → 9.0/10)
 5. ✅ ~~Tips API 구현 & Alembic 마이그레이션 - Day 12-13~~ **완료!** (TDD, 150개 테스트 100% 통과)
 6. ✅ ~~Redis 캐싱 + OAuth 인증 + Rate Limiting - Day 14 Phase 1-4~~ **완료!** (234개 테스트, 98.3% 통과)
-7. 🚀 **Week 3 터미널 에뮬레이터 개발 - Day 15-21** **다음 작업**
+7. ✅ ~~Week 3 터미널 에뮬레이터 개발 - Day 15-20~~ **완료!** (xterm.js, WebSocket, Docker 샌드박스)
+8. 🚀 **Week 3 Day 21: 터미널 보안 및 최적화** **다음 작업**
+9. 🚀 **Week 4: 시스템 통합 및 최적화 (Day 22-28)**
 
-**예상 일정**: Week 1 완료! Week 2 완전 달성! ✅ 🏆
-**다음**: Week 3 터미널 에뮬레이터 개발 시작 (Day 15-21) 🚀
+**예상 일정**: Week 1 완료! Week 2 완전 달성! Week 3 75% 달성! ✅ 🏆
+**다음**: Day 21 보안/최적화 또는 Week 4 시스템 통합 시작 🚀
 
 ---
 

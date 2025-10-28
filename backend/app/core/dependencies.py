@@ -270,3 +270,33 @@ async def get_auth_service(cache: CacheService = Depends(get_cache)) -> "AuthSer
     from app.services.auth_service import AuthService
 
     return AuthService(cache=cache)
+
+
+def get_terminal_service() -> "TerminalService":  # type: ignore[name-defined]
+    """
+    TerminalService 의존성을 제공합니다.
+
+    Docker 기반 터미널 에뮬레이터 세션 관리를 위한 TerminalService 인스턴스를 반환합니다.
+
+    Returns:
+        TerminalService: 터미널 서비스 인스턴스
+
+    Example:
+        ```python
+        @router.post("/terminal/session")
+        async def create_session(
+            db: AsyncSession = Depends(get_db),
+            service: TerminalService = Depends(get_terminal_service)
+        ):
+            session = await service.create_session(db, session_data)
+            return session
+        ```
+
+    Note:
+        - Docker 컨테이너 생명주기 관리
+        - 보안 명령어 실행 (블랙리스트 검증)
+        - 자동 세션 만료 (30분)
+    """
+    from app.services.terminal_service import TerminalService
+
+    return TerminalService()

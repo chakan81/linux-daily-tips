@@ -87,6 +87,7 @@ services:
     volumes:
       - ./backend:/app
       - /app/__pycache__
+      - /var/run/docker.sock:/var/run/docker.sock  # Docker-in-Docker: 호스트 Docker 소켓 마운트
     networks:
       - linux_tips_network
     depends_on:

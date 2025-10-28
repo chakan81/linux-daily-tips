@@ -52,10 +52,11 @@ class AppException(Exception):
         ```
     """
 
-    def __init__(self, status_code: int, detail: str):
+    def __init__(self, status_code: int, detail: str = "", message: str = ""):
         self.status_code = status_code
-        self.detail = detail
-        super().__init__(detail)
+        self.detail = detail or message  # Accept either detail or message
+        self.message = detail or message  # Alias for backward compatibility
+        super().__init__(self.detail)
 
 
 class ErrorResponse:

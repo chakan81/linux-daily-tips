@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Disable React Strict Mode (causes WebSocket double mount in dev)
+  reactStrictMode: false,
+
   // Enable standalone build for Docker
   output: 'standalone',
 

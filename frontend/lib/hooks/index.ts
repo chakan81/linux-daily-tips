@@ -14,6 +14,15 @@ export {
   useLikeTip,
 } from './useTips';
 
+// WebSocket hooks
+export { useTerminalWebSocket } from './useTerminalWebSocket';
+export type {
+  UseTerminalWebSocketReturn,
+  WebSocketMessage,
+  WebSocketMessageType,
+  ConnectionStatus,
+} from './useTerminalWebSocket';
+
 // Add more hook exports as they are created
 // export * from './useAuth';
 // export * from './useStats';

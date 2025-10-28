@@ -10,3 +10,4 @@
 // export * from './draftsService';
 // export * from './authService';
 // export * from './statsService';
+export * from './terminal';
