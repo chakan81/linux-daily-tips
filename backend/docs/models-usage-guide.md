@@ -547,6 +547,64 @@ except SQLAlchemyError as e:
     )
 ```
 
+### EncryptionService Error Handling
+```python
+from app.core.encryption import EncryptionService
+from app.core.exceptions import AppException
+from cryptography.fernet import InvalidToken
+import logging
+
+logger = logging.getLogger(__name__)
+
+# 암호화 서비스 초기화
+encryption_service = EncryptionService()
+
+# 안전한 암호화
+try:
+    encrypted_data = encryption_service.encrypt(session_data)
+except AppException as e:
+    # 암호화 실패 (500 에러)
+    logger.error(f"Encryption failed: {e.detail}")
+    raise
+
+# 안전한 복호화
+try:
+    decrypted_data = encryption_service.decrypt(encrypted_session)
+except AppException as e:
+    if e.status_code == 401:
+        # InvalidToken: 세션이 손상되었거나 키가 잘못됨
+        logger.warning(f"Invalid session token, user needs to re-login")
+        # 사용자에게 재로그인 요청
+    elif e.status_code == 500:
+        # 예상치 못한 복호화 오류
+        logger.error(f"Unexpected decryption error: {e.detail}")
+    raise
+```
+
+### Redis Error Handling
+```python
+from redis.exceptions import RedisError
+from app.config.redis import RedisClient
+import logging
+
+logger = logging.getLogger(__name__)
+
+redis_client = RedisClient()
+
+# 모든 Redis 에러는 자동으로 logger.error()로 기록됨
+# Fail-Open 정책: Redis 장애 시에도 서비스 계속 작동
+
+try:
+    # Redis 작업
+    await redis_client.set("key", "value", ttl=3600)
+    cached_value = await redis_client.get("key")
+except Exception as e:
+    # Redis 에러는 이미 내부에서 로깅됨
+    # 필요 시 fallback 로직 구현
+    logger.warning("Redis unavailable, using fallback")
+    cached_value = None  # 캐시 미스로 처리
+```
+
 ---
 
 ## 📝 Logging (리팩토링 추가)

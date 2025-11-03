@@ -167,31 +167,54 @@ docker-compose exec backend pytest tests/ --lf
 ### 핵심 구성 요소
 - **AppException**: 비즈니스 로직 에러 처리 (HTTP 상태 코드 포함)
 - **전역 예외 핸들러**: SQLAlchemyError, ValidationError 자동 처리
-- **구조화 로깅**: logger.info/warning/error로 체계적 로깅
+- **구조화 로깅**: logger.info/warning/error로 체계적 로깅 (모든 print() 제거)
 - **에러 트래킹**: 모든 에러는 `exc_info=True`로 스택 트레이스 기록
 
 ### 사용 패턴
 - 비즈니스 로직 에러 → `AppException` 발생
 - 데이터베이스 에러 → 자동 rollback + 로깅 + AppException 변환
+- Redis 에러 → logger.error() 자동 기록 + Fail-Open 정책
+- 암호화/복호화 에러 → InvalidToken 명시적 처리 (401/500 구분)
 - 성능 로깅 → 1초 이상 쿼리 자동 경고
 
-**상세 가이드**: `backend/docs/models-usage-guide.md` Error Handling 섹션
+### 환경 변수 설정
+- **HTTP 타임아웃**: `HTTP_TIMEOUT`, `HTTP_CONNECT_TIMEOUT` (.env 설정 가능)
+- **세션 TTL**: `SESSION_TTL`, `OAUTH_STATE_TTL` (.env 설정 가능)
+- 환경별로 다른 타임아웃 설정 가능 (개발/프로덕션)
+
+**상세 가이드**:
+- `backend/docs/models-usage-guide.md` - Error Handling 섹션
+- `backend/docs/environment-variables.md` - 환경 변수 설정 가이드
 
 ---
 
 ## 📚 주요 문서
 
-- `docs/models-usage-guide.md` - SQLAlchemy 사용 가이드 (리팩토링 반영)
-- `docs/code-refactoring-report.md` - 코드 품질 평가 보고서
-- `docs/day10-11-completion-report.md` - Day 10-11 완료 보고서
-- `docs/day12-13-completion-report.md` - Day 12-13 완료 보고서 (TDD, Service 계층, 성능 인덱스)
+### 개발 가이드
+- `docs/models-usage-guide.md` - SQLAlchemy 사용 가이드 (Error Handling 포함)
+- `docs/environment-variables.md` - 환경 변수 설정 가이드 ✨ 신규
+
+### 아키텍처 문서
+- `docs/redis-module-architecture.md` - Redis 모듈 아키텍처
+- `docs/redis-refactoring-summary.md` - Redis 리팩토링 요약
+
+### 완료 보고서
+- `docs/day10-11-completion-report.md` - Day 10-11 (모델/스키마)
+- `docs/day12-13-completion-report.md` - Day 12-13 (TDD, Service 계층)
+- `docs/day14-completion-report.md` - Day 14 (Redis, JWT 인증)
+- `docs/day21-security-optimization.md` - Day 21 (터미널 보안 최적화)
+- `docs/issue-fixes-completion-report.md` - 코드 품질 이슈 수정 ✨ 신규
+
+### 코드 품질 보고서
+- `docs/code-refactoring-report.md` - 초기 리팩토링 (8.3 → 9.0/10)
 
 ---
 
 **핵심 원칙**:
 - **TDD**: 구현 전에 테스트를 작성하라! 🧪
-- **코드 품질**: 9.2/10 (Day 10-11: 9.0/10 → Day 12-13: 9.2/10) 🔧
+- **코드 품질**: 9.5/10 (Day 10-11: 9.0/10 → Day 12-13: 9.2/10 → 이슈 수정: 9.5/10) 🔧
 - **성능 최적화**: 데이터베이스 인덱스 전략 (복합 인덱스, GIN 인덱스) ⚡
+- **환경 변수 관리**: .env 파일로 환경별 설정 분리 (개발/프로덕션) ⚙️
 
 ---
 

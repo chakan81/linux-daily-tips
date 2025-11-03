@@ -126,6 +126,26 @@ class Settings(BaseSettings):
         description="Google OAuth 2.0 Redirect URI",
     )
 
+    # HTTP 클라이언트 설정
+    HTTP_TIMEOUT: int = Field(
+        default=10,
+        description="HTTP 요청 타임아웃 (초)",
+    )
+    HTTP_CONNECT_TIMEOUT: int = Field(
+        default=5,
+        description="HTTP 연결 타임아웃 (초)",
+    )
+
+    # 세션 설정
+    SESSION_TTL: int = Field(
+        default=3600,
+        description="세션 만료 시간 (초, 기본 1시간)",
+    )
+    OAUTH_STATE_TTL: int = Field(
+        default=600,
+        description="OAuth State 만료 시간 (초, 기본 10분)",
+    )
+
     # 프론트엔드 URL 설정
     FRONTEND_URL: str = Field(
         default="http://localhost:3000",
