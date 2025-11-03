@@ -185,7 +185,8 @@ class Settings(BaseSettings):
     # =============================================================================
     # TERMINAL EMULATOR CONFIGURATION
     # =============================================================================
-    terminal_timeout: int = Field(default=30)
+    terminal_timeout: int = Field(default=30)  # Command execution timeout (seconds)
+    session_expiry_minutes: int = Field(default=30)  # Session auto-expiry (minutes)
     terminal_max_memory: str = Field(default="512m")
     terminal_max_cpu: str = Field(default="0.5")
     terminal_max_sessions: int = Field(default=100)

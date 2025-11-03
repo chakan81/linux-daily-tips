@@ -18,7 +18,7 @@ from app.core.rate_limit import limiter
 from app.core.ulid_helper import validate_id_type
 from app.models.tip import DifficultyLevel, Tip as TipModel
 from app.schemas.tip import Tip, TipList
-from app.services.tip_service import TipService
+from app.services.tip import TipService
 
 router = APIRouter()
 

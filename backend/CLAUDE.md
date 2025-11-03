@@ -59,13 +59,19 @@ backend/
 ├── Dockerfile.dev       # 개발용 Docker
 ├── app/
 │   ├── main.py          # FastAPI 진입점
-│   ├── core/            # 설정 (config, security, dependencies)
+│   ├── core/            # 코어 모듈
+│   │   ├── config/      # 설정 (database, settings)
+│   │   ├── cache/       # Redis 캐시 (4개 모듈) ✨ 리팩토링
+│   │   ├── security/    # JWT, 암호화
+│   │   └── dependencies.py
 │   ├── api/v1/          # API 엔드포인트
 │   │   ├── api.py       # 라우터 통합
 │   │   └── endpoints/   # 개별 엔드포인트
 │   ├── models/          # SQLAlchemy 모델
 │   ├── schemas/         # Pydantic 스키마
 │   └── services/        # 비즈니스 로직
+│       ├── tip/         # Tip 서비스 (4개 모듈) ✨ 리팩토링
+│       └── terminal/    # 터미널 서비스 (4개 모듈) ✨ 리팩토링
 └── tests/
     ├── conftest.py      # pytest 설정
     ├── test_models/     # 모델 테스트
@@ -99,6 +105,76 @@ uv pip install -e ".[dev,test]"
 - **uv로 초고속 패키지 설치** (10-100배 빠름)
 - pyproject.toml 표준 형식 사용
 - 로컬 Python 환경은 선택적 (IDE 지원용)
+
+---
+
+## 🏗️ 서비스 모듈 아키텍처 (2025-11-03 리팩토링)
+
+### 리팩토링 개요
+**목표**: 300줄 이상 장문 파일을 Single Responsibility Principle에 따라 모듈화
+**결과**: 3개 파일 (1,575줄) → 12개 모듈로 분리
+
+### 모듈 분리 전략
+
+#### 1. Tip 서비스 (`app/services/tip/`)
+```
+tip_service.py (582줄) → 4개 모듈
+├── tip_crud.py          # CRUD 작업 (create, update, delete, increment)
+├── tip_query.py         # 조회 작업 + 캐싱 전략 (daily, by_id, list)
+├── tip_cache.py         # 캐시 무효화 (invalidate_tip_cache)
+└── tip_service.py       # 조율 레이어 (다른 모듈에 위임)
+```
+
+**캐싱 전략**:
+- `tip:daily:{date}` - 24시간 TTL (일일 팁)
+- `tip:detail:{id}` - 1시간 TTL (관리자 수정 가능)
+- `tips:list:*` - 10분 TTL (빠른 반영)
+
+#### 2. 터미널 서비스 (`app/services/terminal/`)
+```
+terminal_service.py (570줄) → 4개 모듈
+├── session_manager.py      # 세션 CRUD (create, get, terminate)
+├── session_lifecycle.py    # 생명주기 관리 (expiry, cleanup, stats)
+├── command_executor.py     # 명령어 실행 로직
+└── terminal_service.py     # 조율 레이어
+```
+
+**핵심 상수**:
+- `SESSION_EXPIRY_MINUTES = 30` - 세션 타임아웃
+- 멱등성 보장 (terminate는 여러 번 호출 가능)
+
+#### 3. Redis 캐시 (`app/core/cache/`)
+```
+cache.py (423줄) → 4개 모듈
+├── redis_serialization.py  # JSON 인코더 (datetime 처리)
+├── redis_connection.py     # 연결 관리 (connect, disconnect)
+├── redis_operations.py     # CRUD 작업 (get, set, delete, clear_pattern)
+└── cache_service.py        # CacheService 인터페이스
+```
+
+**주요 개선사항**:
+- CustomJSONEncoder로 datetime 자동 직렬화
+- SCAN을 사용한 패턴 기반 삭제 (블로킹 방지)
+- 손상된 캐시 데이터 자동 삭제
+- 에러 처리 표준화 (logger 사용)
+
+### Backward Compatibility
+각 패키지의 `__init__.py`에서 메인 클래스를 재export하여 기존 import 경로 유지:
+```python
+# app/services/tip/__init__.py
+from app.services.tip.tip_service import TipService
+__all__ = ["TipService"]
+
+# 기존 코드 그대로 동작
+from app.services.tip import TipService
+```
+
+### 테스트 검증
+- **266개 테스트 100% 통과** (리팩토링 전후 동일)
+- 기능 변경 없이 구조만 개선
+- 백업 파일 보관 (`.backup` 확장자)
+
+**상세 문서**: `backend/docs/service-refactoring-report.md`
 
 ---
 
@@ -204,6 +280,7 @@ docker-compose exec backend pytest tests/ --lf
 - `docs/day14-completion-report.md` - Day 14 (Redis, JWT 인증)
 - `docs/day21-security-optimization.md` - Day 21 (터미널 보안 최적화)
 - `docs/issue-fixes-completion-report.md` - 코드 품질 이슈 수정 ✨ 신규
+- `docs/service-refactoring-report.md` - 서비스 모듈 리팩토링 (3파일 → 12모듈) ✨ 신규
 
 ### 코드 품질 보고서
 - `docs/code-refactoring-report.md` - 초기 리팩토링 (8.3 → 9.0/10)

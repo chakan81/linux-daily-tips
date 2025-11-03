@@ -36,7 +36,7 @@ async def cleanup_expired_sessions_task():
     """
     from app.config.database import async_session_maker
     from app.services.docker_service import DockerService
-    from app.services.terminal_service import TerminalService
+    from app.services.terminal import TerminalService
 
     logger.info("🧹 컨테이너 정리 백그라운드 작업 시작 (1분 주기)")
 

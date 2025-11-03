@@ -5,6 +5,6 @@
 Day 14에서 LLM 연동, 터미널 관리 등의 서비스가 추가될 예정입니다.
 """
 
-from app.services.tip_service import TipService
+from app.services.tip import TipService
 
 __all__ = ["TipService"]

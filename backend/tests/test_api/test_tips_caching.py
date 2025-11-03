@@ -24,7 +24,7 @@ from app.core.cache import CacheService
 from app.core.dependencies import get_cache, get_tip_service
 from app.main import app
 from app.models.tip import DifficultyLevel, Tip
-from app.services.tip_service import TipService
+from app.services.tip import TipService
 
 
 # ============================================================

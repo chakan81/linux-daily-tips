@@ -64,7 +64,7 @@ class TestTerminalServiceSessionCreation:
         Then: DB에 세션 저장 + Docker 컨테이너 생성
         """
         # Arrange
-        from app.services.terminal_service import TerminalService
+        from app.services.terminal import TerminalService
 
         service = TerminalService(docker_service=mock_docker_service)
         session_data = TerminalSessionCreate(
@@ -109,7 +109,7 @@ class TestTerminalServiceSessionCreation:
         Then: 익명 세션 생성 (tip_id=None)
         """
         # Arrange
-        from app.services.terminal_service import TerminalService
+        from app.services.terminal import TerminalService
 
         service = TerminalService(docker_service=mock_docker_service)
         session_data = TerminalSessionCreate(
@@ -139,7 +139,7 @@ class TestTerminalServiceSessionCreation:
         Then: AppException 발생
         """
         # Arrange
-        from app.services.terminal_service import TerminalService
+        from app.services.terminal import TerminalService
 
         service = TerminalService(docker_service=mock_docker_service)
         session_data = TerminalSessionCreate(
@@ -168,7 +168,7 @@ class TestTerminalServiceSessionCreation:
         Then: AppException 발생
         """
         # Arrange
-        from app.services.terminal_service import TerminalService
+        from app.services.terminal import TerminalService
 
         # 비활성화된 팁 생성
         inactive_tip = Tip(
@@ -207,7 +207,7 @@ class TestTerminalServiceSessionCreation:
         Then: AppException 발생, DB 롤백
         """
         # Arrange
-        from app.services.terminal_service import TerminalService
+        from app.services.terminal import TerminalService
 
         mock_docker_service.create_container.side_effect = AppException(
             message="Docker 데몬 오류", status_code=500
@@ -247,7 +247,7 @@ class TestTerminalServiceSessionCreation:
         Then: expires_at = 생성 시각 + 30분
         """
         # Arrange
-        from app.services.terminal_service import TerminalService
+        from app.services.terminal import TerminalService
 
         service = TerminalService(docker_service=mock_docker_service)
         session_data = TerminalSessionCreate(
@@ -283,7 +283,7 @@ class TestTerminalServiceSessionRetrieval:
         Then: 세션 반환
         """
         # Arrange
-        from app.services.terminal_service import TerminalService
+        from app.services.terminal import TerminalService
 
         service = TerminalService()
 
@@ -309,7 +309,7 @@ class TestTerminalServiceSessionRetrieval:
         Then: None 반환
         """
         # Arrange
-        from app.services.terminal_service import TerminalService
+        from app.services.terminal import TerminalService
 
         service = TerminalService()
 
@@ -334,7 +334,7 @@ class TestTerminalServiceSessionRetrieval:
         Then: 활성 세션만 반환
         """
         # Arrange
-        from app.services.terminal_service import TerminalService
+        from app.services.terminal import TerminalService
 
         # 활성 세션
         active_session = TerminalSession(
@@ -388,7 +388,7 @@ class TestTerminalServiceSessionRetrieval:
         Then: True 반환
         """
         # Arrange
-        from app.services.terminal_service import TerminalService
+        from app.services.terminal import TerminalService
 
         # 이미 만료된 세션 생성 (1시간 전 만료)
         expired_session = TerminalSession(
@@ -422,7 +422,7 @@ class TestTerminalServiceSessionRetrieval:
         Then: False 반환
         """
         # Arrange
-        from app.services.terminal_service import TerminalService
+        from app.services.terminal import TerminalService
 
         service = TerminalService()
 
@@ -445,7 +445,7 @@ class TestTerminalServiceSessionRetrieval:
         Then: 남은 시간(초) 반환
         """
         # Arrange
-        from app.services.terminal_service import TerminalService
+        from app.services.terminal import TerminalService
 
         service = TerminalService()
 
@@ -480,7 +480,7 @@ class TestTerminalServiceSessionTermination:
         Then: status=TERMINATED, terminated_at 설정, 컨테이너 삭제
         """
         # Arrange
-        from app.services.terminal_service import TerminalService
+        from app.services.terminal import TerminalService
 
         service = TerminalService(docker_service=mock_docker_service)
 
@@ -514,7 +514,7 @@ class TestTerminalServiceSessionTermination:
         Then: AppException 발생
         """
         # Arrange
-        from app.services.terminal_service import TerminalService
+        from app.services.terminal import TerminalService
 
         service = TerminalService(docker_service=mock_docker_service)
 
@@ -541,7 +541,7 @@ class TestTerminalServiceSessionTermination:
         Then: 에러 없이 반환, Docker 삭제는 재호출하지 않음
         """
         # Arrange
-        from app.services.terminal_service import TerminalService
+        from app.services.terminal import TerminalService
 
         service = TerminalService(docker_service=mock_docker_service)
 
@@ -581,7 +581,7 @@ class TestTerminalServiceSessionTermination:
         Then: 세션은 종료 상태로 변경, 에러 로깅만 수행
         """
         # Arrange
-        from app.services.terminal_service import TerminalService
+        from app.services.terminal import TerminalService
 
         mock_docker_service.remove_container.side_effect = AppException(
             message="컨테이너를 찾을 수 없습니다", status_code=404
@@ -620,7 +620,7 @@ class TestTerminalServiceCommandExecution:
         Then: 명령어 실행 결과 반환
         """
         # Arrange
-        from app.services.terminal_service import TerminalService
+        from app.services.terminal import TerminalService
 
         mock_docker_service.execute_command.return_value = {
             "exit_code": 0,
@@ -658,7 +658,7 @@ class TestTerminalServiceCommandExecution:
         Then: AppException 발생
         """
         # Arrange
-        from app.services.terminal_service import TerminalService
+        from app.services.terminal import TerminalService
 
         service = TerminalService(docker_service=mock_docker_service)
 
@@ -685,7 +685,7 @@ class TestTerminalServiceCommandExecution:
         Then: AppException 발생
         """
         # Arrange
-        from app.services.terminal_service import TerminalService
+        from app.services.terminal import TerminalService
 
         # 만료된 세션 생성
         expired_session = TerminalSession(
@@ -721,7 +721,7 @@ class TestTerminalServiceCommandExecution:
         Then: AppException 발생
         """
         # Arrange
-        from app.services.terminal_service import TerminalService
+        from app.services.terminal import TerminalService
 
         # 종료된 세션 생성
         terminated_session = TerminalSession(
@@ -759,7 +759,7 @@ class TestTerminalServiceCommandExecution:
         Then: AppException 발생
         """
         # Arrange
-        from app.services.terminal_service import TerminalService
+        from app.services.terminal import TerminalService
 
         mock_docker_service.is_command_safe.return_value = False
 
@@ -791,7 +791,7 @@ class TestTerminalServiceCommandExecution:
         Then: 10초 타임아웃 적용
         """
         # Arrange
-        from app.services.terminal_service import TerminalService
+        from app.services.terminal import TerminalService
 
         service = TerminalService(docker_service=mock_docker_service)
 
@@ -825,7 +825,7 @@ class TestTerminalServiceCleanupTasks:
         Then: status=EXPIRED로 변경, 컨테이너 삭제
         """
         # Arrange
-        from app.services.terminal_service import TerminalService
+        from app.services.terminal import TerminalService
 
         # 만료된 세션 3개 생성
         expired_sessions = []
@@ -888,7 +888,7 @@ class TestTerminalServiceCleanupTasks:
         Then: 세션은 EXPIRED로 변경, 에러 로깅만 수행
         """
         # Arrange
-        from app.services.terminal_service import TerminalService
+        from app.services.terminal import TerminalService
 
         expired_session = TerminalSession(
             tip_id=tip_instance.id,
@@ -929,7 +929,7 @@ class TestTerminalServiceCleanupTasks:
         Then: 상태별 개수 반환
         """
         # Arrange
-        from app.services.terminal_service import TerminalService
+        from app.services.terminal import TerminalService
 
         # 활성 세션 3개
         for i in range(3):

@@ -21,7 +21,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.tip import DifficultyLevel, Tip
 from app.schemas.tip import TipCreate, TipUpdate
-from app.services.tip_service import TipService
+from app.services.tip import TipService
 
 
 @pytest.mark.asyncio

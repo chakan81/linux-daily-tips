@@ -29,7 +29,7 @@ from app.schemas.terminal import (
     WSPingMessage,
     WSPongMessage,
 )
-from app.services.terminal_service import TerminalService
+from app.services.terminal import TerminalService
 
 router = APIRouter()
 logger = logging.getLogger(__name__)

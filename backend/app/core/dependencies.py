@@ -153,7 +153,7 @@ async def get_tip_service(
         - 캐시 MISS 시 자동으로 DB 조회
         - 캐시 HIT/MISS 로깅 포함
     """
-    from app.services.tip_service import TipService
+    from app.services.tip import TipService
 
     return TipService(cache=cache)
 
@@ -297,6 +297,6 @@ def get_terminal_service() -> "TerminalService":  # type: ignore[name-defined]
         - 보안 명령어 실행 (블랙리스트 검증)
         - 자동 세션 만료 (30분)
     """
-    from app.services.terminal_service import TerminalService
+    from app.services.terminal import TerminalService
 
     return TerminalService()

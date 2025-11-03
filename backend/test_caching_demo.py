@@ -11,7 +11,7 @@ from datetime import date
 from app.config.database import get_async_session
 from app.core.cache import CacheService
 from app.models.tip import Tip, DifficultyLevel
-from app.services.tip_service import TipService
+from app.services.tip import TipService
 import time
 
 

@@ -26,7 +26,7 @@ from app.core.config import settings
 from app.core.dependencies import get_cache, get_current_admin, get_tip_service
 from app.main import app
 from app.models.tip import DifficultyLevel, Tip
-from app.services.tip_service import TipService
+from app.services.tip import TipService
 
 
 # ============================================================

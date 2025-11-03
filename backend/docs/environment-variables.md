@@ -213,6 +213,27 @@ SESSION_TTL=3600
 SESSION_TTL=86400
 ```
 
+#### SESSION_EXPIRY_MINUTES
+터미널 세션 자동 만료 시간 (분, 기본값: 30)
+
+```bash
+# 30분 (기본값)
+SESSION_EXPIRY_MINUTES=30
+
+# 1시간
+SESSION_EXPIRY_MINUTES=60
+
+# 개발 환경: 짧은 타임아웃
+SESSION_EXPIRY_MINUTES=10
+```
+
+**적용 위치**: `app/services/terminal/session_manager.py:25`
+
+**설명**:
+- 터미널 세션이 비활성화된 후 자동으로 만료되는 시간
+- Docker 컨테이너 리소스 관리를 위해 설정
+- 만료된 세션은 백그라운드 크론잡이 자동으로 정리
+
 #### OAUTH_STATE_TTL
 OAuth State 만료 시간 (초, 기본값: 600 = 10분)
 
