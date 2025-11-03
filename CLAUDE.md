@@ -88,7 +88,7 @@ Backend API 서버
 
 ## 📊 현재 개발 상태
 
-### Phase 1 (MVP) 진행률: 32% (21/65 작업 완료)
+### Phase 1 (MVP) 진행률: 75% (55/73 작업 완료)
 
 #### ✅ Week 1 완료 (Day 1-7)
 **프론트엔드 인프라 100% 완료**
@@ -104,8 +104,8 @@ Backend API 서버
 - Docker 가상환경 최적화 (불필요한 venv 제거)
 - FastAPI 기본 앱 실행 확인
 
-#### 🔄 Week 2 진행 중 (Day 8-14)
-**백엔드 API 개발**
+#### ✅ Week 2 완료 (Day 8-14)
+**백엔드 API 개발 100% 완료**
 - ✅ FastAPI 프로젝트 구조 설계 (Day 8-9 완료!)
   - 완전한 프로젝트 구조 (core, api, models, schemas, services)
   - 보안 아키텍처 (JWT + OAuth 준비)
@@ -123,21 +123,53 @@ Backend API 서버
   - Service 계층 완성, Alembic 마이그레이션
   - 성능 인덱스 추가 (3개)
   - **코드 품질: 9.2/10** (Day 10-11 대비 +0.2)
-- ⏳ Redis 캐싱 및 JWT 인증 (Day 14 예정)
+- ✅ Redis 캐싱 및 JWT 인증 (Day 14 완료!)
+  - Redis 캐싱 (90% 성능 개선)
+  - Google OAuth 2.0 + JWT 인증 시스템
+  - API Rate Limiting (slowapi)
+  - 234개 테스트 98.3% 통과 (230/234)
+  - 코드 품질: 9.1/10
 
-#### ⏳ Week 3-4 예정
-- 터미널 에뮬레이터 (xterm.js + WebSocket + Docker)
-- 시스템 통합 및 성능 최적화
-- 테스트 및 문서화
+#### ✅ Week 3 완료 (Day 15-21) 🎉
+**터미널 에뮬레이터 100% 완료 (PoC 수준)**
+- ✅ Day 15-16: 프론트엔드 터미널 UI
+  - xterm.js 5.6.0 터미널 UI 브라우저 렌더링
+  - 기본 입력/출력 테스트 완료
+- ✅ Day 17-18: WebSocket 실시간 통신
+  - 프론트엔드-백엔드 WebSocket 연결
+  - 메시지 송수신, 재연결 로직 (3회 시도)
+- ✅ Day 19-20: Docker 컨테이너 통합
+  - Docker 컨테이너 명령어 실행 (ls, pwd, cat, echo)
+  - 세션 생성/종료 API 구현
+  - Playwright 자동화 테스트 통과
+- ✅ Day 21: 보안 강화 및 최적화 **[오늘 완료!]**
+  - **보안 검증**: 네트워크 격리, 리소스 제한 (256MB, CPU 0.5코어) 실제 동작 확인
+  - **성능 측정**: 세션 생성 0.14초, 명령어 실행 0.055초 (목표 초과 달성!)
+  - **컨테이너 정리 크론잡**: 1분 주기 백그라운드 작업 구현
+  - **동시 세션 테스트**: 5개 0.32초, 10개 0.42초 (모두 < 2초 달성)
+  - **완료 보고서**: backend/docs/day21-security-optimization.md
+
+**Week 3 성과 요약**:
+- ✅ PoC 수준 터미널 완성 (라인 버퍼 모드)
+- ✅ 보안: 네트워크 격리, 리소스 제한, 세션 타임아웃 30분
+- ✅ 성능: 모든 목표 초과 달성 (세션 생성 < 2초, 명령어 < 1초)
+- ⚠️ 제약: vim/nano 미지원, 실시간 입력 불가, 특수 키 미처리 → Phase 2에서 개선
+
+#### ⏳ Week 4 예정 (Day 22-28)
+- 프론트엔드-백엔드 전체 통합
+- 성능 최적화 (Lighthouse 90+)
+- 완전 도커화 (원클릭 배포)
+- E2E 테스트 작성
 
 ### 📂 주요 문서
 - `docs/requirements.md`: 전체 서비스 요구사항 정의서
 - `docs/service-planning.md`: 기술 설계 및 아키텍처
-- `docs/phase1-tasks.md`: Phase 1 상세 개발 계획 (리팩토링 반영)
+- `docs/terminal-architecture.md`: 터미널 시스템 아키텍처 설계서
+- `docs/phase1-tasks.md`: Phase 1 상세 개발 계획
 - `frontend/CLAUDE.md`: 프론트엔드 개발 가이드
 - `backend/CLAUDE.md`: 백엔드 개발 가이드 (uv, TDD, Error Handling 포함)
 - `frontend/docs/`: Day 7 완료 보고서
-- `backend/docs/`: Day 8-9, 10-11 완료 보고서, 코드 리팩토링 보고서, 모델 사용 가이드
+- `backend/docs/`: Day 8-9, 10-11, 12-13, 14, 21 완료 보고서, 코드 리팩토링 보고서, 모델 사용 가이드
 
 ---
 

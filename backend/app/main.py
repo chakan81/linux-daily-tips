@@ -5,6 +5,7 @@ Linux Daily Tips Backend API의 메인 애플리케이션입니다.
 CORS, 라우터 등록, 애플리케이션 라이프사이클 이벤트를 관리합니다.
 """
 
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 
@@ -22,6 +23,48 @@ from app.core.rate_limit import limiter
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
+# 백그라운드 작업 제어
+cleanup_task = None
+should_cleanup = True
+
+
+async def cleanup_expired_sessions_task():
+    """
+    만료된 터미널 세션을 주기적으로 정리하는 백그라운드 작업
+
+    매 1분마다 실행되어 만료된 세션과 고아 컨테이너를 자동 삭제합니다.
+    """
+    from app.config.database import async_session_maker
+    from app.services.docker_service import DockerService
+    from app.services.terminal_service import TerminalService
+
+    logger.info("🧹 컨테이너 정리 백그라운드 작업 시작 (1분 주기)")
+
+    docker_service = DockerService()
+    terminal_service = TerminalService(docker_service=docker_service)
+
+    while should_cleanup:
+        try:
+            # 만료된 세션 정리
+            async with async_session_maker() as db:
+                cleaned_count = await terminal_service.cleanup_expired_sessions(db)
+                if cleaned_count > 0:
+                    logger.info(f"🧹 만료된 세션 {cleaned_count}개 정리 완료")
+                await db.commit()
+
+            # 고아 컨테이너 정리 (Redis에 없는 컨테이너)
+            orphan_count = await docker_service.cleanup_all_containers(
+                label="app=linux-daily-tips"
+            )
+            if orphan_count > 0:
+                logger.info(f"🧹 고아 컨테이너 {orphan_count}개 정리 완료")
+
+        except Exception as e:
+            logger.error(f"❌ 세션 정리 중 오류 발생: {str(e)}", exc_info=True)
+
+        # 1분 대기
+        await asyncio.sleep(60)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -35,21 +78,19 @@ async def lifespan(app: FastAPI):
         None
 
     Note:
-        - Day 10-11에서 데이터베이스 연결 초기화 추가 예정
-        - Day 14에서 Redis 연결 초기화 추가 예정
+        - Day 21: 컨테이너 정리 백그라운드 작업 추가
     """
+    global cleanup_task, should_cleanup
+
     # 애플리케이션 시작 시
     logger.info(f"🚀 Starting {settings.PROJECT_NAME} v{settings.VERSION}")
     logger.info(f"📝 Environment: {settings.ENVIRONMENT}")
     logger.info(f"🔒 Debug mode: {settings.DEBUG}")
 
-    # TODO: Day 10-11에서 데이터베이스 연결 초기화
-    # logger.info("🗄️  Initializing database connection...")
-    # await init_db()
-
-    # TODO: Day 14에서 Redis 연결 초기화
-    # logger.info("📦 Initializing Redis connection...")
-    # await init_redis()
+    # 백그라운드 정리 작업 시작
+    should_cleanup = True
+    cleanup_task = asyncio.create_task(cleanup_expired_sessions_task())
+    logger.info("✅ 컨테이너 정리 백그라운드 작업 등록 완료")
 
     logger.info("✅ Application startup complete")
 
@@ -58,13 +99,14 @@ async def lifespan(app: FastAPI):
     # 애플리케이션 종료 시
     logger.info(f"👋 Shutting down {settings.PROJECT_NAME}")
 
-    # TODO: Day 10-11에서 데이터베이스 연결 종료
-    # logger.info("🗄️  Closing database connection...")
-    # await close_db()
-
-    # TODO: Day 14에서 Redis 연결 종료
-    # logger.info("📦 Closing Redis connection...")
-    # await close_redis()
+    # 백그라운드 작업 중지
+    should_cleanup = False
+    if cleanup_task:
+        cleanup_task.cancel()
+        try:
+            await cleanup_task
+        except asyncio.CancelledError:
+            logger.info("🧹 컨테이너 정리 백그라운드 작업 중지 완료")
 
     logger.info("✅ Application shutdown complete")
 
