@@ -214,8 +214,8 @@ export function TerminalEmulator({ sessionId, wsUrl, onSessionEnd }: TerminalEmu
     const terminal = xtermRef.current;
 
     if (isConnected) {
-      terminal.writeln('\x1b[1;32mConnected!\x1b[0m');
-      terminal.writeln('');
+      // 우측 하단에 연결 상태 표시가 있으므로 터미널에 중복 메시지 출력하지 않음
+      // Race condition 방지: 백엔드 프롬프트와 겹치지 않도록 함
       terminal.focus();
     } else if (isConnecting) {
       terminal.writeln('\x1b[90mConnecting...\x1b[0m');

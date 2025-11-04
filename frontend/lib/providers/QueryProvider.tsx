@@ -2,7 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 /**
  * Query Client Configuration
@@ -64,23 +64,6 @@ const queryClientConfig = {
 export function QueryProvider({ children }: { children: React.ReactNode }) {
   // Create a new query client for each request to prevent sharing between users
   const [queryClient] = useState(() => new QueryClient(queryClientConfig));
-
-  // Initialize MSW in development environment
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      import('@/lib/mocks/browser').then(({ worker }) => {
-        worker.start({
-          onUnhandledRequest: 'bypass', // 처리되지 않은 요청은 실제 서버로 전달
-        }).then(() => {
-          console.log('🔶 MSW: Mock API enabled for development');
-        }).catch((error) => {
-          console.error('❌ MSW: Failed to start service worker', error);
-        });
-      }).catch((error) => {
-        console.error('❌ MSW: Failed to import browser module', error);
-      });
-    }
-  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

@@ -8,7 +8,17 @@
       "Bash(npm run type-check:*)",
       "Bash(grep:*)",
       "Bash(test:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(cat:*)",
+      "Bash(curl:*)",
+      "Bash(python3:*)",
+      "Bash(npm run dev:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill -9)",
+      "mcp__playwright__browser_type",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_navigate"
     ]
   },
   "enabledMcpjsonServers": [
@@ -16,5 +26,5 @@
     "playwright",
     "shadcn-ui"
   ],
-  "outputStyle": "korean"
+  "outputStyle": "default"
 }

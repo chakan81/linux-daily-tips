@@ -49,7 +49,7 @@ export function RecentTipsSection() {
     );
   }
 
-  if (!recentTips || recentTips.length === 0) {
+  if (!recentTips || !recentTips.items || recentTips.items.length === 0) {
     return null;
   }
   return (
@@ -65,9 +65,10 @@ export function RecentTipsSection() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {recentTips.map((tip, index) => {
+          {recentTips.items.map((tip, index) => {
             // Format the date as relative time
-            const publishDate = new Date(tip.publishDate);
+            // 백엔드가 publish_date (snake_case)로 반환
+            const publishDate = new Date((tip as any).publish_date || tip.publishDate);
             const now = new Date();
             const diffInDays = Math.floor((now.getTime() - publishDate.getTime()) / (1000 * 60 * 60 * 24));
             const dateText = diffInDays === 0 ? 'Today' : diffInDays === 1 ? 'Yesterday' : `${diffInDays} days ago`;
@@ -91,7 +92,7 @@ export function RecentTipsSection() {
                   {tip.title}
                 </h3>
 
-                <p className="text-sm text-muted-foreground mb-4">{tip.category}</p>
+                <p className="text-sm text-muted-foreground mb-4">{Array.isArray(tip.category) ? tip.category.join(', ') : tip.category}</p>
 
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-medium text-accent-600">Read more</span>

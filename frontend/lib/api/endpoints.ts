@@ -7,15 +7,15 @@
 import { QueryParams } from '@/lib/types/common'
 
 export const API_ENDPOINTS = {
-  // Tips endpoints
+  // Tips endpoints (백엔드 FastAPI 엔드포인트에 맞춤)
   TIPS: {
-    LIST: '/api/tips',
-    TODAY: '/api/tips/today',
-    BY_ID: (id: string) => `/api/tips/${id}`,
-    RECENT: '/api/tips/recent',
-    BY_CATEGORY: (category: string) => `/api/tips/category/${category}`,
-    BY_DIFFICULTY: (difficulty: string) => `/api/tips/difficulty/${difficulty}`,
-    SEARCH: '/api/tips/search',
+    LIST: '/api/v1/tips',
+    TODAY: '/api/v1/tips/daily',  // 백엔드: GET /api/v1/tips/daily
+    BY_ID: (id: string) => `/api/v1/tips/${id}`,  // 백엔드: GET /api/v1/tips/{tip_id}
+    RECENT: '/api/v1/tips',  // 백엔드: GET /api/v1/tips/?page=1&page_size=10
+    BY_CATEGORY: (category: string) => `/api/v1/tips/category/${category}`,
+    BY_DIFFICULTY: (difficulty: string) => `/api/v1/tips/difficulty/${difficulty}`,
+    SEARCH: '/api/v1/tips/search',
   },
 
   // Draft endpoints

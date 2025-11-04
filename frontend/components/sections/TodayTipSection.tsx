@@ -72,38 +72,21 @@ export function TodayTipSection() {
                 <div className={`px-3 py-1 rounded-full text-sm font-medium ${getDifficultyColor(todaysTip.difficulty)}`}>
                   {todaysTip.difficulty}
                 </div>
-                <span className="text-sm text-muted-foreground">{todaysTip.category}</span>
+                <span className="text-sm text-muted-foreground">{Array.isArray(todaysTip.category) ? todaysTip.category.join(', ') : todaysTip.category}</span>
               </div>
               <h3 className="text-2xl font-bold text-foreground mb-2">
                 {todaysTip.title}
               </h3>
-              <p className="text-muted-foreground leading-relaxed">
-                {todaysTip.description}
+            </div>
+          </div>
+
+          {todaysTip.content && (
+            <div className="prose prose-invert max-w-none mb-6 p-6 bg-gray-900/50 rounded-xl" role="region" aria-label="팁 미리보기">
+              <p className="text-gray-300 leading-relaxed line-clamp-3">
+                {todaysTip.content.split('\n').slice(0, 3).join(' ').substring(0, 200)}...
               </p>
             </div>
-
-            <div className="flex items-center gap-2 text-sm text-muted-foreground ml-6">
-              <Clock className="w-4 h-4" aria-hidden="true" />
-              <span aria-label={`예상 소요시간 ${todaysTip.estimatedTime}`}>{todaysTip.estimatedTime}</span>
-            </div>
-          </div>
-
-          <div className="bg-gray-900 rounded-xl p-6 mb-6 terminal-container" role="region" aria-label="터미널 예제">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-3 h-3 bg-red-500 rounded-full" aria-hidden="true"></div>
-              <div className="w-3 h-3 bg-yellow-500 rounded-full" aria-hidden="true"></div>
-              <div className="w-3 h-3 bg-green-500 rounded-full" aria-hidden="true"></div>
-              <span className="text-gray-400 text-sm ml-4">Terminal</span>
-            </div>
-            <div className="font-mono" role="code" aria-label={`명령어: ${todaysTip.command}`}>
-              <div className="text-terminal-green">$ {todaysTip.command}</div>
-              <div className="text-terminal-text mt-2 opacity-75">
-                # Sets read, write, execute permissions for owner
-                <br />
-                # and read, execute permissions for group and others
-              </div>
-            </div>
-          </div>
+          )}
 
           <div className="flex flex-col sm:flex-row gap-4">
             <Link

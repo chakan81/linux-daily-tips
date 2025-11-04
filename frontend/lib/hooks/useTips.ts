@@ -23,15 +23,16 @@ export function useTodayTip() {
  *
  * Usage:
  * ```tsx
- * const { data: tips, isLoading, error } = useRecentTips(5);
+ * const { data, isLoading, error } = useRecentTips(5);
+ * const tips = data?.items || [];
  * ```
  */
 export function useRecentTips(limit: number = 10) {
   return useQuery({
     queryKey: ['tips', 'recent', limit],
     queryFn: () =>
-      apiRequest<TipData[]>({
-        url: buildUrl(API_ENDPOINTS.TIPS.RECENT, { limit }),
+      apiRequest<{ items: TipData[]; total: number; page: number; page_size: number }>({
+        url: buildUrl(API_ENDPOINTS.TIPS.RECENT, { page: 1, page_size: limit }),
       }),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
