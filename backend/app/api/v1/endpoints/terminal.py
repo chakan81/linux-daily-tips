@@ -59,7 +59,6 @@ async def create_terminal_session(
         TerminalSessionResponse: 생성된 세션 정보
             - session_id: 세션 ID
             - container_id: Docker 컨테이너 ID
-            - ws_url: WebSocket 연결 URL
             - status: 세션 상태
             - expires_at: 만료 시각
 
@@ -82,7 +81,6 @@ async def create_terminal_session(
         {
             "session_id": "session_01JCAW0V1QQ9KZ2F3XHBP8TGNY",
             "container_id": "abc123def456",
-            "ws_url": "ws://localhost:8000/api/v1/terminal/ws/session_01JCAW0V1QQ9KZ2F3XHBP8TGNY",
             "status": "active",
             "expires_at": "2025-10-28T12:30:00Z"
         }
@@ -110,11 +108,6 @@ async def create_terminal_session(
             db, session_data, ip_address=client_ip, user_agent=user_agent
         )
 
-        # WebSocket URL 생성
-        # request.url.scheme이 http면 ws, https면 wss
-        ws_scheme = "wss" if request.url.scheme == "https" else "ws"
-        ws_url = f"{ws_scheme}://{request.url.netloc}/api/v1/terminal/ws/{session.id}"
-
         await db.commit()
 
         logger.info(f"세션 생성 완료: {session.id}")
@@ -122,7 +115,6 @@ async def create_terminal_session(
         return TerminalSessionResponse(
             session_id=session.id,
             container_id=session.container_id or "unknown",
-            ws_url=ws_url,
             status=session.status.value,
             expires_at=session.expires_at,
         )

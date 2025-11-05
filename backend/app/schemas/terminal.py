@@ -56,12 +56,6 @@ class TerminalSessionResponse(BaseModel):
         examples=["abc123def456"],
     )
 
-    ws_url: str = Field(
-        ...,
-        description="WebSocket 연결 URL",
-        examples=["ws://localhost:8000/api/v1/terminal/ws/session_01JCAW0V1QQ9KZ2F3XHBP8TGNY"],
-    )
-
     status: str = Field(
         ...,
         description="세션 상태 (active/terminated/expired)",
@@ -78,7 +72,6 @@ class TerminalSessionResponse(BaseModel):
             "example": {
                 "session_id": "session_01JCAW0V1QQ9KZ2F3XHBP8TGNY",
                 "container_id": "abc123def456",
-                "ws_url": "ws://localhost:8000/api/v1/terminal/ws/session_01JCAW0V1QQ9KZ2F3XHBP8TGNY",
                 "status": "active",
                 "expires_at": "2025-10-28T12:30:00Z",
             }

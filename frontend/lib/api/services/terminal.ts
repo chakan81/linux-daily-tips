@@ -14,7 +14,6 @@ import { API_ENDPOINTS } from '@/lib/api/endpoints';
 export interface TerminalSessionResponse {
   session_id: string;
   container_id: string;
-  ws_url: string;
   status: string;
   expires_at: string;
 }

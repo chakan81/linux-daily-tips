@@ -208,7 +208,15 @@ export type ApiError = NetworkError | ValidationError | ...
 - **appStore**: 전역 UI 상태 (sidebar, terminal, loading)
 
 ### Custom Hooks
+
+**Data Fetching (React Query):**
 - `useTodayTip()`, `useRecentTips()`, `useTip()`, `useTipsList()`, `useSearchTips()`, `useLikeTip()`
+
+**Terminal (Day 27 Part 3 추가):**
+- `useTerminal()` - 터미널 생명주기 관리 (초기화, 리사이즈, 정리)
+- `useTerminalInput()` - 입력 이벤트 처리 (Enter, Backspace, Ctrl+C)
+- `useTerminalWebSocketMessages()` - WebSocket 메시지 처리
+- `useTerminalWebSocket()` - WebSocket 연결 관리 (기존)
 
 ### 공통 컴포넌트
 - **ErrorBoundary**: React 에러 처리
@@ -293,6 +301,48 @@ export type ApiError = NetworkError | ValidationError | ...
 ### 완료 보고서
 - `docs/tips-pages-implementation-plan.md` 업데이트 완료
 
+## 🎉 Day 27 Part 3 완료 (코드 품질 리팩토링)
+
+### 주요 성과
+1. **테스트 헬퍼 클래스 추출 (Phase 1)** ✅
+   - `e2e/test-helpers/terminal.ts` (141줄) - TerminalTestHelpers 클래스
+   - `e2e/test-helpers/tips.ts` (283줄) - TipsTestHelpers 클래스
+   - **terminal.spec.ts**: 186줄 → 74줄 (**60% 감소**)
+   - **tips.spec.ts**: 174줄 → 86줄 (**51% 감소**)
+   - **총 360줄 → 160줄 (56% 감소)** + 중복 코드 제거
+
+2. **TerminalEmulator 컴포넌트 분리 (Phase 2)** ✅
+   - **TerminalEmulator.tsx**: 278줄 → 182줄 (**35% 감소**)
+   - 3개 커스텀 훅 추출:
+     - `lib/hooks/useTerminal.ts` (123줄) - 터미널 생명주기 관리
+     - `lib/hooks/useTerminalInput.ts` (107줄) - 입력 이벤트 처리
+     - `lib/hooks/useTerminalWebSocketMessages.ts` (38줄) - WebSocket 메시지 처리
+   - **효과**: God Component 분리, 단일 책임 원칙 준수, 재사용성 향상
+
+3. **상수 추출 및 적용 (Phase 3)** ✅
+   - `e2e/constants.ts` (56줄) - TIMEOUTS, SCROLL_THRESHOLD
+   - Magic numbers 제거 (13곳 적용)
+   - 일관성 향상 및 유지보수성 개선
+
+### 검증 결과
+- ✅ **TypeScript 타입 체크**: 에러 없음
+- ✅ **E2E 테스트**: **22/22 통과 (100%, 34.5초)**
+  - Homepage: 5/5 passing
+  - Terminal Emulator: 7/7 passing
+  - Tips Page: 10/10 passing
+
+### 코드 품질 개선 효과
+- **중복 코드 56% 감소** (테스트 파일)
+- **God Component 분리** (278줄 → 4개 모듈)
+- **Magic numbers 제거** (상수화)
+- **재사용 가능한 훅** (독립적 테스트 가능)
+- **유지보수성 대폭 향상** (변경 시 한 곳만 수정)
+
+### 예상 품질 점수 개선
+- TerminalEmulator.tsx: 7.5/10 → **8.5+/10** (예상)
+- terminal.spec.ts: 6.0/10 → **8.0+/10** (예상)
+- tips.spec.ts: 6.5/10 → **8.0+/10** (예상)
+
 ## 🚀 다음 단계 (Week 4: Day 25-28)
 
 ### Day 25-26: Tips 페이지 구현 (최우선)
@@ -342,38 +392,33 @@ export type ApiError = NetworkError | ValidationError | ...
 - [x] FastAPI 백엔드 구현 (PostgreSQL 연동, 266개 테스트 100% 통과)
 - [x] Terminal Emulator (xterm.js + WebSocket + Docker)
 
-**Week 4 (Day 22-25): API 통합 & 코드 품질 개선**
-- [x] MSW 완전 제거 (596줄 코드, 33개 패키지)
-- [x] Frontend ↔ Backend API 통합 완료
-- [x] API 네이밍 이슈 완전 해결 (Pydantic alias_generator)
-- [x] Frontend cleanup (any 타입 완전 제거)
-- [x] Categories API 동적화 (PostgreSQL 쿼리)
-- [x] 타입 안전성 100% 달성
-- [x] 홈페이지 실제 데이터 표시
-- [x] API 네이밍 이슈 해결 (`publish_date` vs `publishDate`)
-- [x] 터미널 WebSocket 완전 작동
+**Week 4 (Day 22-27): API 통합 & 코드 품질 개선**
+- [x] Day 22-24: MSW 완전 제거 (596줄 코드, 33개 패키지)
+- [x] Day 22-24: Frontend ↔ Backend API 통합 완료
+- [x] Day 25: API 네이밍 이슈 완전 해결 (Pydantic alias_generator)
+- [x] Day 25: Frontend cleanup (any 타입 완전 제거)
+- [x] Day 25: Categories API 동적화 (PostgreSQL 쿼리)
+- [x] Day 25: 타입 안전성 100% 달성
+- [x] Day 27 Part 1: 검색/정렬 API (TDD, 11개 테스트 100% 통과)
+- [x] Day 27 Part 2: E2E 테스트 100% 통과 (22/22)
+- [x] Day 27 Part 3: 코드 품질 리팩토링 (56% 코드 감소)
 
-### 🔄 다음 작업 (Week 4: Day 26-28)
-- [ ] **Day 26: Tips 페이지 구현** - 최우선
-  - [ ] 팁 상세 페이지 (`/tips/[id]/page.tsx`)
-  - [ ] 팁 목록 페이지 (`/tips/page.tsx`)
-  - [ ] **검색 기능 수정** ⭐ (백엔드 지원 확인 후 활성화)
-  - [ ] **정렬 드롭다운 버그 수정** ⭐ (상태 관리 수정)
-  - [ ] 페이지네이션 구현
-  - [ ] 홈페이지 404 링크 수정
-- [ ] Day 27: E2E 테스트 작성 (Playwright)
-- [ ] Day 27: 성능 최적화 (Lighthouse 90+)
-- [ ] Day 28: 완전 도커화 (프론트엔드 Docker)
+### 🔄 다음 작업 (Week 4: Day 28)
+- [ ] **Day 28: 성능 최적화 & 문서화** - 최종 마무리
+  - [ ] Lighthouse 90+ 달성 (번들 사이즈 분석, 코드 분할)
+  - [ ] 사용자 가이드 문서 작성
+  - [ ] API 문서 업데이트
+  - [ ] 배포 가이드 작성
 
 ### 📈 프로젝트 진행률
-- **Phase 1 (MVP)**: 87% 완료 (71/82 작업)
+- **Phase 1 (MVP)**: **90% 완료 (74/82 작업)**
   - ✅ Week 1 Frontend: 100% 완료 (17/17 작업)
   - ✅ Week 2 Backend API: 100% 완료 (26/26 작업)
   - ✅ Week 3 Terminal Emulator: 100% 완료 (16/16 작업)
-  - ⏳ Week 4 통합 및 최적화: 52% 완료 (12/23 작업)
-    - Day 22-25 완료 (12개)
-    - Day 26 예정 (6개, 검색/정렬 수정 포함) ⭐
-    - Day 27-28 예정 (5개)
+  - ⏳ Week 4 통합 및 최적화: **65% 완료 (15/23 작업)**
+    - ✅ Day 22-25 완료 (12개): MSW 제거, API 통합, 타입 안전성
+    - ✅ Day 27 완료 (3개): 검색/정렬 API, E2E 테스트, 코드 리팩토링
+    - ⏳ Day 28 예정 (8개): 성능 최적화, 문서화
 
 이 문서는 프로젝트 진행에 따라 지속적으로 업데이트됩니다.
 

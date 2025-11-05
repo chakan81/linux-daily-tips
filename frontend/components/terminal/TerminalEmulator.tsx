@@ -8,10 +8,11 @@
  * an interactive command-line interface in the browser.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Terminal } from '@xterm/xterm';
-import { FitAddon } from '@xterm/addon-fit';
-import { useTerminalWebSocket, WebSocketMessage } from '@/lib/hooks';
+import { useEffect, useRef, useState } from 'react';
+import { useTerminalWebSocket } from '@/lib/hooks';
+import { useTerminal } from '@/lib/hooks/useTerminal';
+import { useTerminalInput } from '@/lib/hooks/useTerminalInput';
+import { useTerminalWebSocketMessages } from '@/lib/hooks/useTerminalWebSocketMessages';
 import '@xterm/xterm/css/xterm.css';
 
 /**
@@ -77,40 +78,23 @@ const TERMINAL_CONFIG = {
 export function TerminalEmulator({ sessionId, wsUrl, onSessionEnd }: TerminalEmulatorProps) {
   // Refs
   const terminalRef = useRef<HTMLDivElement>(null);
-  const xtermRef = useRef<Terminal | null>(null);
-  const fitAddonRef = useRef<FitAddon | null>(null);
-  const currentLineRef = useRef<string>('');
-  const sendCommandRef = useRef<((command: string) => void) | null>(null);
 
   // State
   const [isReady, setIsReady] = useState(false);
 
-  // WebSocket message handler callback
-  const handleMessage = useCallback((message: any) => {
-    if (!xtermRef.current) return;
+  // Terminal lifecycle management
+  const { terminal, initializeTerminal, disposeTerminal } = useTerminal(TERMINAL_CONFIG);
 
-    const terminal = xtermRef.current;
-    console.log('[Terminal] Handling message:', message.type, message.data);
-
-    switch (message.type) {
-      case 'output':
-        if (message.data) {
-          terminal.write(message.data);
-        }
-        break;
-      case 'error':
-        terminal.writeln(`\r\n\x1b[1;31mError: ${message.message || 'Unknown error'}\x1b[0m\r\n`);
-        break;
-    }
-  }, []);
+  // WebSocket message handling
+  const { handleMessage } = useTerminalWebSocketMessages(terminal);
 
   // WebSocket connection
-  const { isConnected, isConnecting, error, sendCommand, disconnect, lastMessage } = useTerminalWebSocket(wsUrl, {
+  const { isConnected, isConnecting, error, sendCommand, disconnect } = useTerminalWebSocket(wsUrl, {
     onMessage: handleMessage,
   });
 
-  // Update sendCommand ref whenever it changes
-  sendCommandRef.current = sendCommand;
+  // Terminal input handling
+  useTerminalInput(terminal, sendCommand);
 
   /**
    * Initialize xterm.js terminal
@@ -118,111 +102,30 @@ export function TerminalEmulator({ sessionId, wsUrl, onSessionEnd }: TerminalEmu
   useEffect(() => {
     if (!terminalRef.current) return;
 
-    // Create terminal instance
-    const terminal = new Terminal(TERMINAL_CONFIG);
-    const fitAddon = new FitAddon();
-
-    // Load addons
-    terminal.loadAddon(fitAddon);
-
-    // Open terminal in DOM
-    terminal.open(terminalRef.current);
-
-    // Store refs
-    xtermRef.current = terminal;
-    fitAddonRef.current = fitAddon;
-
-    // Fit terminal to container (after next frame to ensure renderer is ready)
-    requestAnimationFrame(() => {
-      try {
-        fitAddon.fit();
-      } catch (err) {
-        console.warn('Error fitting terminal on initial load:', err);
-      }
-    });
-
-    // Write welcome message
-    terminal.writeln('\x1b[1;32mLinux Daily Tips Terminal\x1b[0m');
-    terminal.writeln('\x1b[90mConnecting to session...\x1b[0m');
-    terminal.writeln('');
-
+    // Initialize terminal
+    initializeTerminal(terminalRef.current);
     setIsReady(true);
-
-    // Handle user input
-    terminal.onData((data) => {
-      // Handle special keys
-      if (data === '\r') {
-        // Enter key - send command
-        terminal.write('\r\n');
-        const command = currentLineRef.current;
-        currentLineRef.current = '';
-
-        if (command.trim() && sendCommandRef.current) {
-          sendCommandRef.current(command);
-        }
-      } else if (data === '\u007F') {
-        // Backspace
-        if (currentLineRef.current.length > 0) {
-          currentLineRef.current = currentLineRef.current.slice(0, -1);
-          terminal.write('\b \b');
-        }
-      } else if (data === '\u0003') {
-        // Ctrl+C
-        terminal.write('^C\r\n');
-        currentLineRef.current = '';
-        if (sendCommandRef.current) {
-          sendCommandRef.current('\u0003'); // Send interrupt signal
-        }
-      } else if (data.charCodeAt(0) < 32) {
-        // Ignore other control characters for now
-        return;
-      } else {
-        // Regular character
-        currentLineRef.current += data;
-        terminal.write(data);
-      }
-    });
-
-    // Handle window resize
-    const handleResize = () => {
-      if (fitAddonRef.current) {
-        try {
-          fitAddonRef.current.fit();
-        } catch (err) {
-          console.warn('Error fitting terminal:', err);
-        }
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
 
     // Cleanup
     return () => {
-      window.removeEventListener('resize', handleResize);
-      terminal.dispose();
-      xtermRef.current = null;
-      fitAddonRef.current = null;
+      disposeTerminal();
     };
-  }, []); // ✅ 빈 배열: 터미널은 한 번만 초기화
+  }, [initializeTerminal, disposeTerminal]);
 
   /**
    * Handle connection status changes
    */
   useEffect(() => {
-    if (!xtermRef.current) return;
-
-    const terminal = xtermRef.current;
+    if (!terminal) return;
 
     if (isConnected) {
       // 우측 하단에 연결 상태 표시가 있으므로 터미널에 중복 메시지 출력하지 않음
       // Race condition 방지: 백엔드 프롬프트와 겹치지 않도록 함
       terminal.focus();
-    } else if (isConnecting) {
-      terminal.writeln('\x1b[90mConnecting...\x1b[0m');
     } else if (error) {
       terminal.writeln(`\r\n\x1b[1;31mConnection Error: ${error}\x1b[0m\r\n`);
     }
-  }, [isConnected, isConnecting, error]);
+  }, [terminal, isConnected, error]);
 
   /**
    * Cleanup on unmount

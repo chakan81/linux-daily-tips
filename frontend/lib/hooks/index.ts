@@ -23,6 +23,12 @@ export type {
   ConnectionStatus,
 } from './useTerminalWebSocket';
 
+// Terminal hooks
+export { useTerminal } from './useTerminal';
+export type { TerminalConfig } from './useTerminal';
+export { useTerminalInput } from './useTerminalInput';
+export { useTerminalWebSocketMessages } from './useTerminalWebSocketMessages';
+
 // Add more hook exports as they are created
 // export * from './useAuth';
 // export * from './useStats';

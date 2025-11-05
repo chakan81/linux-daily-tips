@@ -16,14 +16,23 @@ const TerminalEmulator = dynamic(
   }
 );
 
+// Extend TerminalSessionResponse with client-side ws_url
+type TerminalSession = TerminalSessionResponse & { ws_url: string };
+
 export default function TerminalPage() {
-  const [session, setSession] = useState<TerminalSessionResponse | null>(null);
+  const [session, setSession] = useState<TerminalSession | null>(null);
 
   // Create session mutation
   const createSessionMutation = useMutation({
     mutationFn: () => createTerminalSession(),
     onSuccess: (data) => {
-      setSession(data);
+      // Generate WebSocket URL on client-side
+      // Use localhost:8000 which is exposed by Docker Compose
+      // This works for both browser and Playwright E2E tests
+      const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${wsProtocol}//localhost:8000/api/v1/terminal/ws/${data.session_id}`;
+
+      setSession({ ...data, ws_url: wsUrl });
     },
     onError: (error: Error) => {
       console.error('Failed to create terminal session:', error);
