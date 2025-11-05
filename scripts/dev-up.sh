@@ -17,6 +17,7 @@ PROJECT_NAME="Linux Daily Tips"
 COMPOSE_FILES="-f docker-compose.yml -f docker-compose.dev.yml"
 SERVICES=("postgres" "redis" "pgadmin" "redis-commander" "mailhog")
 BACKEND_SERVICE="backend"
+FRONTEND_SERVICE="frontend"
 
 # Function to print colored output
 print_status() {
@@ -159,6 +160,18 @@ start_backend() {
     fi
 }
 
+# Function to start frontend service
+start_frontend() {
+    if [ -f "frontend/Dockerfile" ] && [ -f "frontend/package.json" ]; then
+        print_status "Starting Next.js frontend..."
+        docker compose $COMPOSE_FILES up -d $FRONTEND_SERVICE
+        print_success "Frontend service started"
+    else
+        print_warning "Frontend service files not found, skipping frontend startup"
+        print_warning "Run this script again after setting up the Next.js frontend"
+    fi
+}
+
 # Function to display service URLs
 show_service_urls() {
     echo ""
@@ -181,11 +194,20 @@ show_service_urls() {
     echo "      └── SMTP: localhost:1025"
     echo ""
 
-    if docker compose $COMPOSE_FILES ps $BACKEND_SERVICE >/dev/null 2>&1; then
+    if docker compose $COMPOSE_FILES ps $BACKEND_SERVICE >/dev/null 2>&1 || \
+       docker compose $COMPOSE_FILES ps $FRONTEND_SERVICE >/dev/null 2>&1; then
         echo "🎯 Application Services:"
-        echo "   🔧 FastAPI Backend:  http://localhost:8000"
-        echo "      └── API Docs: http://localhost:8000/docs"
-        echo "      └── ReDoc: http://localhost:8000/redoc"
+
+        if docker compose $COMPOSE_FILES ps $BACKEND_SERVICE >/dev/null 2>&1; then
+            echo "   🔧 FastAPI Backend:  http://localhost:8000"
+            echo "      └── API Docs: http://localhost:8000/docs"
+            echo "      └── ReDoc: http://localhost:8000/redoc"
+        fi
+
+        if docker compose $COMPOSE_FILES ps $FRONTEND_SERVICE >/dev/null 2>&1; then
+            echo "   🌐 Next.js Frontend: http://localhost:3000"
+        fi
+
         echo ""
     fi
 
@@ -232,6 +254,7 @@ main() {
     start_core_services
     start_dev_tools
     start_backend
+    start_frontend
 
     # Post-startup checks
     sleep 5
