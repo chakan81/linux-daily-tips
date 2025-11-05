@@ -67,8 +67,7 @@ export function RecentTipsSection() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {recentTips.items.map((tip, index) => {
             // Format the date as relative time
-            // 백엔드가 publish_date (snake_case)로 반환
-            const publishDate = new Date((tip as any).publish_date || tip.publishDate);
+            const publishDate = new Date(tip.publishDate);
             const now = new Date();
             const diffInDays = Math.floor((now.getTime() - publishDate.getTime()) / (1000 * 60 * 60 * 24));
             const dateText = diffInDays === 0 ? 'Today' : diffInDays === 1 ? 'Yesterday' : `${diffInDays} days ago`;

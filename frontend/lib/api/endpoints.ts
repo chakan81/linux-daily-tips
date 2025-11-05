@@ -16,6 +16,7 @@ export const API_ENDPOINTS = {
     BY_CATEGORY: (category: string) => `/api/v1/tips/category/${category}`,
     BY_DIFFICULTY: (difficulty: string) => `/api/v1/tips/difficulty/${difficulty}`,
     SEARCH: '/api/v1/tips/search',
+    CATEGORIES: '/api/v1/tips/categories/list',  // 백엔드: GET /api/v1/tips/categories/list
   },
 
   // Draft endpoints

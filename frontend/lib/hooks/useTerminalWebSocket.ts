@@ -232,9 +232,10 @@ export function useTerminalWebSocket(
         wsRef.current = null;
 
         // Attempt reconnection if not manual disconnect
-        if (!isManualDisconnectRef.current && reconnectAttemptsRef.current < mergedConfig.reconnectAttempts) {
+        const maxAttempts = mergedConfig.reconnectAttempts ?? 3;
+        if (!isManualDisconnectRef.current && reconnectAttemptsRef.current < maxAttempts) {
           reconnectAttemptsRef.current += 1;
-          console.log(`Reconnection attempt ${reconnectAttemptsRef.current}/${mergedConfig.reconnectAttempts}`);
+          console.log(`Reconnection attempt ${reconnectAttemptsRef.current}/${maxAttempts}`);
 
           setTimeout(() => {
             if (!isManualDisconnectRef.current) {
@@ -243,7 +244,8 @@ export function useTerminalWebSocket(
           }, mergedConfig.reconnectDelay);
         } else {
           setStatus('disconnected');
-          if (reconnectAttemptsRef.current >= mergedConfig.reconnectAttempts) {
+          const maxAttempts = mergedConfig.reconnectAttempts ?? 3;
+          if (reconnectAttemptsRef.current >= maxAttempts) {
             setError('Failed to reconnect after multiple attempts');
           }
         }

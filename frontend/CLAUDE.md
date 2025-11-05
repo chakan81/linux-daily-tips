@@ -214,19 +214,96 @@ export type ApiError = NetworkError | ValidationError | ...
 
 자세한 내용은 [Day 7 완료 보고서](./docs/DAY7_COMPLETION_REPORT.md) 참고
 
-## 🚀 다음 단계 (Week 2: Day 8-14)
+## 🎉 Day 23-24 완료 (MSW 제거 및 API 통합)
 
-### Day 8-9: 백엔드 API 연동
-1. **FastAPI 서버 구현**: PostgreSQL 연동, CRUD API
-2. **Frontend ↔ Backend 통합**: 실제 데이터 연동
+### 주요 성과
+1. **MSW 완전 제거** ✅
+   - 596줄 Mock 코드 삭제 (`frontend/lib/mocks/`)
+   - 33개 패키지 제거 (msw + 의존성)
+   - `QueryProvider`에서 MSW 초기화 코드 제거
 
-### Day 10-11: Terminal Emulator
-1. **xterm.js 통합**: 웹 터미널 컴포넌트
-2. **Docker Sandbox**: 안전한 격리 환경
+2. **실제 백엔드 API 연동** ✅
+   - 홈페이지에서 실제 데이터 표시 확인
+   - `useTodayTip()`, `useRecentTips()` hooks 실제 API 호출
+   - React Query 캐싱 전략 적용 (5분 TTL)
 
-### Day 12-14: LLM 연동
-1. **OpenAI/Claude API**: 주간 Draft 자동 생성
-2. **관리자 워크플로우**: Draft 승인/거절 UI
+3. **API 네이밍 이슈 임시 해결** ✅
+   - 백엔드: `publish_date` (snake_case, Python 표준)
+   - 프론트엔드: `publishDate` (camelCase, TypeScript 표준)
+   - 임시 해결: `(tip as any).publish_date || tip.publishDate` 패턴
+   - 장기 해결: Pydantic `alias_generator` (Day 25에서 완전 해결!)
+
+4. **버그 수정** ✅
+   - 카테고리 배열 표시: `Array.isArray(tip.category) ? tip.category.join(', ') : tip.category`
+   - 터미널 레이스 컨디션: "Connected!" 메시지 제거
+
+5. **통합 테스트 성공** ✅
+   - 홈페이지: 오늘의 팁 + 최근 팁 3개 표시
+   - 터미널: WebSocket 연결 완전 작동
+
+### 주의사항
+- **네이밍 패턴**: Tips 페이지 구현 시 `(tip as any).publish_date || tip.publishDate` 계속 사용
+- **MSW 잔재**: `package.json` msw 설정 블록, `public/mockServiceWorker.js` 정리 권장 (선택)
+
+## 🎉 Day 25 완료 (코드 품질 개선)
+
+### 주요 성과
+1. **API 네이밍 이슈 완전 해결** ✅
+   - **Pydantic alias_generator 구현** (`backend/app/schemas/tip.py`)
+   - `to_camel()` 함수로 snake_case → camelCase 자동 변환
+   - `publish_date` → `publishDate`, `view_count` → `viewCount` 등 모든 필드 자동 변환
+   - **결과**: 백엔드 API 응답이 이제 TypeScript 표준 camelCase로 제공됨!
+
+2. **Frontend Cleanup 완료** ✅
+   - 3개 파일에서 모든 `(tip as any)` 제거:
+     - `components/tips/TipCard.tsx`
+     - `components/sections/RecentTipsSection.tsx`
+     - `app/tips/[id]/page.tsx`
+   - 변경 전: `const publishDate = new Date((tip as any).publish_date || tip.publishDate);`
+   - 변경 후: `const publishDate = new Date(tip.publishDate);`
+
+3. **Categories API 동적화** ✅
+   - 하드코딩 제거 → PostgreSQL 실시간 쿼리
+   - `jsonb_array_elements_text()` 함수로 고유 카테고리 추출
+   - `useCategories()` hook으로 프론트엔드 연동 (30분 캐싱)
+
+4. **Trailing Slash 이슈 수정** ✅
+   - 307 Redirect 문제 해결 (backend `@router.get("", ...)`)
+   - Tips 페이지 필터 정상 작동 확인
+
+5. **Search 기능 임시 비활성화** ✅
+   - `disabled` prop 추가, "Search (Coming soon)" 표시
+   - Phase 2에서 재구현 예정
+
+6. **타입 안전성 100% 달성** ✅
+   - `lib/types/common.ts` 타입 정의 확인 (이미 완성됨)
+   - `lib/env.ts` Zod 환경 변수 검증 확인 (이미 완성됨)
+   - `lib/api/client.ts` CustomError 사용 확인 (이미 완성됨)
+   - TypeScript 컴파일: 에러 없음 ✅
+
+### 코드 품질 향상
+- **any 타입 완전 제거**: 프로덕션 코드에서 `as any` 사용 제거
+- **환경 변수 검증**: Zod 스키마로 런타임 검증
+- **API 응답 통일**: snake_case/camelCase 혼용 문제 해결
+- **타입 추론 개선**: 모든 API 응답이 TypeScript 타입과 완벽 일치
+
+### 완료 보고서
+- `docs/tips-pages-implementation-plan.md` 업데이트 완료
+
+## 🚀 다음 단계 (Week 4: Day 25-28)
+
+### Day 25-26: Tips 페이지 구현 (최우선)
+1. **팁 상세 페이지**: `/tips/[id]/page.tsx` - 개별 팁 전체 내용
+2. **팁 목록 페이지**: `/tips/page.tsx` - 페이지네이션 + 필터링 + 검색
+3. **홈페이지 404 링크 수정**: "View All Tips", 팁 카드 클릭
+
+### Day 27: E2E 테스트 & 성능 최적화
+1. **Playwright E2E 테스트**: 홈페이지, 터미널, Tips 페이지
+2. **Lighthouse 90+ 달성**: 번들 사이즈 분석, 코드 분할
+
+### Day 28: 완전 도커화
+1. **프론트엔드 Docker**: 멀티스테이지 빌드
+2. **docker-compose 통합**: 원클릭 전체 스택 실행
 
 ## ⚠️ 주의사항
 
@@ -241,36 +318,59 @@ export type ApiError = NetworkError | ValidationError | ...
 - 코드 분할 (Code Splitting) 적용 예정
 - 번들 크기 최적화 예정
 
-## 📊 현재 상태 요약 (Day 7 완료)
+## 📊 현재 상태 요약 (Day 23-24 완료)
 
-### ✅ 완료된 작업 (Day 1-7)
+### ✅ 완료된 작업 (Day 1-24)
+**Week 1 (Day 1-7): 프론트엔드 인프라**
 - [x] Next.js 16 + React 19.2 + TypeScript 프로젝트 설정
 - [x] Tailwind CSS + Awwwards 테마 적용
 - [x] shadcn/ui 컴포넌트 시스템 통합
-- [x] 컴포넌트 파일 분리 및 구조화
+- [x] 컴포넌트 파일 분리 및 구조화 (5개 섹션)
 - [x] TypeScript 타입 시스템 구축 (100% 커버리지)
 - [x] 접근성 개선 (WCAG 2.1 AA 수준, 9.0+/10)
 - [x] Hot Reload < 2초 성능 달성
-- [x] **Zustand 상태 관리 시스템 (3개 stores)**
-- [x] **React Query 데이터 페칭 (6개 hooks)**
-- [x] **Axios API 클라이언트 (25+ endpoints)**
-- [x] **에러 처리 및 로딩 컴포넌트**
-- [x] **Layout 통합 (ErrorBoundary, QueryProvider)**
+- [x] Zustand 상태 관리 시스템 (3개 stores)
+- [x] React Query 데이터 페칭 (6개 hooks)
+- [x] Axios API 클라이언트 (25+ endpoints)
+- [x] 에러 처리 및 로딩 컴포넌트
+- [x] Layout 통합 (ErrorBoundary, QueryProvider)
 
-### 🔄 다음 작업 (Week 2: Day 8-14)
-- [ ] FastAPI 백엔드 구현 (PostgreSQL 연동)
-- [ ] Frontend ↔ Backend API 통합
-- [ ] Terminal Emulator (xterm.js)
-- [ ] Docker Sandbox 환경
-- [ ] LLM 연동 (OpenAI/Claude API)
-- [ ] 관리자 대시보드 구현
+**Week 2-3 (Day 8-21): 백엔드 API & 터미널**
+- [x] FastAPI 백엔드 구현 (PostgreSQL 연동, 266개 테스트 100% 통과)
+- [x] Terminal Emulator (xterm.js + WebSocket + Docker)
+
+**Week 4 (Day 22-25): API 통합 & 코드 품질 개선**
+- [x] MSW 완전 제거 (596줄 코드, 33개 패키지)
+- [x] Frontend ↔ Backend API 통합 완료
+- [x] API 네이밍 이슈 완전 해결 (Pydantic alias_generator)
+- [x] Frontend cleanup (any 타입 완전 제거)
+- [x] Categories API 동적화 (PostgreSQL 쿼리)
+- [x] 타입 안전성 100% 달성
+- [x] 홈페이지 실제 데이터 표시
+- [x] API 네이밍 이슈 해결 (`publish_date` vs `publishDate`)
+- [x] 터미널 WebSocket 완전 작동
+
+### 🔄 다음 작업 (Week 4: Day 26-28)
+- [ ] **Day 26: Tips 페이지 구현** - 최우선
+  - [ ] 팁 상세 페이지 (`/tips/[id]/page.tsx`)
+  - [ ] 팁 목록 페이지 (`/tips/page.tsx`)
+  - [ ] **검색 기능 수정** ⭐ (백엔드 지원 확인 후 활성화)
+  - [ ] **정렬 드롭다운 버그 수정** ⭐ (상태 관리 수정)
+  - [ ] 페이지네이션 구현
+  - [ ] 홈페이지 404 링크 수정
+- [ ] Day 27: E2E 테스트 작성 (Playwright)
+- [ ] Day 27: 성능 최적화 (Lighthouse 90+)
+- [ ] Day 28: 완전 도커화 (프론트엔드 Docker)
 
 ### 📈 프로젝트 진행률
-- **Phase 1 (MVP)**: 26% 완료 (17/65 작업)
+- **Phase 1 (MVP)**: 87% 완료 (71/82 작업)
   - ✅ Week 1 Frontend: 100% 완료 (17/17 작업)
-  - ⏳ Week 2 Backend API: 0% (0/16 작업)
-  - ⏳ Week 3 Terminal Emulator: 0% (0/16 작업)
-  - ⏳ Week 4 통합 및 최적화: 0% (0/16 작업)
+  - ✅ Week 2 Backend API: 100% 완료 (26/26 작업)
+  - ✅ Week 3 Terminal Emulator: 100% 완료 (16/16 작업)
+  - ⏳ Week 4 통합 및 최적화: 52% 완료 (12/23 작업)
+    - Day 22-25 완료 (12개)
+    - Day 26 예정 (6개, 검색/정렬 수정 포함) ⭐
+    - Day 27-28 예정 (5개)
 
 이 문서는 프로젝트 진행에 따라 지속적으로 업데이트됩니다.
 

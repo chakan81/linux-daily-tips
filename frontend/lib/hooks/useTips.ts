@@ -56,40 +56,95 @@ export function useTip(id: string | null) {
 }
 
 /**
- * React Query Hook for fetching tips list with pagination
+ * React Query Hook for fetching tips list with pagination and filters
  *
  * Usage:
  * ```tsx
- * const { data, isLoading, error } = useTipsList({ page: 1, limit: 20 });
+ * const { data, isLoading, error } = useTipsList({
+ *   page: 1,
+ *   page_size: 12,
+ *   difficulty: 'beginner',
+ *   category: 'file-system',
+ *   sort_by: 'publish_date',
+ *   order: 'desc',
+ * });
+ * const tips = data?.items || [];
+ * const total = data?.total || 0;
  * ```
  */
-export function useTipsList(params?: { page?: number; limit?: number }) {
+export function useTipsList(params?: {
+  page?: number;
+  page_size?: number;
+  difficulty?: string;
+  category?: string;
+  sort_by?: string;
+  order?: 'asc' | 'desc';
+}) {
+  // Convert page to skip for backend API (page 1 = skip 0)
+  const skip = params?.page ? (params.page - 1) * (params.page_size || 10) : 0;
+  const limit = params?.page_size || 10;
+
+  const apiParams = {
+    skip,
+    limit,
+    difficulty: params?.difficulty,
+    category: params?.category,
+    sort_by: params?.sort_by,
+    order: params?.order,
+  };
+
   return useQuery({
     queryKey: ['tips', 'list', params],
     queryFn: () =>
-      apiRequest<{ tips: TipData[]; total: number }>({
-        url: buildUrl(API_ENDPOINTS.TIPS.LIST, params),
+      apiRequest<{ items: TipData[]; total: number; page: number; page_size: number }>({
+        url: buildUrl(API_ENDPOINTS.TIPS.LIST, apiParams),
       }),
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 }
 
 /**
- * React Query Hook for searching tips
+ * React Query Hook for searching tips with filters
+ *
+ * Uses the search endpoint with pagination and filter support
  *
  * Usage:
  * ```tsx
- * const { data, isLoading, error } = useSearchTips('grep', { difficulty: 'Beginner' });
+ * const { data, isLoading, error } = useSearchTips({
+ *   q: 'grep',
+ *   page: 1,
+ *   page_size: 12,
+ *   difficulty: 'beginner',
+ * });
+ * const tips = data?.items || [];
  * ```
  */
-export function useSearchTips(query: string, filters?: Record<string, any>) {
+export function useSearchTips(params: {
+  q: string;
+  page?: number;
+  page_size?: number;
+  difficulty?: string;
+  category?: string;
+}) {
+  // Convert page to skip for backend API
+  const skip = params?.page ? (params.page - 1) * (params.page_size || 10) : 0;
+  const limit = params.page_size || 10;
+
+  const apiParams = {
+    q: params.q,
+    skip,
+    limit,
+    difficulty: params.difficulty,
+    category: params.category,
+  };
+
   return useQuery({
-    queryKey: ['tips', 'search', query, filters],
+    queryKey: ['tips', 'search', params],
     queryFn: () =>
-      apiRequest<TipData[]>({
-        url: buildUrl(API_ENDPOINTS.TIPS.SEARCH, { q: query, ...filters }),
+      apiRequest<{ items: TipData[]; total: number; page: number; page_size: number }>({
+        url: buildUrl(API_ENDPOINTS.TIPS.SEARCH, apiParams),
       }),
-    enabled: query.length > 0, // Only search if query is not empty
+    enabled: params.q.length > 0, // Only search if query is not empty
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
 }
@@ -119,5 +174,24 @@ export function useLikeTip() {
       // Invalidate and refetch relevant queries
       queryClient.invalidateQueries({ queryKey: ['tips'] });
     },
+  });
+}
+
+/**
+ * React Query Hook for fetching available categories
+ *
+ * Fetches dynamic list of categories from the database.
+ *
+ * Usage:
+ * ```tsx
+ * const { data: categories, isLoading } = useCategories();
+ * const categoryList = categories || [];
+ * ```
+ */
+export function useCategories() {
+  return useQuery({
+    queryKey: ['tips', 'categories'],
+    queryFn: () => apiRequest<{ categories: string[] }>({ url: API_ENDPOINTS.TIPS.CATEGORIES }),
+    staleTime: 1000 * 60 * 30, // 30 minutes (카테고리는 자주 변경되지 않음)
   });
 }

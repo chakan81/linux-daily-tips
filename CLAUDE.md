@@ -88,7 +88,7 @@ Backend API 서버
 
 ## 📊 현재 개발 상태
 
-### Phase 1 (MVP) 진행률: 75% (55/73 작업 완료)
+### Phase 1 (MVP) 진행률: 85% (62/73 작업 완료)
 
 #### ✅ Week 1 완료 (Day 1-7)
 **프론트엔드 인프라 100% 완료**
@@ -161,11 +161,28 @@ Backend API 서버
 - ✅ 성능: 모든 목표 초과 달성 (세션 생성 < 2초, 명령어 < 1초)
 - ⚠️ 제약: vim/nano 미지원, 실시간 입력 불가, 특수 키 미처리 → Phase 2에서 개선
 
-#### ⏳ Week 4 예정 (Day 22-28)
-- 프론트엔드-백엔드 전체 통합
-- 성능 최적화 (Lighthouse 90+)
-- 완전 도커화 (원클릭 배포)
-- E2E 테스트 작성
+#### ✅ Week 4 진행 중 (Day 22-24 완료) 🚀
+**프론트엔드-백엔드 통합 85% 완료**
+- ✅ Day 22-24: MSW 제거 및 API 통합 **[완료!]**
+  - **MSW 완전 제거**: 596줄 Mock 코드 삭제, 33개 패키지 제거
+  - **실제 백엔드 API 연동**: 홈페이지에서 실제 데이터 표시 확인
+  - **백엔드 테스트 데이터**: `backend/scripts/add_test_tips.py` 스크립트 (5개 샘플)
+  - **API 네이밍 이슈 해결**: `publish_date` (백엔드) vs `publishDate` (프론트엔드) 대응
+  - **버그 수정**: 카테고리 배열 표시, 터미널 레이스 컨디션
+  - **통합 테스트 성공**: 홈페이지, 터미널 WebSocket 완전 작동
+  - **완료 보고서**: 에이전트 분석 완료 (docs/tips-pages-implementation-plan.md 참조)
+
+**Week 4 성과 요약**:
+- ✅ MSW → 실제 백엔드 API 전환 완료
+- ✅ 홈페이지 실제 데이터 표시 (오늘의 팁, 최근 팁 3개)
+- ✅ 터미널 시스템 WebSocket 완전 작동
+- ⚠️ Tips 페이지 미구현 (홈페이지 링크 404 발생) → Day 25-26 예정
+
+#### ⏳ Week 4 남은 작업 (Day 25-28)
+- Tips 페이지 구현 (`/tips`, `/tips/[id]`) - Day 25-26 예정
+- E2E 테스트 작성 (Playwright) - Day 27
+- 성능 최적화 (Lighthouse 90+) - Day 27
+- 완전 도커화 (원클릭 배포) - Day 28
 
 ### 📂 주요 문서
 
@@ -187,6 +204,7 @@ Backend API 서버
 - `backend/docs/issue-fixes-completion-report.md`: 코드 품질 이슈 수정 ✨ 신규
 - `backend/docs/redis-module-architecture.md`: Redis 모듈 아키텍처
 - `backend/docs/code-refactoring-report.md`: 코드 리팩토링 보고서
+- `docs/tips-pages-implementation-plan.md`: Day 23-24 통합 완료 분석 + Tips 페이지 구현 계획 ✨ 신규
 
 ---
 

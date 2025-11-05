@@ -21,6 +21,7 @@
       "mcp__playwright__browser_navigate"
     ]
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "context7",
     "playwright",

@@ -104,7 +104,7 @@ async def get_daily_tip(
     return Tip.model_validate(tip_model, from_attributes=True)
 
 
-@router.get("/", summary="팁 목록 조회", tags=["tips"], response_model=TipList)
+@router.get("", summary="팁 목록 조회", tags=["tips"], response_model=TipList)
 @limiter.limit("30/minute")
 async def get_tips(
     request: Request,
@@ -284,14 +284,21 @@ async def get_tip(
 
 @router.get("/categories/list", summary="카테고리 목록 조회", tags=["tips"])
 @limiter.limit("30/minute")
-async def get_categories(request: Request):
+async def get_categories(
+    request: Request,
+    db: AsyncSession = Depends(get_db),
+):
     """
-    사용 가능한 카테고리 목록 조회
+    사용 가능한 카테고리 목록 조회 (데이터베이스 기반)
 
     팁 필터링에 사용할 수 있는 카테고리 목록을 반환합니다.
+    실제 데이터베이스에서 활성화된 팁의 고유 카테고리를 동적으로 추출합니다.
+
+    Args:
+        db: 데이터베이스 세션 (자동 주입)
 
     Returns:
-        dict: 카테고리 목록 및 각 카테고리별 팁 개수
+        dict: 고유 카테고리 목록 (알파벳 순 정렬)
 
     Example:
         ```
@@ -300,37 +307,32 @@ async def get_categories(request: Request):
         Response:
         {
             "categories": [
-                {
-                    "name": "file-system",
-                    "display_name": "파일 시스템",
-                    "count": 2
-                },
-                {
-                    "name": "text-processing",
-                    "display_name": "텍스트 처리",
-                    "count": 2
-                },
-                ...
+                "basics",
+                "file-system",
+                "networking",
+                "text-processing"
             ]
         }
         ```
 
     Note:
         - 인증 불필요
-        - 현재는 Mock 데이터 반환 (향후 실제 DB 쿼리로 개선 예정)
-        - PostgreSQL의 JSONB 집계 쿼리 필요 (jsonb_array_elements)
+        - PostgreSQL unnest() 함수로 배열 전개
+        - is_active=True 팁만 조회
+        - DISTINCT + ORDER BY로 중복 제거 및 정렬
     """
-    # TODO: 실제 DB 쿼리로 변경 (Day 14 이후)
-    # SELECT DISTINCT jsonb_array_elements_text(category) as cat, COUNT(*)
-    # FROM tips WHERE is_active = True GROUP BY cat
-    #
-    # 현재는 정적 Mock 데이터 반환
-    categories = [
-        {"name": "file-system", "display_name": "파일 시스템", "count": 0},
-        {"name": "text-processing", "display_name": "텍스트 처리", "count": 0},
-        {"name": "permissions", "display_name": "권한 관리", "count": 0},
-        {"name": "networking", "display_name": "네트워킹", "count": 0},
-        {"name": "process-management", "display_name": "프로세스 관리", "count": 0},
-    ]
+    from sqlalchemy import func, select
+
+    # PostgreSQL jsonb_array_elements_text()로 JSONB 배열 요소 추출
+    # → DISTINCT로 중복 제거
+    stmt = (
+        select(func.jsonb_array_elements_text(TipModel.category).label("category"))
+        .where(TipModel.is_active == True)  # noqa: E712
+        .distinct()
+        .order_by("category")
+    )
+
+    result = await db.execute(stmt)
+    categories = [row[0] for row in result.fetchall()]
 
     return {"categories": categories}

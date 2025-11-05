@@ -17,6 +17,30 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from app.models.tip import DifficultyLevel
 
 
+def to_camel(string: str) -> str:
+    """
+    snake_case 문자열을 camelCase로 변환합니다.
+
+    프론트엔드(TypeScript)와 백엔드(Python) 간 네이밍 규칙 차이 해결용.
+
+    Args:
+        string: 변환할 snake_case 문자열
+
+    Returns:
+        camelCase로 변환된 문자열
+
+    Examples:
+        >>> to_camel("publish_date")
+        'publishDate'
+        >>> to_camel("view_count")
+        'viewCount'
+        >>> to_camel("created_at")
+        'createdAt'
+    """
+    components = string.split('_')
+    return components[0] + ''.join(x.title() for x in components[1:])
+
+
 def validate_category_tags(categories: list[str] | None) -> list[str] | None:
     """
     카테고리 태그 검증 및 정규화 (공통 함수)
@@ -250,6 +274,8 @@ class TipInDB(TipBase):
 
     model_config = ConfigDict(
         from_attributes=True,  # SQLAlchemy 모델에서 직접 변환 허용
+        alias_generator=to_camel,  # snake_case → camelCase 자동 변환
+        populate_by_name=True,  # snake_case와 camelCase 둘 다 허용
         json_schema_extra={
             "example": {
                 "id": "tip_01JCAW0V1QQ9KZ2F3XHBP8TGNY",
@@ -315,6 +341,8 @@ class TipList(BaseModel):
     )
 
     model_config = ConfigDict(
+        alias_generator=to_camel,  # snake_case → camelCase 자동 변환
+        populate_by_name=True,  # snake_case와 camelCase 둘 다 허용
         json_schema_extra={
             "example": {
                 "items": [
