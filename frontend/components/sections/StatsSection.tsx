@@ -1,26 +1,37 @@
-import { BookOpen, Users, TrendingUp } from 'lucide-react'
-import { StatsData, DifficultyLevel, TipCategory } from '@/lib/types'
+'use client';
 
-const stats: StatsData = {
-  totalTips: 365,
-  activeUsers: 12500,
-  completionRate: 87,
-  dailyActiveUsers: 850,
-  weeklyActiveUsers: 4200,
-  monthlyActiveUsers: 12500,
-  popularCategories: [
-    { category: "File Management" as TipCategory, count: 45, percentage: 12.3 },
-    { category: "System Monitoring" as TipCategory, count: 38, percentage: 10.4 },
-    { category: "Networking" as TipCategory, count: 32, percentage: 8.8 },
-  ],
-  difficultyDistribution: [
-    { difficulty: "Beginner" as DifficultyLevel, count: 120, percentage: 32.9 },
-    { difficulty: "Intermediate" as DifficultyLevel, count: 150, percentage: 41.1 },
-    { difficulty: "Advanced" as DifficultyLevel, count: 95, percentage: 26.0 },
-  ],
-}
+import { BookOpen, Users, TrendingUp } from 'lucide-react'
+import { useStats } from '@/lib/hooks/useStats'
+import { LoadingSpinner } from '@/components/common/LoadingSpinner'
+import { ErrorMessage } from '@/components/common/ErrorMessage'
 
 export function StatsSection() {
+  const { data: stats, isLoading, error } = useStats();
+
+  if (isLoading) {
+    return (
+      <section className="container-awwwards py-16" aria-label="서비스 통계" role="region">
+        <h2 className="sr-only">Linux Daily Tips 서비스 통계</h2>
+        <LoadingSpinner size="lg" text="Loading statistics..." />
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="container-awwwards py-16" aria-label="서비스 통계" role="region">
+        <h2 className="sr-only">Linux Daily Tips 서비스 통계</h2>
+        <ErrorMessage
+          type="error"
+          message="Failed to load statistics. Please try again later."
+        />
+      </section>
+    );
+  }
+
+  if (!stats) {
+    return null;
+  }
   return (
     <section className="container-awwwards py-16" aria-label="서비스 통계" role="region">
       {/* Screen reader only heading */}

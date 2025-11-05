@@ -1,0 +1,10 @@
+"""
+비즈니스 로직 서비스 패키지
+
+비즈니스 로직 및 외부 서비스 연동을 관리합니다.
+Day 14에서 LLM 연동, 터미널 관리 등의 서비스가 추가될 예정입니다.
+"""
+
+from app.services.tip import TipService
+
+__all__ = ["TipService"]

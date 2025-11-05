@@ -14,8 +14,8 @@ const customJestConfig = {
   // Test environment
   testEnvironment: 'jest-environment-jsdom',
 
-  // Module name mapping for absolute imports
-  moduleNameMapping: {
+  // Module name mapper for absolute imports (correct property name)
+  moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
     '^@/components/(.*)$': '<rootDir>/components/$1',
     '^@/lib/(.*)$': '<rootDir>/lib/$1',
@@ -85,12 +85,6 @@ const customJestConfig = {
 
   // Error handling
   errorOnDeprecated: true,
-
-  // Watch plugins
-  watchPlugins: [
-    'jest-watch-typeahead/filename',
-    'jest-watch-typeahead/testname',
-  ],
 };
 
 // createJestConfig is exported this way to ensure that next/jest can load the Next.js config which is async

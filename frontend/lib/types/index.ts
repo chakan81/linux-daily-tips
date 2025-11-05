@@ -5,22 +5,41 @@
  * 백엔드 데이터 모델과 동기화된 TypeScript 인터페이스
  */
 
-// ===== 핵심 데이터 타입 =====
 import type {
-  DifficultyLevel as _DifficultyLevel,
-  TipCategory as _TipCategory,
-  TipData as _TipData,
-  TerminalSetup as _TerminalSetup,
-  DraftWeek as _DraftWeek,
-  StatsData as _StatsData,
-  UserProgress as _UserProgress,
-  SearchQuery as _SearchQuery,
-  TerminalSession as _TerminalSession,
-  ApiResponse as _ApiResponse,
-  PaginatedResponse as _PaginatedResponse,
-  ApiError as _ApiError,
+  DifficultyLevel,
+  TipCategory,
+  TipData,
+  TerminalSetup,
+  DraftWeek,
+  StatsData,
+  UserProgress,
+  SearchQuery,
+  TerminalSession,
+  ApiResponse,
+  PaginatedResponse,
+  ApiError,
 } from './tip'
 
+import type { AdminLoginRequest } from './api'
+
+// ===== 공통 타입 =====
+export type {
+  CustomError,
+  IconComponent,
+  Activity,
+  BatchReviewData,
+  TerminalMessageData,
+  TerminalCommandData,
+  TerminalOutputData,
+  TerminalStatusData,
+  TerminalHeartbeatData,
+  TerminalErrorData,
+  QueryParams,
+  QueryParamValue,
+  ErrorDetails,
+} from './common'
+
+// ===== 핵심 데이터 타입 =====
 export type {
   DifficultyLevel,
   TipCategory,
@@ -79,7 +98,6 @@ export type {
   ValidationError,
   AuthenticationError,
   AuthorizationError,
-  ApiError as ApiErrorUnion,
 
   // React Query
   QueryOptions,
@@ -97,18 +115,18 @@ export type {
 
 // TipCard 컴포넌트 Props
 export interface TipCardProps {
-  tip: _TipData
+  tip: TipData
   variant?: 'default' | 'compact' | 'featured'
   showCategory?: boolean
   showDifficulty?: boolean
   showEstimatedTime?: boolean
-  onClick?: (tip: _TipData) => void
+  onClick?: (tip: TipData) => void
   className?: string
 }
 
 // DifficultyBadge 컴포넌트 Props
 export interface DifficultyBadgeProps {
-  difficulty: _DifficultyLevel
+  difficulty: DifficultyLevel
   size?: 'sm' | 'md' | 'lg'
   variant?: 'default' | 'outline' | 'minimal'
   className?: string
@@ -129,10 +147,10 @@ export interface TerminalEmulatorProps {
 
 // SearchFilters 컴포넌트 Props
 export interface SearchFiltersProps {
-  query: _SearchQuery
-  onQueryChange: (query: Partial<_SearchQuery>) => void
-  categories: _TipCategory[]
-  difficulties: _DifficultyLevel[]
+  query: SearchQuery
+  onQueryChange: (query: Partial<SearchQuery>) => void
+  categories: TipCategory[]
+  difficulties: DifficultyLevel[]
   className?: string
 }
 
@@ -165,18 +183,18 @@ export interface PaginationProps {
 
 // useTip 훅
 export interface UseTipReturn {
-  tip: _TipData | null
+  tip: TipData | null
   isLoading: boolean
-  error: _ApiError | null
+  error: ApiError | null
   refetch: () => void
 }
 
 // useTipsList 훅
 export interface UseTipsListReturn {
-  tips: _TipData[]
-  pagination: _PaginatedResponse<_TipData>['pagination'] | null
+  tips: TipData[]
+  pagination: PaginatedResponse<TipData>['pagination'] | null
   isLoading: boolean
-  error: _ApiError | null
+  error: ApiError | null
   refetch: () => void
   loadMore: () => void
   hasMore: boolean
@@ -184,21 +202,21 @@ export interface UseTipsListReturn {
 
 // useTerminalSession 훅
 export interface UseTerminalSessionReturn {
-  session: _TerminalSession | null
+  session: TerminalSession | null
   isConnected: boolean
   isLoading: boolean
-  error: _ApiError | null
+  error: ApiError | null
   sendCommand: (command: string) => void
   connect: () => void
   disconnect: () => void
-  commandHistory: _TerminalSession['commandHistory']
+  commandHistory: TerminalSession['commandHistory']
 }
 
 // useStats 훅
 export interface UseStatsReturn {
-  stats: _StatsData | null
+  stats: StatsData | null
   isLoading: boolean
-  error: _ApiError | null
+  error: ApiError | null
   refetch: () => void
   lastUpdated: string | null
 }
@@ -208,8 +226,8 @@ export interface UseStatsReturn {
 // 검색 폼
 export interface SearchFormData {
   query: string
-  category: _TipCategory | 'all'
-  difficulty: _DifficultyLevel | 'all'
+  category: TipCategory | 'all'
+  difficulty: DifficultyLevel | 'all'
   tags: string[]
 }
 

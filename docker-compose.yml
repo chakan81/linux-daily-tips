@@ -1,8 +1,8 @@
 
 services:
-  # PostgreSQL 15 - Primary Database
+  # PostgreSQL 18 - Primary Database
   postgres:
-    image: postgres:15-alpine
+    image: postgres:18-alpine
     container_name: linux_tips_postgres
     restart: unless-stopped
     environment:
@@ -10,7 +10,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres_dev_password
       POSTGRES_HOST_AUTH_METHOD: trust
-      PGDATA: /var/lib/postgresql/data/pgdata
     ports:
       - "5432:5432"
     volumes:
@@ -25,9 +24,9 @@ services:
       retries: 5
       start_period: 10s
 
-  # Redis 7 - Cache and Session Storage
+  # Redis 8 - Cache and Session Storage
   redis:
-    image: redis:7-alpine
+    image: redis:8-alpine
     container_name: linux_tips_redis
     restart: unless-stopped
     command: redis-server --appendonly yes --requirepass redis_dev_password
@@ -52,15 +51,43 @@ services:
     container_name: linux_tips_backend
     restart: unless-stopped
     environment:
+      # Database Configuration
       DATABASE_URL: postgresql+asyncpg://postgres:postgres_dev_password@postgres:5432/linux_daily_tips
+      POSTGRES_DB: linux_daily_tips
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_dev_password
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      # Redis Configuration
       REDIS_URL: redis://:redis_dev_password@redis:6379/0
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: 0
+      REDIS_PASSWORD: redis_dev_password
+      # FastAPI Configuration
       ENVIRONMENT: development
+      DEBUG: "true"
       LOG_LEVEL: DEBUG
+      # Security Configuration
+      SECRET_KEY: dev-secret-key-change-in-production-min-32-chars-long-12345678
+      JWT_SECRET_KEY: dev-jwt-secret-key-change-in-production-min-32-chars-long
+      JWT_ALGORITHM: HS256
+      JWT_ACCESS_TOKEN_EXPIRE_MINUTES: 60
+      JWT_REFRESH_TOKEN_EXPIRE_DAYS: 7
+      # Admin Configuration
+      ADMIN_EMAIL: admin@linuxtips.dev
+      ADMIN_PASSWORD: admin_dev_password_change_in_production
+      ADMIN_USERNAME: admin
+      # Google OAuth 2.0 Configuration
+      GOOGLE_CLIENT_ID: "your-google-client-id.apps.googleusercontent.com"
+      GOOGLE_CLIENT_SECRET: "your-google-client-secret"
+      GOOGLE_REDIRECT_URI: "http://localhost:8000/api/v1/auth/callback"
     ports:
       - "8000:8000"
     volumes:
       - ./backend:/app
       - /app/__pycache__
+      - /var/run/docker.sock:/var/run/docker.sock  # Docker-in-Docker: 호스트 Docker 소켓 마운트
     networks:
       - linux_tips_network
     depends_on:
@@ -77,6 +104,53 @@ services:
             - __pycache__
             - .pytest_cache
             - "*.pyc"
+
+  # Next.js Frontend (Development mode)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development
+    container_name: linux_tips_frontend
+    restart: unless-stopped
+    environment:
+      # Backend API URL (클라이언트 사이드)
+      # 빈 문자열 = Next.js rewrites 프록시 사용 (/api/* → backend:8000/api/*)
+      # 브라우저와 Playwright 모두 동일한 상대 경로 사용
+      NEXT_PUBLIC_API_URL: ""
+      # Backend API URL (서버 사이드 - Next.js rewrites용)
+      # Docker 네트워크 내부에서만 사용
+      API_BACKEND_URL: http://backend:8000
+      # App environment
+      NEXT_PUBLIC_APP_ENV: development
+      # Node.js environment
+      NODE_ENV: development
+      # Disable Next.js telemetry
+      NEXT_TELEMETRY_DISABLED: 1
+      # Enable hot reload
+      WATCHPACK_POLLING: "true"
+      # Playwright configuration
+      DOCKER_ENV: "true"
+      PLAYWRIGHT_BASE_URL: http://localhost:3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - linux_tips_network
+    depends_on:
+      - backend
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend
+          target: /app
+          ignore:
+            - node_modules
+            - .next
+            - .git
 
 # Persistent volumes for data
 volumes:

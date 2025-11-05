@@ -1,0 +1,50 @@
+# Dockerfile for Linux Daily Tips Terminal Sandbox
+# Ubuntu 24.04 기반 안전한 터미널 환경
+
+FROM ubuntu:24.04
+
+# 환경 변수 설정
+ENV DEBIAN_FRONTEND=noninteractive \
+    LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8
+
+# 기본 패키지 설치 (최소한의 유틸리티만)
+RUN apt-get update && apt-get install -y \
+    bash \
+    coreutils \
+    findutils \
+    grep \
+    sed \
+    gawk \
+    diffutils \
+    procps \
+    less \
+    vim \
+    nano \
+    man-db \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# 비root 사용자 생성 (보안)
+RUN useradd -m -s /bin/bash linuxuser && \
+    echo "linuxuser:linuxuser" | chpasswd
+
+# 작업 디렉토리 생성 및 권한 설정
+RUN mkdir -p /workspace && \
+    chown -R linuxuser:linuxuser /workspace
+
+# 사용자 홈 디렉토리에 샘플 파일 생성 (실습용)
+RUN su - linuxuser -c 'mkdir -p /home/linuxuser/documents /home/linuxuser/downloads' && \
+    su - linuxuser -c 'echo "Welcome to Linux Daily Tips Terminal!" > /home/linuxuser/README.txt' && \
+    su - linuxuser -c 'echo "echo Hello World" > /home/linuxuser/hello.sh' && \
+    chmod +x /home/linuxuser/hello.sh
+
+# 비root 사용자로 전환
+USER linuxuser
+WORKDIR /home/linuxuser
+
+# Bash 프롬프트 커스터마이징
+RUN echo 'export PS1="\[\033[01;32m\]\u@linux-tips\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ "' >> /home/linuxuser/.bashrc
+
+# 컨테이너 실행 시 bash 실행 (tail -f /dev/null로 유지)
+CMD ["/bin/bash", "-c", "tail -f /dev/null"]

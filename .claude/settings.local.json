@@ -4,8 +4,52 @@
       "Bash(./scripts/dev-up.sh:*)",
       "Bash(docker-compose:*)",
       "Bash(./scripts/dev-down.sh:*)",
-      "mcp__shadcn-ui__get_component"
+      "mcp__shadcn-ui__get_component",
+      "Bash(npm run type-check:*)",
+      "Bash(grep:*)",
+      "Bash(test:*)",
+      "Bash(node:*)",
+      "Bash(cat:*)",
+      "Bash(curl:*)",
+      "Bash(python3:*)",
+      "Bash(npm run dev:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill -9)",
+      "mcp__playwright__browser_type",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_navigate"
     ]
   },
-  "outputStyle": "korean"
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "context7",
+    "playwright",
+    "shadcn-ui"
+  ],
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "say \"저기요?\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "say \"작업이 완료되었습니다\""
+          }
+        ]
+      }
+    ]
+  },
+  "outputStyle": "default"
 }

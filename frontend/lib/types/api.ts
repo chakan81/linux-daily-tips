@@ -16,6 +16,10 @@ import {
   DifficultyLevel,
   TipCategory,
 } from './tip'
+import {
+  TerminalMessageData,
+  ErrorDetails
+} from './common'
 
 // ===== API 엔드포인트 관련 타입 =====
 
@@ -101,7 +105,7 @@ export interface TerminalWebSocketMessage {
   type: 'command' | 'output' | 'error' | 'status' | 'heartbeat'
   sessionId: string
   timestamp: string
-  data: any
+  data: TerminalMessageData
 }
 
 export interface TerminalCommandMessage extends TerminalWebSocketMessage {
@@ -184,7 +188,7 @@ export interface ApiErrorResponse {
   statusCode: number
   timestamp: string
   path: string
-  details?: Record<string, any>
+  details?: ErrorDetails
 }
 
 export interface NetworkError {
@@ -198,7 +202,7 @@ export interface ValidationError {
   type: 'validation'
   message: string
   field: string
-  value: any
+  value: string | number | boolean
   constraint: string
 }
 

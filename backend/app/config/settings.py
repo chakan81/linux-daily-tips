@@ -8,7 +8,8 @@ and third-party service integrations.
 
 import os
 from typing import List, Optional, Any, Dict
-from pydantic import BaseSettings, validator, Field
+from pydantic import field_validator, Field
+from pydantic_settings import BaseSettings
 from pydantic.networks import AnyHttpUrl
 from functools import lru_cache
 
@@ -25,21 +26,21 @@ class Settings(BaseSettings):
     # =============================================================================
     # APPLICATION INFORMATION
     # =============================================================================
-    app_name: str = Field(default="Linux Daily Tips API", env="APP_NAME")
-    app_version: str = Field(default="1.0.0", env="APP_VERSION")
+    app_name: str = Field(default="Linux Daily Tips API")
+    app_version: str = Field(default="1.0.0")
     description: str = Field(
-        default="Backend API for Linux Daily Tips educational platform",
-        env="APP_DESCRIPTION"
+        default="Backend API for Linux Daily Tips educational platform"
     )
 
     # =============================================================================
     # ENVIRONMENT CONFIGURATION
     # =============================================================================
-    environment: str = Field(default="development", env="ENVIRONMENT")
-    debug: bool = Field(default=True, env="DEBUG")
-    log_level: str = Field(default="DEBUG", env="LOG_LEVEL")
+    environment: str = Field(default="development")
+    debug: bool = Field(default=True)
+    log_level: str = Field(default="DEBUG")
 
-    @validator("log_level")
+    @field_validator("log_level")
+    @classmethod
     def validate_log_level(cls, v):
         """Validate log level is one of the standard levels."""
         valid_levels = ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]
@@ -50,12 +51,13 @@ class Settings(BaseSettings):
     # =============================================================================
     # SERVER CONFIGURATION
     # =============================================================================
-    host: str = Field(default="0.0.0.0", env="HOST")
-    port: int = Field(default=8000, env="PORT")
-    reload: bool = Field(default=True, env="AUTO_RESTART")
-    workers: int = Field(default=1, env="BACKEND_WORKERS")
+    host: str = Field(default="0.0.0.0")
+    port: int = Field(default=8000)
+    reload: bool = Field(default=True)
+    workers: int = Field(default=1)
 
-    @validator("port")
+    @field_validator("port")
+    @classmethod
     def validate_port(cls, v):
         """Validate port is in valid range."""
         if not 1 <= v <= 65535:
@@ -65,19 +67,20 @@ class Settings(BaseSettings):
     # =============================================================================
     # DATABASE CONFIGURATION
     # =============================================================================
-    database_url: str = Field(..., env="DATABASE_URL")
-    postgres_db: str = Field(..., env="POSTGRES_DB")
-    postgres_user: str = Field(..., env="POSTGRES_USER")
-    postgres_password: str = Field(..., env="POSTGRES_PASSWORD")
-    database_host: str = Field(default="localhost", env="DATABASE_HOST")
-    database_port: int = Field(default=5432, env="DATABASE_PORT")
+    database_url: str
+    postgres_db: str
+    postgres_user: str
+    postgres_password: str
+    database_host: str = Field(default="localhost")
+    database_port: int = Field(default=5432)
 
     # Database Pool Configuration
-    db_pool_size: int = Field(default=10, env="DB_POOL_SIZE")
-    db_max_overflow: int = Field(default=20, env="DB_MAX_OVERFLOW")
-    db_pool_timeout: int = Field(default=30, env="DB_POOL_TIMEOUT")
+    db_pool_size: int = Field(default=10)
+    db_max_overflow: int = Field(default=20)
+    db_pool_timeout: int = Field(default=30)
 
-    @validator("database_url")
+    @field_validator("database_url")
+    @classmethod
     def validate_database_url(cls, v):
         """Validate database URL format."""
         if not v.startswith(("postgresql://", "postgresql+asyncpg://")):
@@ -87,17 +90,18 @@ class Settings(BaseSettings):
     # =============================================================================
     # REDIS CONFIGURATION
     # =============================================================================
-    redis_url: str = Field(..., env="REDIS_URL")
-    redis_host: str = Field(default="localhost", env="REDIS_HOST")
-    redis_port: int = Field(default=6379, env="REDIS_PORT")
-    redis_password: Optional[str] = Field(default=None, env="REDIS_PASSWORD")
-    redis_db: int = Field(default=0, env="REDIS_DB")
+    redis_url: str
+    redis_host: str = Field(default="localhost")
+    redis_port: int = Field(default=6379)
+    redis_password: Optional[str] = Field(default=None)
+    redis_db: int = Field(default=0)
 
     # Redis Connection Pool Configuration
-    redis_max_connections: int = Field(default=10, env="REDIS_MAX_CONNECTIONS")
-    redis_retry_on_timeout: bool = Field(default=True, env="REDIS_RETRY_ON_TIMEOUT")
+    redis_max_connections: int = Field(default=10)
+    redis_retry_on_timeout: bool = Field(default=True)
 
-    @validator("redis_port")
+    @field_validator("redis_port")
+    @classmethod
     def validate_redis_port(cls, v):
         """Validate Redis port is in valid range."""
         if not 1 <= v <= 65535:
@@ -107,17 +111,14 @@ class Settings(BaseSettings):
     # =============================================================================
     # SECURITY CONFIGURATION
     # =============================================================================
-    secret_key: str = Field(..., env="SECRET_KEY")
-    jwt_secret_key: str = Field(..., env="JWT_SECRET_KEY")
-    jwt_algorithm: str = Field(default="HS256", env="JWT_ALGORITHM")
-    jwt_access_token_expire_minutes: int = Field(
-        default=30, env="JWT_ACCESS_TOKEN_EXPIRE_MINUTES"
-    )
-    jwt_refresh_token_expire_days: int = Field(
-        default=7, env="JWT_REFRESH_TOKEN_EXPIRE_DAYS"
-    )
+    secret_key: str
+    jwt_secret_key: str
+    jwt_algorithm: str = Field(default="HS256")
+    jwt_access_token_expire_minutes: int = Field(default=30)
+    jwt_refresh_token_expire_days: int = Field(default=7)
 
-    @validator("secret_key", "jwt_secret_key")
+    @field_validator("secret_key", "jwt_secret_key")
+    @classmethod
     def validate_secrets(cls, v):
         """Validate secrets are not default values in production."""
         if "production" in os.getenv("ENVIRONMENT", "").lower():
@@ -128,32 +129,31 @@ class Settings(BaseSettings):
     # =============================================================================
     # CORS CONFIGURATION
     # =============================================================================
-    cors_origins: List[str] = Field(
-        default=["http://localhost:3000"],
-        env="CORS_ORIGINS"
-    )
-    cors_credentials: bool = Field(default=True, env="CORS_CREDENTIALS")
+    cors_origins: List[str] = Field(default=["http://localhost:3000"])
+    cors_credentials: bool = Field(default=True)
     cors_methods: List[str] = Field(
-        default=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
-        env="CORS_METHODS"
+        default=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"]
     )
-    cors_headers: List[str] = Field(default=["*"], env="CORS_HEADERS")
+    cors_headers: List[str] = Field(default=["*"])
 
-    @validator("cors_origins", pre=True)
+    @field_validator("cors_origins", mode="before")
+    @classmethod
     def validate_cors_origins(cls, v):
         """Parse CORS origins from string or list."""
         if isinstance(v, str):
             return [origin.strip() for origin in v.split(",")]
         return v
 
-    @validator("cors_methods", pre=True)
+    @field_validator("cors_methods", mode="before")
+    @classmethod
     def validate_cors_methods(cls, v):
         """Parse CORS methods from string or list."""
         if isinstance(v, str):
             return [method.strip() for method in v.split(",")]
         return v
 
-    @validator("cors_headers", pre=True)
+    @field_validator("cors_headers", mode="before")
+    @classmethod
     def validate_cors_headers(cls, v):
         """Parse CORS headers from string or list."""
         if isinstance(v, str):
@@ -164,19 +164,18 @@ class Settings(BaseSettings):
     # LLM API CONFIGURATION
     # =============================================================================
     # OpenAI Configuration
-    openai_api_key: Optional[str] = Field(default=None, env="OPENAI_API_KEY")
-    openai_model: str = Field(default="gpt-4", env="OPENAI_MODEL")
-    openai_max_tokens: int = Field(default=2000, env="OPENAI_MAX_TOKENS")
-    openai_temperature: float = Field(default=0.7, env="OPENAI_TEMPERATURE")
+    openai_api_key: Optional[str] = Field(default=None)
+    openai_model: str = Field(default="gpt-4")
+    openai_max_tokens: int = Field(default=2000)
+    openai_temperature: float = Field(default=0.7)
 
     # Anthropic Configuration
-    anthropic_api_key: Optional[str] = Field(default=None, env="ANTHROPIC_API_KEY")
-    anthropic_model: str = Field(
-        default="claude-3-sonnet-20240229", env="ANTHROPIC_MODEL"
-    )
-    anthropic_max_tokens: int = Field(default=2000, env="ANTHROPIC_MAX_TOKENS")
+    anthropic_api_key: Optional[str] = Field(default=None)
+    anthropic_model: str = Field(default="claude-3-sonnet-20240229")
+    anthropic_max_tokens: int = Field(default=2000)
 
-    @validator("openai_temperature")
+    @field_validator("openai_temperature")
+    @classmethod
     def validate_openai_temperature(cls, v):
         """Validate OpenAI temperature is in valid range."""
         if not 0 <= v <= 2:
@@ -186,73 +185,64 @@ class Settings(BaseSettings):
     # =============================================================================
     # TERMINAL EMULATOR CONFIGURATION
     # =============================================================================
-    terminal_timeout: int = Field(default=30, env="TERMINAL_TIMEOUT")
-    terminal_max_memory: str = Field(default="512m", env="TERMINAL_MAX_MEMORY")
-    terminal_max_cpu: str = Field(default="0.5", env="TERMINAL_MAX_CPU")
-    terminal_max_sessions: int = Field(default=100, env="TERMINAL_MAX_SESSIONS")
-    terminal_container_prefix: str = Field(
-        default="linuxtips_terminal_", env="TERMINAL_CONTAINER_PREFIX"
-    )
-    docker_host: str = Field(
-        default="unix:///var/run/docker.sock", env="DOCKER_HOST"
-    )
+    terminal_timeout: int = Field(default=30)  # Command execution timeout (seconds)
+    session_expiry_minutes: int = Field(default=30)  # Session auto-expiry (minutes)
+    terminal_max_memory: str = Field(default="512m")
+    terminal_max_cpu: str = Field(default="0.5")
+    terminal_max_sessions: int = Field(default=100)
+    terminal_container_prefix: str = Field(default="linuxtips_terminal_")
+    docker_host: str = Field(default="unix:///var/run/docker.sock")
 
     # =============================================================================
     # RATE LIMITING CONFIGURATION
     # =============================================================================
-    rate_limit_requests: int = Field(default=100, env="RATE_LIMIT_REQUESTS")
-    rate_limit_period: int = Field(default=60, env="RATE_LIMIT_PERIOD")
-    rate_limit_redis_key_prefix: str = Field(
-        default="ratelimit:", env="RATE_LIMIT_REDIS_KEY_PREFIX"
-    )
+    rate_limit_requests: int = Field(default=100)
+    rate_limit_period: int = Field(default=60)
+    rate_limit_redis_key_prefix: str = Field(default="ratelimit:")
 
     # =============================================================================
     # ADMIN CONFIGURATION
     # =============================================================================
-    admin_email: str = Field(default="admin@linuxtips.dev", env="ADMIN_EMAIL")
-    admin_password: str = Field(..., env="ADMIN_PASSWORD")
-    admin_username: str = Field(default="admin", env="ADMIN_USERNAME")
+    admin_email: str = Field(default="admin@linuxtips.dev")
+    admin_password: str
+    admin_username: str = Field(default="admin")
 
     # =============================================================================
     # EMAIL CONFIGURATION
     # =============================================================================
-    smtp_host: str = Field(default="localhost", env="SMTP_HOST")
-    smtp_port: int = Field(default=587, env="SMTP_PORT")
-    smtp_username: Optional[str] = Field(default=None, env="SMTP_USERNAME")
-    smtp_password: Optional[str] = Field(default=None, env="SMTP_PASSWORD")
-    smtp_use_tls: bool = Field(default=True, env="SMTP_USE_TLS")
-    smtp_from: str = Field(default="noreply@linuxtips.dev", env="SMTP_FROM")
+    smtp_host: str = Field(default="localhost")
+    smtp_port: int = Field(default=587)
+    smtp_username: Optional[str] = Field(default=None)
+    smtp_password: Optional[str] = Field(default=None)
+    smtp_use_tls: bool = Field(default=True)
+    smtp_from: str = Field(default="noreply@linuxtips.dev")
 
     # =============================================================================
     # GOOGLE ADSENSE CONFIGURATION
     # =============================================================================
-    google_adsense_client_id: Optional[str] = Field(
-        default=None, env="GOOGLE_ADSENSE_CLIENT_ID"
-    )
-    google_adsense_publisher_id: Optional[str] = Field(
-        default=None, env="GOOGLE_ADSENSE_PUBLISHER_ID"
-    )
-    adsense_enabled: bool = Field(default=False, env="ADSENSE_ENABLED")
+    google_adsense_client_id: Optional[str] = Field(default=None)
+    google_adsense_publisher_id: Optional[str] = Field(default=None)
+    adsense_enabled: bool = Field(default=False)
 
     # =============================================================================
     # MONITORING & ANALYTICS CONFIGURATION
     # =============================================================================
-    sentry_dsn: Optional[str] = Field(default=None, env="SENTRY_DSN")
-    sentry_environment: str = Field(default="development", env="SENTRY_ENVIRONMENT")
-    posthog_api_key: Optional[str] = Field(default=None, env="POSTHOG_API_KEY")
-    posthog_host: str = Field(default="https://app.posthog.com", env="POSTHOG_HOST")
+    sentry_dsn: Optional[str] = Field(default=None)
+    sentry_environment: str = Field(default="development")
+    posthog_api_key: Optional[str] = Field(default=None)
+    posthog_host: str = Field(default="https://app.posthog.com")
 
     # =============================================================================
     # FILE UPLOAD CONFIGURATION
     # =============================================================================
-    max_file_size: int = Field(default=10485760, env="MAX_FILE_SIZE")  # 10MB
+    max_file_size: int = Field(default=10485760)  # 10MB
     allowed_file_types: List[str] = Field(
-        default=[".txt", ".md", ".json", ".yaml", ".yml"],
-        env="ALLOWED_FILE_TYPES"
+        default=[".txt", ".md", ".json", ".yaml", ".yml"]
     )
-    upload_dir: str = Field(default="uploads/", env="UPLOAD_DIR")
+    upload_dir: str = Field(default="uploads/")
 
-    @validator("allowed_file_types", pre=True)
+    @field_validator("allowed_file_types", mode="before")
+    @classmethod
     def validate_allowed_file_types(cls, v):
         """Parse allowed file types from string or list."""
         if isinstance(v, str):
@@ -262,19 +252,18 @@ class Settings(BaseSettings):
     # =============================================================================
     # CACHE CONFIGURATION
     # =============================================================================
-    cache_enabled: bool = Field(default=True, env="CACHE_ENABLED")
-    cache_ttl: int = Field(default=3600, env="CACHE_TTL")  # 1 hour
-    cache_max_size: int = Field(default=1000, env="CACHE_MAX_SIZE")
+    cache_enabled: bool = Field(default=True)
+    cache_ttl: int = Field(default=3600)  # 1 hour
+    cache_max_size: int = Field(default=1000)
 
     # =============================================================================
     # LOGGING CONFIGURATION
     # =============================================================================
-    log_file: str = Field(default="logs/app.log", env="LOG_FILE")
-    log_rotation: str = Field(default="daily", env="LOG_ROTATION")
-    log_retention_days: int = Field(default=30, env="LOG_RETENTION_DAYS")
+    log_file: str = Field(default="logs/app.log")
+    log_rotation: str = Field(default="daily")
+    log_retention_days: int = Field(default=30)
     log_format: str = Field(
-        default="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        env="LOG_FORMAT"
+        default="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     )
 
     # =============================================================================
@@ -331,20 +320,15 @@ class Settings(BaseSettings):
     # =============================================================================
     # PYDANTIC CONFIGURATION
     # =============================================================================
-    class Config:
-        """Pydantic configuration."""
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = False
-
-        # Allow arbitrary types for complex configurations
-        arbitrary_types_allowed = True
-
-        # Validate assignment to catch configuration changes
-        validate_assignment = True
-
-        # Use enum values instead of names
-        use_enum_values = True
+    model_config = {
+        "env_file": ".env",
+        "env_file_encoding": "utf-8",
+        "case_sensitive": False,
+        "extra": "ignore",  # 정의되지 않은 환경 변수 무시
+        "arbitrary_types_allowed": True,
+        "validate_assignment": True,
+        "use_enum_values": True,
+    }
 
 
 @lru_cache()

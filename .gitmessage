@@ -1,0 +1,27 @@
+# Commit Message Format
+# feat: Complete Day/Week X - Brief description
+#
+# Examples:
+# feat: Complete Day 7 - State management and configuration fixes
+# feat: Complete Week 1 - Frontend development and comprehensive refactoring
+# fix: Resolve build errors in production environment
+# docs: Update API documentation for authentication
+# chore: Update dependencies to latest versions
+#
+# Guidelines:
+# - Use "feat:" for new features or major milestones (Day/Week completions)
+# - Use "fix:" for bug fixes
+# - Use "docs:" for documentation only changes
+# - Use "chore:" for maintenance tasks
+# - Use "refactor:" for code refactoring
+# - Use "test:" for adding or updating tests
+#
+# Body (optional):
+# - Explain WHAT changed and WHY (not HOW)
+# - Reference issues/tickets if applicable
+#
+# Footer (auto-added by system):
+# 🤖 Generated with [Claude Code](https://claude.com/claude-code)
+#
+# Co-Authored-By: Claude <noreply@anthropic.com>
+

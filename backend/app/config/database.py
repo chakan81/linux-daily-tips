@@ -8,6 +8,7 @@ Supports both synchronous and asynchronous database operations.
 
 import os
 import asyncio
+import logging
 from typing import AsyncGenerator, Optional, Dict, Any
 from contextlib import asynccontextmanager
 from functools import lru_cache
@@ -20,11 +21,13 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
     AsyncEngine
 )
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import declarative_base, sessionmaker, Session
 from sqlalchemy.pool import NullPool, QueuePool
 
 from .settings import get_settings
+
+# 로거 인스턴스
+logger = logging.getLogger(__name__)
 
 
 # =============================================================================
@@ -87,8 +90,9 @@ class DatabaseConfig:
         # Use NullPool for testing to avoid connection issues
         if settings.is_testing:
             engine_config["poolclass"] = NullPool
-        else:
-            engine_config["poolclass"] = QueuePool
+        # For async engine, do not specify poolclass (uses AsyncAdaptedQueuePool by default)
+        # else:
+        #     engine_config["poolclass"] = QueuePool  # This causes error with async engine
 
         engine = create_async_engine(**engine_config)
 
@@ -151,13 +155,13 @@ class DatabaseConfig:
         def receive_checkout(dbapi_connection, connection_record, connection_proxy):
             """Log database connection checkout in debug mode."""
             if self.settings.debug and self.settings.log_level == "DEBUG":
-                print(f"Connection checked out: {id(dbapi_connection)}")
+                logger.debug(f"Connection checked out: {id(dbapi_connection)}")
 
         @event.listens_for(engine, "checkin")
         def receive_checkin(dbapi_connection, connection_record):
             """Log database connection checkin in debug mode."""
             if self.settings.debug and self.settings.log_level == "DEBUG":
-                print(f"Connection checked in: {id(dbapi_connection)}")
+                logger.debug(f"Connection checked in: {id(dbapi_connection)}")
 
     @property
     def async_session_factory(self):
@@ -205,14 +209,14 @@ class DatabaseConfig:
             if not exists:
                 # Create database
                 await conn.execute(f'CREATE DATABASE "{db_name}"')
-                print(f"Database '{db_name}' created successfully")
+                logger.info(f"Database '{db_name}' created successfully")
             else:
-                print(f"Database '{db_name}' already exists")
+                logger.info(f"Database '{db_name}' already exists")
 
             await conn.close()
 
         except Exception as e:
-            print(f"Error creating database: {e}")
+            logger.error(f"Error creating database: {e}", exc_info=True)
             # Don't raise exception to allow application to continue
 
     async def create_tables(self) -> None:
@@ -223,13 +227,13 @@ class DatabaseConfig:
             # from app.models import *  # noqa
 
             await conn.run_sync(Base.metadata.create_all)
-            print("Database tables created successfully")
+            logger.info("Database tables created successfully")
 
     async def drop_tables(self) -> None:
         """Drop all database tables (use with caution!)."""
         async with self.async_engine.begin() as conn:
             await conn.run_sync(Base.metadata.drop_all)
-            print("Database tables dropped successfully")
+            logger.info("Database tables dropped successfully")
 
     async def check_connection(self) -> bool:
         """Check if database connection is working."""
@@ -238,7 +242,7 @@ class DatabaseConfig:
                 await session.execute("SELECT 1")
                 return True
         except Exception as e:
-            print(f"Database connection check failed: {e}")
+            logger.error(f"Database connection check failed: {e}", exc_info=True)
             return False
 
     async def get_database_info(self) -> Dict[str, Any]:
@@ -358,7 +362,7 @@ async def init_database() -> None:
     """Initialize database connection and create tables."""
     db = get_database()
 
-    print("Initializing database...")
+    logger.info("Initializing database...")
 
     # Create database if it doesn't exist
     await db.create_database()
@@ -370,14 +374,14 @@ async def init_database() -> None:
     # Create tables
     await db.create_tables()
 
-    print("Database initialization completed successfully")
+    logger.info("Database initialization completed successfully")
 
 
 async def cleanup_database() -> None:
     """Cleanup database connections."""
     db = get_database()
     await db.close()
-    print("Database connections closed")
+    logger.info("Database connections closed")
 
 
 # =============================================================================

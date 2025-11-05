@@ -176,6 +176,13 @@ media/
 docs/build/
 docs/_build/
 
+# Generated PDF and server migration docs
+docs/server-migration-guide.md
+docs/server-migration-guide.pdf
+
+# Git workflow documentation (개인 메모, 공유 불필요)
+docs/git-workflow-guide.md
+
 # ===========================================
 # Deployment & CI/CD
 # ===========================================
@@ -188,3 +195,5 @@ docker-compose.override.yml
 .github/secrets/.playwright-mcp/
 .playwright-mcp/
 mcp*.json
+.mcp.json
+.mcp*.json

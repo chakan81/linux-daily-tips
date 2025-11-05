@@ -5,7 +5,12 @@ This module provides centralized configuration management for the FastAPI applic
 including settings, database connections, Redis caching, and other infrastructure components.
 """
 
+import logging
+
 from .settings import Settings, get_settings, get_config
+
+# 로거 인스턴스
+logger = logging.getLogger(__name__)
 from .database import (
     Base,
     metadata,
@@ -38,7 +43,7 @@ from .redis import (
 
 async def init_all() -> None:
     """Initialize all configuration components."""
-    print("Initializing application configuration...")
+    logger.info("Initializing application configuration...")
 
     # Initialize database
     await init_database()
@@ -46,12 +51,12 @@ async def init_all() -> None:
     # Initialize Redis
     await init_redis()
 
-    print("All configuration components initialized successfully")
+    logger.info("All configuration components initialized successfully")
 
 
 async def cleanup_all() -> None:
     """Cleanup all configuration components."""
-    print("Cleaning up application configuration...")
+    logger.info("Cleaning up application configuration...")
 
     # Cleanup database connections
     await cleanup_database()
@@ -59,7 +64,7 @@ async def cleanup_all() -> None:
     # Cleanup Redis connections
     await cleanup_redis()
 
-    print("All configuration components cleaned up successfully")
+    logger.info("All configuration components cleaned up successfully")
 
 
 # =============================================================================
