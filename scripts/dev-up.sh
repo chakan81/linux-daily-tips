@@ -149,7 +149,7 @@ start_dev_tools() {
 
 # Function to start backend service
 start_backend() {
-    if [ -f "backend/Dockerfile.dev" ] && [ -f "backend/main.py" ]; then
+    if [ -f "backend/Dockerfile.dev" ] && [ -f "backend/app/main.py" ]; then
         print_status "Starting FastAPI backend..."
         docker compose $COMPOSE_FILES up -d $BACKEND_SERVICE
         print_success "Backend service started"

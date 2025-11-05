@@ -1,8 +1,8 @@
 # Multi-stage Dockerfile for FastAPI Backend
 # Production and CI optimized with uv
 
-# Base image with Python 3.12
-FROM python:3.12-slim-bullseye AS base
+# Base image with Python 3.14
+FROM python:3.14-slim-trixie AS base
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \

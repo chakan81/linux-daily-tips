@@ -7,7 +7,7 @@
 ### Prerequisites
 - Docker & Docker Compose
 - Node.js 18+ (프론트엔드 개발용)
-- Python 3.12+ (백엔드 개발용)
+- Python 3.14+ (백엔드 개발용)
 
 ### Development Environment Setup
 
@@ -64,7 +64,7 @@ cp .env.example .env
 
 ### 기술 스택
 - **Frontend**: Next.js 15 + TypeScript + Tailwind CSS + shadcn/ui
-- **Backend**: FastAPI + Python 3.12 + asyncio
+- **Backend**: FastAPI + Python 3.14 + asyncio
 - **Database**: PostgreSQL 15 + Redis 7
 - **DevOps**: Docker + Docker Compose
 

@@ -28,7 +28,7 @@
 
 **Core Framework**
 - **FastAPI**: 고성능 비동기 Python 웹 프레임워크
-- **Python 3.12**: 최신 Python 버전의 성능 개선사항 활용
+- **Python 3.14**: 최신 Python 버전의 성능 개선사항 활용 (JIT 컴파일러 포함)
 - **uvicorn**: ASGI 서버
 - **asyncio**: 비동기 처리 엔진
 
