@@ -2,7 +2,7 @@
 # Production and CI optimized with uv
 
 # Base image with Python 3.12
-FROM python:3.12-slim-bullseye as base
+FROM python:3.12-slim-bullseye AS base
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1 \
@@ -29,7 +29,7 @@ WORKDIR /app
 COPY pyproject.toml README.md ./
 
 # Development stage
-FROM base as development
+FROM base AS development
 
 # Install all dependencies including dev and test
 RUN uv pip install --system --no-cache -e ".[dev,test]"
@@ -44,7 +44,7 @@ EXPOSE 8000
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
 
 # Testing stage (for CI)
-FROM base as testing
+FROM base AS testing
 
 # Install all dependencies including dev and test
 RUN uv pip install --system --no-cache -e ".[dev,test]"
@@ -56,10 +56,10 @@ COPY . .
 ENV ENVIRONMENT=testing
 
 # Production stage
-FROM base as production
+FROM base AS production
 
 # Install only production dependencies
-RUN uv pip install --system --no-cache --no-dev .
+RUN uv pip install --system --no-cache .
 
 # Create non-root user
 RUN groupadd -r appuser && useradd -r -g appuser appuser
