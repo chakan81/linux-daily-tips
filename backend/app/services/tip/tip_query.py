@@ -161,13 +161,16 @@ async def get_tips(
     limit: int = 10,
     difficulty: DifficultyLevel | None = None,
     category: str | None = None,
+    search_query: str | None = None,
+    sort_by: str = "publish_date",
+    order: str = "desc",
     cache: Optional[CacheService] = None,
 ) -> tuple[list[Tip], int]:
     """
     필터링 및 페이지네이션된 팁 목록 조회 (캐싱 적용)
 
     캐싱 전략:
-    - Key: "tips:list:page-{page}:size-{limit}:diff-{difficulty}:cat-{category}"
+    - Key: "tips:list:page-{page}:size-{limit}:diff-{difficulty}:cat-{category}:q-{search}:sort-{sort_by}:{order}"
     - TTL: 600초 (10분)
     - 이유: 새 팁 추가 시 빠른 반영
 
@@ -177,6 +180,9 @@ async def get_tips(
         limit: 조회할 최대 개수
         difficulty: 난이도 필터 (beginner/intermediate/advanced)
         category: 카테고리 필터 (예: "file-system")
+        search_query: 검색 쿼리 (제목 또는 내용에서 검색, 대소문자 무시)
+        sort_by: 정렬 필드 (publish_date 또는 title, 기본값: publish_date)
+        order: 정렬 순서 (asc 또는 desc, 기본값: desc)
         cache: Redis 캐시 서비스 (선택적)
 
     Returns:
@@ -200,7 +206,8 @@ async def get_tips(
         else:
             diff_str = "all"
         cat_str = category or "all"
-        cache_key = f"tips:list:page-{page}:size-{limit}:diff-{diff_str}:cat-{cat_str}"
+        search_str = search_query or "none"
+        cache_key = f"tips:list:page-{page}:size-{limit}:diff-{diff_str}:cat-{cat_str}:q-{search_str}:sort-{sort_by}:{order}"
 
         # 2. 캐시 확인
         if cache:
@@ -225,6 +232,17 @@ async def get_tips(
             # PostgreSQL JSONB contains operator (@>)
             conditions.append(Tip.category.contains([category]))
 
+        # 검색 쿼리 (제목 또는 내용에서 검색, 대소문자 무시)
+        if search_query:
+            from sqlalchemy import or_
+            search_pattern = f"%{search_query}%"
+            conditions.append(
+                or_(
+                    Tip.title.ilike(search_pattern),
+                    Tip.content.ilike(search_pattern),
+                )
+            )
+
         # WHERE 절 구성
         if conditions:
             stmt = select(Tip).where(and_(*conditions))
@@ -232,6 +250,19 @@ async def get_tips(
         else:
             stmt = select(Tip)
             count_stmt = select(func.count()).select_from(Tip)
+
+        # 정렬 적용 (보안: 허용된 필드만)
+        ALLOWED_SORT_FIELDS = {"publish_date", "title"}
+        if sort_by in ALLOWED_SORT_FIELDS:
+            sort_column = getattr(Tip, sort_by)
+            if order == "asc":
+                stmt = stmt.order_by(sort_column.asc())
+            else:
+                stmt = stmt.order_by(sort_column.desc())
+        else:
+            # 잘못된 필드 시 기본 정렬 (publish_date desc)
+            logger.warning(f"Invalid sort_by field: {sort_by}, using default (publish_date desc)")
+            stmt = stmt.order_by(Tip.publish_date.desc())
 
         # 페이지네이션 적용
         stmt = stmt.offset(skip).limit(limit)
@@ -247,7 +278,8 @@ async def get_tips(
         logger.info(
             f"Retrieved {len(tips)} tips (total: {total_count}, "
             f"skip: {skip}, limit: {limit}, "
-            f"difficulty: {difficulty}, category: {category})"
+            f"difficulty: {difficulty}, category: {category}, "
+            f"search_query: {search_query}, sort_by: {sort_by}, order: {order})"
         )
 
         # 4. 캐싱 (10분 TTL)

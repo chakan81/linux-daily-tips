@@ -272,19 +272,47 @@ API 요청 → JWT 검증 → Redis 세션 확인 → 권한 체크
 - ✅ 환경 변수 Zod 검증 완료
 - ✅ TypeScript 컴파일 성공
 
-#### Day 26: Tips 페이지 구현 및 검색/정렬 수정
+#### Day 26: Tips 페이지 구현 ✅ (100% 완료!)
 **Tips 페이지 완성**
-- [ ] 팁 상세 페이지 구현 (`/tips/[id]/page.tsx`) → **frontend-code-writer**
-- [ ] 팁 목록 페이지 구현 (`/tips/page.tsx`) → **frontend-code-writer**
-- [ ] **검색 기능 수정** (백엔드 지원 확인 후 활성화) → **frontend-code-writer** ⭐
-- [ ] **정렬 드롭다운 버그 수정** (상태 관리 수정) → **frontend-code-writer** ⭐
-- [ ] 페이지네이션 구현 → **frontend-code-writer**
-- [ ] 홈페이지 404 링크 수정 → **frontend-code-writer**
+- [x] 팁 상세 페이지 구현 (`/tips/[id]/page.tsx`) → **frontend-code-writer** ✅
+- [x] 팁 목록 페이지 구현 (`/tips/page.tsx`) → **frontend-code-writer** ✅
+- [x] 페이지네이션 구현 → **frontend-code-writer** ✅
+- [x] 홈페이지 404 링크 수정 → **frontend-code-writer** ✅
+- [x] 검색/정렬/필터 기능 구현 → **frontend-code-writer** ✅
+- [x] URL 상태 관리 (query parameters) → **frontend-code-writer** ✅
 
-**완료 기준**: Tips 페이지 완전 동작 (목록, 상세, 검색, 정렬, 페이징)
-**예상 소요 시간**: 7.5-9.5시간 (검색/정렬 수정 1.5시간 포함)
+**완료 기준**: Tips 페이지 완전 동작 (목록, 상세, 검색, 정렬, 페이징) ✅
+**현재 상태**: Day 25-26에서 완료됨 (이전 세션)
 
-#### Day 27: 프론트엔드 도커화, 테스트 및 시스템 통합
+#### Day 27 Part 1: 검색/정렬 API + Node.js 22 업그레이드 ✅ (100% 완료!)
+**백엔드 검색/정렬 API (TDD)**
+- [x] 검색 기능 구현 (ILIKE, case-insensitive) → **backend-code-writer** ✅
+- [x] 정렬 기능 구현 (publish_date/title, asc/desc) → **backend-code-writer** ✅
+- [x] Whitelist 기반 SQL Injection 방지 → **backend-code-writer** ✅
+- [x] 캐시 키 형식 업데이트 → **backend-code-writer** ✅
+- [x] 11개 TDD 테스트 작성 (100% 통과) → **unit-test-generator** ✅
+- [x] 프론트엔드 검색창 활성화 → **frontend-code-writer** ✅
+
+**Node.js 22 LTS 업그레이드**
+- [x] Node.js 20 → 22 LTS 업그레이드 → **frontend-code-writer** ✅
+- [x] @types/node 22.19.0 업데이트 → **frontend-code-writer** ✅
+- [x] Next.js 16 Suspense 이슈 수정 (/tips/page.tsx) → **frontend-code-writer** ✅
+- [x] 호환성 테스트 (type-check, build, runtime) → **frontend-code-writer** ✅
+
+**완료 기준**:
+- 검색/정렬 API 완전 동작 + 11/11 테스트 통과 ✅
+- Node.js 22 호환성 검증 완료 ✅
+
+**현재 상태**: Day 27 Part 1 완료! 🎉 (2025-11-05)
+- ✅ 검색 API: ILIKE 패턴, 제목/내용 검색
+- ✅ 정렬 API: publish_date/title, asc/desc
+- ✅ 보안: Whitelist 기반 필드 검증
+- ✅ 성능: < 800ms, Redis 캐싱 10분
+- ✅ Node.js 22 LTS: 2027년까지 지원, @types/node 22.19.0
+- ✅ Next.js 16 Suspense: useSearchParams() 감싸기 완료
+- 📊 **완료 보고서**: `backend/docs/day27-search-sort-completion-report.md`
+
+#### Day 27 Part 2: 프론트엔드 도커화 + E2E 테스트
 **완전한 도커화 환경 구축**
 - [ ] 프론트엔드 Docker Compose 서비스 추가 → **frontend-code-writer + backend-code-writer**
 - [ ] 개발/프로덕션 환경 일치성 검증 → **frontend-code-writer**
@@ -539,20 +567,25 @@ API 요청 → JWT 검증 → Redis 세션 확인 → 권한 체크
 ### 🔄 Week 4: 시스템 통합 및 최적화 (7일)
 - **Day 22-24 (API 통합)**: 6/6 작업 완료 (100%) ✅
 - **Day 25 (코드 품질)**: 6/6 작업 완료 (100%) ✅
-- **Day 26 (Tips 페이지)**: 0/6 작업 완료 (0%) ⏳
-  - Tips 상세/목록 페이지 구현
-  - 검색 기능 수정 ⭐
-  - 정렬 드롭다운 버그 수정 ⭐
-- **Day 27-28 (도커화/테스트)**: 0/5 작업 완료 (0%) ⏳
-- **전체 진행률**: 12/23 작업 완료 (52%) 🚀
+- **Day 26 (Tips 페이지)**: 6/6 작업 완료 (100%) ✅
+  - Tips 상세/목록 페이지 구현 ✅
+  - 검색/정렬/필터 기능 ✅
+  - 페이지네이션 구현 ✅
+- **Day 27 Part 1 (검색/정렬 API + Node.js 22)**: 10/10 작업 완료 (100%) ✅
+  - 백엔드 검색/정렬 API (TDD) ✅
+  - Node.js 22 LTS 업그레이드 ✅
+  - 11개 테스트 100% 통과 ✅
+- **Day 27 Part 2 (도커화/E2E)**: 0/5 작업 완료 (0%) ⏳
+- **Day 28 (문서화)**: 0/4 작업 완료 (0%) ⏳
+- **전체 진행률**: 28/37 작업 완료 (76%) 🚀
 
 ### 📈 전체 Phase 1 진행률
-**현재 상태**: 71/82 작업 완료 (**87%**) 🚀
+**현재 상태**: 87/96 작업 완료 (**91%**) 🚀
 
 **이전 대비 변화**:
-- 작업 수: 82개 (Day 26 검색/정렬 수정 +6개 추가, Day 27-28 작업 +5개)
-- 완료 작업: 71개 (Week 4 Day 22-25 완료!)
-- 진행률: 87% (Day 26-28 작업 추가로 재계산)
+- 작업 수: 96개 (Day 26: 6개, Day 27 Part 1: 10개, Day 27 Part 2: 5개, Day 28: 4개)
+- 완료 작업: 87개 (Week 4 Day 22-27 Part 1 완료!)
+- 진행률: 91% (+4% 증가) 🎉
 
 **마일스톤 달성률**:
 - Week 1 마일스톤: 100% 달성 ✅ 🎉
@@ -585,15 +618,17 @@ API 요청 → JWT 검증 → Redis 세션 확인 → 권한 체크
 10. ✅ ~~Week 4 Day 25: 코드 품질 개선~~ **완료!** 🎉 (API 네이밍 해결, any 타입 제거, 타입 안전성 100%)
 11. 🚀 **Week 4 Day 26-28: Tips 페이지 구현 + 테스트 + 도커화** **다음 작업**
 
-**최신 완료 사항** (Day 25):
-- **API 네이밍 이슈 완전 해결**: Pydantic `alias_generator` 구현 (snake_case → camelCase)
-- **Frontend cleanup 완료**: 3개 파일에서 모든 `(tip as any)` 제거
-- **Categories API 동적화**: PostgreSQL 쿼리 (`jsonb_array_elements_text()`)
-- **Trailing slash 이슈 수정**: 307 Redirect 해결
-- **타입 안전성 100%**: TypeScript 컴파일 에러 없음
+**최신 완료 사항** (Day 27 Part 1 - 2025-11-05):
+- **검색/정렬 API 완성**: ILIKE 검색, Whitelist 정렬, SQL Injection 방지
+- **TDD 방식 개발**: 11개 테스트 100% 통과 (RED → GREEN 사이클)
+- **Node.js 22 LTS 업그레이드**: @types/node 22.19.0, 2027년까지 지원
+- **Next.js 16 Suspense 수정**: useSearchParams() 감싸기 완료
+- **프론트엔드 검색 활성화**: /tips 페이지 검색창 사용 가능
+- **호환성 검증**: type-check, build, runtime 모두 통과
+- 📊 **완료 보고서**: `backend/docs/day27-search-sort-completion-report.md`
 
-**예상 일정**: Week 1 완료! Week 2 완전 달성! Week 3 완전 달성! **Week 4 진행 중 (89% 완료)** ✅ 🚀
-**다음**: Day 26 Tips 페이지 구현 시작 (`/tips`, `/tips/[id]`) 🚀
+**예상 일정**: Week 1 완료! Week 2 완전 달성! Week 3 완전 달성! **Week 4 진행 중 (76% 완료)** ✅ 🚀
+**다음**: Day 27 Part 2 프론트엔드 도커화 + E2E 테스트 시작 🚀
 
 ---
 

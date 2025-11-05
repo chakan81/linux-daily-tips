@@ -191,7 +191,7 @@ class TestDailyTipCaching:
         assert response.status_code == 200
         data = response.json()
         assert data["title"] == "오늘의 팁: ls 명령어"
-        assert data["publish_date"] == str(date.today())
+        assert data["publishDate"] == str(date.today())  # camelCase (Pydantic alias)
 
         # Assert: 캐시에 저장되었는지 확인
         assert await cache_service.exists(cache_key) is True, "캐시에 저장되어야 함"
@@ -397,9 +397,9 @@ class TestTipsListCaching:
         When: /api/v1/tips/?skip=0&limit=2 호출
         Then: 페이지별로 독립적인 캐시 키 사용
         """
-        # Arrange: 캐시 키 예측
-        cache_key_page1 = "tips:list:page-1:size-2:diff-all:cat-all"
-        cache_key_page2 = "tips:list:page-2:size-2:diff-all:cat-all"
+        # Arrange: 캐시 키 예측 (신규 형식: 검색/정렬 파라미터 포함)
+        cache_key_page1 = "tips:list:page-1:size-2:diff-all:cat-all:q-none:sort-publish_date:desc"
+        cache_key_page2 = "tips:list:page-2:size-2:diff-all:cat-all:q-none:sort-publish_date:desc"
 
         # Act: 페이지 1 요청
         response1 = await test_client.get("/api/v1/tips/?skip=0&limit=2")
@@ -441,7 +441,7 @@ class TestTipsListCaching:
         data1 = response1.json()
         initial_count = data1["total"]
 
-        cache_key = "tips:list:page-1:size-10:diff-all:cat-all"
+        cache_key = "tips:list:page-1:size-10:diff-all:cat-all:q-none:sort-publish_date:desc"  # 신규 형식
         assert await cache_service.exists(cache_key) is True
 
         # Act: 새 팁 추가 (다음 주 날짜)

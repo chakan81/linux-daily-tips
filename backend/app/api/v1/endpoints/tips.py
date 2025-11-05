@@ -114,6 +114,9 @@ async def get_tips(
         None, description="난이도 필터 (beginner/intermediate/advanced)"
     ),
     category: str | None = Query(None, description="카테고리 필터"),
+    q: str | None = Query(None, description="검색 쿼리 (제목/내용)"),
+    sort_by: str = Query("publish_date", description="정렬 필드 (publish_date/title)"),
+    order: str = Query("desc", description="정렬 순서 (asc/desc)"),
     db: AsyncSession = Depends(get_db),
     service: TipService = Depends(get_tip_service),
 ):
@@ -128,6 +131,9 @@ async def get_tips(
         limit: 최대 개수 (1-100, 기본값: 10)
         difficulty: 난이도 필터 (beginner/intermediate/advanced)
         category: 카테고리 필터 (예: "file-system")
+        q: 검색 쿼리 (제목 또는 내용에서 검색, 대소문자 무시)
+        sort_by: 정렬 필드 (publish_date 또는 title, 기본값: publish_date)
+        order: 정렬 순서 (asc 또는 desc, 기본값: desc)
         db: 데이터베이스 세션 (자동 주입)
         service: TipService (캐싱 포함, 자동 주입)
 
@@ -144,7 +150,7 @@ async def get_tips(
 
     Example:
         ```
-        GET /api/v1/tips/?skip=0&limit=10&difficulty=beginner
+        GET /api/v1/tips/?skip=0&limit=10&difficulty=beginner&q=파일&sort_by=title&order=asc
 
         Response:
         {
@@ -171,6 +177,8 @@ async def get_tips(
         - Redis 캐싱 (10분 TTL)
         - 데이터베이스 연동 (Day 12)
         - 조회 시 view_count는 증가하지 않음 (목록 조회)
+        - 검색 시 제목과 내용 모두 검색 (ILIKE 사용, 대소문자 무시)
+        - 잘못된 sort_by 필드 → 기본값(publish_date desc) 적용 (보안: SQL Injection 방지)
     """
     # difficulty 문자열을 Enum으로 변환
     difficulty_enum = None
@@ -184,7 +192,14 @@ async def get_tips(
 
     # TipService로 팁 목록 조회 (캐싱 적용)
     tips, total = await service.get_tips(
-        db, skip=skip, limit=limit, difficulty=difficulty_enum, category=category
+        db,
+        skip=skip,
+        limit=limit,
+        difficulty=difficulty_enum,
+        category=category,
+        search_query=q,
+        sort_by=sort_by,
+        order=order,
     )
 
     # TipList 스키마로 반환

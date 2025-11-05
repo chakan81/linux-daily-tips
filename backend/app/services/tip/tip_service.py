@@ -76,6 +76,9 @@ class TipService:
         limit: int = 10,
         difficulty: DifficultyLevel | None = None,
         category: str | None = None,
+        search_query: str | None = None,
+        sort_by: str = "publish_date",
+        order: str = "desc",
     ) -> tuple[list[Tip], int]:
         """
         필터링 및 페이지네이션된 팁 목록 조회 (캐싱 적용)
@@ -86,12 +89,23 @@ class TipService:
             limit: 조회할 최대 개수
             difficulty: 난이도 필터 (beginner/intermediate/advanced)
             category: 카테고리 필터 (예: "file-system")
+            search_query: 검색 쿼리 (제목 또는 내용에서 검색, 대소문자 무시)
+            sort_by: 정렬 필드 (publish_date 또는 title, 기본값: publish_date)
+            order: 정렬 순서 (asc 또는 desc, 기본값: desc)
 
         Returns:
             tuple[list[Tip], int]: (팁 목록, 전체 개수)
         """
         return await tip_query.get_tips(
-            db, skip, limit, difficulty, category, self.cache
+            db,
+            skip,
+            limit,
+            difficulty,
+            category,
+            search_query,
+            sort_by,
+            order,
+            self.cache,
         )
 
     async def create_tip(self, db: AsyncSession, tip_data: TipCreate) -> Tip:

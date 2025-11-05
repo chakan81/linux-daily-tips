@@ -15,7 +15,7 @@ export const API_ENDPOINTS = {
     RECENT: '/api/v1/tips',  // 백엔드: GET /api/v1/tips/?page=1&page_size=10
     BY_CATEGORY: (category: string) => `/api/v1/tips/category/${category}`,
     BY_DIFFICULTY: (difficulty: string) => `/api/v1/tips/difficulty/${difficulty}`,
-    SEARCH: '/api/v1/tips/search',
+    SEARCH: '/api/v1/tips',  // 백엔드: GET /api/v1/tips?q=검색어 (검색도 동일한 엔드포인트)
     CATEGORIES: '/api/v1/tips/categories/list',  // 백엔드: GET /api/v1/tips/categories/list
   },
 
