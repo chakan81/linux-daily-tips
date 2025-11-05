@@ -207,7 +207,7 @@ backend/app/config/database.py.backup
 
 ### pytest 실행
 ```bash
-docker-compose -f backend/docker-compose.yml exec backend pytest tests/ -v
+docker compose -f backend/docker-compose.yml exec backend pytest tests/ -v
 ```
 
 ### 결과

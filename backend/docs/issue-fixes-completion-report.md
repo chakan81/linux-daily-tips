@@ -369,7 +369,7 @@ async def stop_container(
 
 #### 실행 명령
 ```bash
-docker-compose exec backend pytest tests/ -v --cov=app --cov-report=term-missing
+docker compose exec backend pytest tests/ -v --cov=app --cov-report=term-missing
 ```
 
 #### 테스트 결과

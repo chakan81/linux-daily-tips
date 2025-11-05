@@ -34,10 +34,10 @@ cd linux-daily-tips
 cp .env.example .env
 
 # 3. 전체 스택 시작 (Docker Compose)
-docker-compose up -d
+docker compose up -d
 
 # 4. 서비스 상태 확인
-docker-compose ps
+docker compose ps
 ```
 
 ### 서비스 접속
@@ -54,10 +54,10 @@ docker-compose ps
 
 ```bash
 # 전체 서비스 종료
-docker-compose down
+docker compose down
 
 # 데이터 완전 삭제 후 종료 (주의!)
-docker-compose down -v
+docker compose down -v
 ```
 
 ---
@@ -70,14 +70,14 @@ docker-compose down -v
 
 ```bash
 # 전체 스택 시작
-docker-compose up -d
+docker compose up -d
 
 # 로그 실시간 확인
-docker-compose logs -f
+docker compose logs -f
 
 # 특정 서비스만 재시작
-docker-compose restart frontend
-docker-compose restart backend
+docker compose restart frontend
+docker compose restart backend
 ```
 
 **개발 워크플로우**:
@@ -96,7 +96,7 @@ docker-compose restart backend
 
 ```bash
 # 1. PostgreSQL + Redis만 Docker로 실행
-docker-compose up -d postgres redis
+docker compose up -d postgres redis
 
 # 2. 백엔드 로컬 실행
 cd backend
@@ -201,13 +201,13 @@ SENTRY_DSN=                       # Sentry 에러 추적
 
 ```bash
 # Docker 컨테이너에서 실행
-docker-compose exec backend pytest
+docker compose exec backend pytest
 
 # 커버리지 포함
-docker-compose exec backend pytest --cov=app --cov-report=html
+docker compose exec backend pytest --cov=app --cov-report=html
 
 # 특정 테스트 파일만
-docker-compose exec backend pytest tests/test_tips_service.py
+docker compose exec backend pytest tests/test_tips_service.py
 
 # 로컬 환경에서 실행 (가상환경 활성화 필요)
 cd backend
@@ -219,13 +219,13 @@ pytest --cov=app --cov-report=term-missing
 
 ```bash
 # Docker 컨테이너에서 실행
-docker-compose exec frontend npm run test
+docker compose exec frontend npm run test
 
 # E2E 테스트 (Playwright)
-docker-compose exec frontend npm run test:e2e
+docker compose exec frontend npm run test:e2e
 
 # E2E UI 모드 (디버깅)
-docker-compose exec frontend npm run test:e2e:ui
+docker compose exec frontend npm run test:e2e:ui
 
 # 로컬 환경에서 실행
 cd frontend
@@ -238,11 +238,11 @@ npm run test:e2e:ui
 
 ```bash
 # CI 환경 시뮬레이션
-docker-compose -f docker-compose.ci.yml up --abort-on-container-exit
+docker compose -f docker-compose.ci.yml up --abort-on-container-exit
 
 # 개별 CI 테스트
-docker-compose -f docker-compose.ci.yml run --rm backend-test
-docker-compose -f docker-compose.ci.yml run --rm frontend-test
+docker compose -f docker-compose.ci.yml run --rm backend-test
+docker compose -f docker-compose.ci.yml run --rm frontend-test
 ```
 
 ---
@@ -251,7 +251,7 @@ docker-compose -f docker-compose.ci.yml run --rm frontend-test
 
 ### 1. Docker 서비스가 시작되지 않음
 
-**증상**: `docker-compose up` 실패, 컨테이너가 즉시 종료됨
+**증상**: `docker compose up` 실패, 컨테이너가 즉시 종료됨
 
 **해결 방법**:
 
@@ -260,14 +260,14 @@ docker-compose -f docker-compose.ci.yml run --rm frontend-test
 docker info
 
 # Docker Compose 버전 확인 (2.0+ 필요)
-docker-compose --version
+docker compose --version
 
 # 이전 컨테이너 완전 제거
-docker-compose down -v
+docker compose down -v
 docker system prune -a --volumes  # 주의: 모든 Docker 데이터 삭제
 
 # 다시 시작
-docker-compose up -d
+docker compose up -d
 ```
 
 ---
@@ -305,21 +305,21 @@ services:
 
 ```bash
 # 1. 서비스 상태 확인
-docker-compose ps
+docker compose ps
 
 # 2. PostgreSQL 헬스 체크
-docker-compose exec postgres pg_isready -U postgres
+docker compose exec postgres pg_isready -U postgres
 
 # 3. 로그 확인
-docker-compose logs postgres
+docker compose logs postgres
 
 # 4. 환경 변수 확인
-docker-compose exec postgres env | grep POSTGRES
+docker compose exec postgres env | grep POSTGRES
 
 # 5. 데이터베이스 완전 재생성
-docker-compose down -v
-docker-compose up -d postgres
-docker-compose exec postgres psql -U postgres -c "CREATE DATABASE linux_daily_tips;"
+docker compose down -v
+docker compose up -d postgres
+docker compose exec postgres psql -U postgres -c "CREATE DATABASE linux_daily_tips;"
 ```
 
 ---
@@ -332,11 +332,11 @@ docker-compose exec postgres psql -U postgres -c "CREATE DATABASE linux_daily_ti
 
 ```bash
 # 1. 컨테이너 재시작
-docker-compose restart frontend
+docker compose restart frontend
 
 # 2. node_modules 재설치
-docker-compose exec frontend rm -rf node_modules .next
-docker-compose exec frontend npm install
+docker compose exec frontend rm -rf node_modules .next
+docker compose exec frontend npm install
 
 # 3. 볼륨 마운트 확인 (docker-compose.dev.yml)
 services:
@@ -360,13 +360,13 @@ npm run dev
 
 ```bash
 # 1. 백엔드 환경 변수 확인
-docker-compose exec backend env | grep CORS_ORIGINS
+docker compose exec backend env | grep CORS_ORIGINS
 
 # 2. .env 파일 수정
 CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
 
 # 3. 백엔드 재시작
-docker-compose restart backend
+docker compose restart backend
 
 # 4. Next.js rewrites 사용 (권장)
 # frontend/next.config.js의 rewrites 설정 확인
@@ -384,17 +384,17 @@ NEXT_PUBLIC_API_URL=
 
 ```bash
 # 1. Redis 서비스 확인
-docker-compose ps redis
+docker compose ps redis
 
 # 2. Redis CLI 접속 테스트
-docker-compose exec redis redis-cli -a redis_dev_password ping
+docker compose exec redis redis-cli -a redis_dev_password ping
 # 응답: PONG
 
 # 3. Redis 로그 확인
-docker-compose logs redis
+docker compose logs redis
 
 # 4. Redis 재시작
-docker-compose restart redis
+docker compose restart redis
 ```
 
 ---
@@ -414,14 +414,14 @@ docker network ls
 docker network inspect linux-daily-tips_default
 
 # 3. 백엔드 로그 확인
-docker-compose logs backend | grep -i websocket
+docker compose logs backend | grep -i websocket
 
 # 4. Docker 샌드박스 컨테이너 정리
 docker ps -a | grep alpine-sandbox
 docker rm -f $(docker ps -a -q --filter "name=sandbox")
 
 # 5. 백엔드 재시작
-docker-compose restart backend
+docker compose restart backend
 ```
 
 ---
@@ -435,20 +435,20 @@ docker-compose restart backend
 ```bash
 # Backend 테스트 실패
 # 1. 테스트 데이터베이스 재설정
-docker-compose exec backend pytest --create-db
+docker compose exec backend pytest --create-db
 
 # 2. 캐시 삭제
-docker-compose exec backend rm -rf .pytest_cache __pycache__
+docker compose exec backend rm -rf .pytest_cache __pycache__
 
 # 3. 특정 테스트만 실행 (디버깅)
-docker-compose exec backend pytest tests/test_tips_service.py -v -s
+docker compose exec backend pytest tests/test_tips_service.py -v -s
 
 # Frontend E2E 테스트 실패
 # 1. Playwright 브라우저 재설치
-docker-compose exec frontend npx playwright install --with-deps
+docker compose exec frontend npx playwright install --with-deps
 
 # 2. 테스트 UI 모드로 디버깅
-docker-compose exec frontend npm run test:e2e:ui
+docker compose exec frontend npm run test:e2e:ui
 
 # 3. 스크린샷/비디오 확인
 ls -la frontend/test-results/
@@ -508,7 +508,7 @@ ls -la frontend/test-results/
 **Docker Compose 통합**:
 1. `File` → `Settings` → `Build, Execution, Deployment` → `Docker`
 2. `+` 버튼 클릭 → `Docker for Mac` (또는 사용 중인 Docker 엔진)
-3. `docker-compose.yml` 우클릭 → `Run 'docker-compose up'`
+3. `docker-compose.yml` 우클릭 → `Run 'docker compose up'`
 
 ---
 
@@ -518,18 +518,18 @@ ls -la frontend/test-results/
 
 ```bash
 # 서비스 상태 확인
-docker-compose ps
+docker compose ps
 
 # 실시간 로그 확인
-docker-compose logs -f
+docker compose logs -f
 
 # 특정 서비스 로그
-docker-compose logs backend
-docker-compose logs frontend
+docker compose logs backend
+docker compose logs frontend
 
 # 컨테이너 내부 접속
-docker-compose exec backend bash
-docker-compose exec frontend sh
+docker compose exec backend bash
+docker compose exec frontend sh
 
 # 리소스 사용량 확인
 docker stats
@@ -545,35 +545,35 @@ docker system prune -a --volumes
 
 ```bash
 # PostgreSQL 접속
-docker-compose exec postgres psql -U postgres -d linux_daily_tips
+docker compose exec postgres psql -U postgres -d linux_daily_tips
 
 # SQL 파일 실행
-docker-compose exec postgres psql -U postgres -d linux_daily_tips -f /path/to/file.sql
+docker compose exec postgres psql -U postgres -d linux_daily_tips -f /path/to/file.sql
 
 # 데이터베이스 백업
-docker-compose exec postgres pg_dump -U postgres linux_daily_tips > backup.sql
+docker compose exec postgres pg_dump -U postgres linux_daily_tips > backup.sql
 
 # 데이터베이스 복원
-docker-compose exec -T postgres psql -U postgres -d linux_daily_tips < backup.sql
+docker compose exec -T postgres psql -U postgres -d linux_daily_tips < backup.sql
 
 # 테이블 목록 확인
-docker-compose exec postgres psql -U postgres -d linux_daily_tips -c "\dt"
+docker compose exec postgres psql -U postgres -d linux_daily_tips -c "\dt"
 ```
 
 ### Redis 관리
 
 ```bash
 # Redis CLI 접속
-docker-compose exec redis redis-cli -a redis_dev_password
+docker compose exec redis redis-cli -a redis_dev_password
 
 # 모든 키 확인
-docker-compose exec redis redis-cli -a redis_dev_password KEYS '*'
+docker compose exec redis redis-cli -a redis_dev_password KEYS '*'
 
 # 캐시 플러시 (개발용)
-docker-compose exec redis redis-cli -a redis_dev_password FLUSHALL
+docker compose exec redis redis-cli -a redis_dev_password FLUSHALL
 
 # Redis 메모리 사용량
-docker-compose exec redis redis-cli -a redis_dev_password INFO memory
+docker compose exec redis redis-cli -a redis_dev_password INFO memory
 ```
 
 ---

@@ -45,11 +45,11 @@ check_docker() {
     print_success "Docker is running"
 }
 
-# Function to check if docker-compose is available
+# Function to check if docker compose is available
 check_docker_compose() {
     print_status "Checking Docker Compose availability..."
-    if ! command -v docker-compose >/dev/null 2>&1; then
-        print_error "docker-compose is not installed. Please install docker-compose and try again."
+    if ! command -v docker compose >/dev/null 2>&1; then
+        print_error "docker compose is not installed. Please install docker compose and try again."
         exit 1
     fi
     print_success "Docker Compose is available"
@@ -97,7 +97,7 @@ EOF
 # Function to pull latest images
 pull_images() {
     print_status "Pulling latest Docker images..."
-    docker-compose $COMPOSE_FILES pull --quiet
+    docker compose $COMPOSE_FILES pull --quiet
     print_success "Docker images updated"
 }
 
@@ -105,7 +105,7 @@ pull_images() {
 build_images() {
     print_status "Building custom Docker images..."
     if [ -f "backend/Dockerfile.dev" ]; then
-        docker-compose $COMPOSE_FILES build $BACKEND_SERVICE
+        docker compose $COMPOSE_FILES build $BACKEND_SERVICE
         print_success "Backend image built successfully"
     else
         print_warning "Backend Dockerfile.dev not found, skipping backend build"
@@ -115,7 +115,7 @@ build_images() {
 # Function to start core services (postgres, redis)
 start_core_services() {
     print_status "Starting core services (PostgreSQL, Redis)..."
-    docker-compose $COMPOSE_FILES up -d postgres redis
+    docker compose $COMPOSE_FILES up -d postgres redis
 
     # Wait for services to be healthy
     print_status "Waiting for core services to be ready..."
@@ -123,8 +123,8 @@ start_core_services() {
     local attempt=1
 
     while [ $attempt -le $max_attempts ]; do
-        if docker-compose $COMPOSE_FILES ps postgres | grep -q "healthy" && \
-           docker-compose $COMPOSE_FILES ps redis | grep -q "Up"; then
+        if docker compose $COMPOSE_FILES ps postgres | grep -q "healthy" && \
+           docker compose $COMPOSE_FILES ps redis | grep -q "Up"; then
             print_success "Core services are ready"
             return 0
         fi
@@ -136,14 +136,14 @@ start_core_services() {
 
     print_error "Core services failed to start within expected time"
     print_status "Checking service logs..."
-    docker-compose $COMPOSE_FILES logs postgres redis
+    docker compose $COMPOSE_FILES logs postgres redis
     exit 1
 }
 
 # Function to start development tools
 start_dev_tools() {
     print_status "Starting development tools (pgAdmin, Redis Commander, Mailhog)..."
-    docker-compose $COMPOSE_FILES up -d pgadmin redis-commander mailhog
+    docker compose $COMPOSE_FILES up -d pgadmin redis-commander mailhog
     print_success "Development tools started"
 }
 
@@ -151,7 +151,7 @@ start_dev_tools() {
 start_backend() {
     if [ -f "backend/Dockerfile.dev" ] && [ -f "backend/main.py" ]; then
         print_status "Starting FastAPI backend..."
-        docker-compose $COMPOSE_FILES up -d $BACKEND_SERVICE
+        docker compose $COMPOSE_FILES up -d $BACKEND_SERVICE
         print_success "Backend service started"
     else
         print_warning "Backend service files not found, skipping backend startup"
@@ -181,7 +181,7 @@ show_service_urls() {
     echo "      └── SMTP: localhost:1025"
     echo ""
 
-    if docker-compose $COMPOSE_FILES ps $BACKEND_SERVICE >/dev/null 2>&1; then
+    if docker compose $COMPOSE_FILES ps $BACKEND_SERVICE >/dev/null 2>&1; then
         echo "🎯 Application Services:"
         echo "   🔧 FastAPI Backend:  http://localhost:8000"
         echo "      └── API Docs: http://localhost:8000/docs"
@@ -190,20 +190,20 @@ show_service_urls() {
     fi
 
     echo "🔧 Useful Commands:"
-    echo "   📋 View logs:        docker-compose $COMPOSE_FILES logs -f"
+    echo "   📋 View logs:        docker compose $COMPOSE_FILES logs -f"
     echo "   🛑 Stop services:    ./scripts/dev-down.sh"
     echo "   🔄 Restart:          ./scripts/dev-down.sh && ./scripts/dev-up.sh"
-    echo "   📊 Check status:     docker-compose $COMPOSE_FILES ps"
+    echo "   📊 Check status:     docker compose $COMPOSE_FILES ps"
 }
 
 # Function to run database health check
 check_database() {
     print_status "Running database health check..."
-    if docker-compose $COMPOSE_FILES exec -T postgres psql -U postgres -d linux_daily_tips -c "SELECT 1;" >/dev/null 2>&1; then
+    if docker compose $COMPOSE_FILES exec -T postgres psql -U postgres -d linux_daily_tips -c "SELECT 1;" >/dev/null 2>&1; then
         print_success "Database connection successful"
 
         # Check if schema is initialized
-        if docker-compose $COMPOSE_FILES exec -T postgres psql -U postgres -d linux_daily_tips -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'linux_tips';" | grep -q "7"; then
+        if docker compose $COMPOSE_FILES exec -T postgres psql -U postgres -d linux_daily_tips -c "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = 'linux_tips';" | grep -q "7"; then
             print_success "Database schema is properly initialized"
         else
             print_warning "Database schema may not be fully initialized"
@@ -241,7 +241,7 @@ main() {
     show_service_urls
 
     print_success "Development environment startup completed!"
-    print_status "Use 'docker-compose $COMPOSE_FILES logs -f' to view real-time logs"
+    print_status "Use 'docker compose $COMPOSE_FILES logs -f' to view real-time logs"
 }
 
 # Handle interruption

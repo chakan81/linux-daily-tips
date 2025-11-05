@@ -263,7 +263,7 @@ ws.onmessage = (event) => {
 
 #### 문제 증상
 ```bash
-docker-compose exec frontend npm run build
+docker compose exec frontend npm run build
 
 # 에러 메시지
 Error occurred prerendering page "/_global-error"
@@ -355,7 +355,7 @@ Export encountered an error on /_global-error/page: /_global-error
 git clone <repository-url>
 cd linux-daily-tips
 cp .env.example .env
-docker-compose up -d
+docker compose up -d
 ```
 - 서비스 접속 URL 테이블
 - 빠른 종료 방법
@@ -376,12 +376,12 @@ docker-compose up -d
 **4. 테스트 실행**
 ```bash
 # 백엔드
-docker-compose exec backend pytest
-docker-compose exec backend pytest --cov=app
+docker compose exec backend pytest
+docker compose exec backend pytest --cov=app
 
 # 프론트엔드
-docker-compose exec frontend npm run test:e2e
-docker-compose exec frontend npm run test:e2e:ui
+docker compose exec frontend npm run test:e2e
+docker compose exec frontend npm run test:e2e:ui
 ```
 
 **5. 트러블슈팅** (8가지 시나리오)

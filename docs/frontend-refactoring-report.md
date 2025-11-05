@@ -1652,7 +1652,7 @@ $ cd frontend && npm run type-check
 
 **E2E 테스트**:
 ```bash
-$ docker-compose exec -T frontend npx playwright test --project=chromium
+$ docker compose exec -T frontend npx playwright test --project=chromium
 
 Running 22 tests using 3 workers
 

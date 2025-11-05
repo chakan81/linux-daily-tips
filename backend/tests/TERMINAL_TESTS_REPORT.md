@@ -166,12 +166,12 @@
 ### 전체 터미널 테스트 실행
 ```bash
 # Docker 환경에서 실행 (권장)
-docker-compose exec backend pytest tests/test_services/test_docker_service.py \
+docker compose exec backend pytest tests/test_services/test_docker_service.py \
                                         tests/test_services/test_terminal_service.py \
                                         tests/test_api/test_terminal_api.py -v
 
 # 커버리지 확인
-docker-compose exec backend pytest tests/test_services/test_docker_service.py \
+docker compose exec backend pytest tests/test_services/test_docker_service.py \
                                         tests/test_services/test_terminal_service.py \
                                         tests/test_api/test_terminal_api.py \
                                         --cov=app.services.docker_service \
@@ -183,21 +183,21 @@ docker-compose exec backend pytest tests/test_services/test_docker_service.py \
 ### 개별 테스트 실행
 ```bash
 # Docker 서비스 테스트만
-docker-compose exec backend pytest tests/test_services/test_docker_service.py -v
+docker compose exec backend pytest tests/test_services/test_docker_service.py -v
 
 # 터미널 서비스 테스트만
-docker-compose exec backend pytest tests/test_services/test_terminal_service.py -v
+docker compose exec backend pytest tests/test_services/test_terminal_service.py -v
 
 # WebSocket API 테스트만
-docker-compose exec backend pytest tests/test_api/test_terminal_api.py -v
+docker compose exec backend pytest tests/test_api/test_terminal_api.py -v
 
 # 특정 테스트 케이스만
-docker-compose exec backend pytest tests/test_services/test_docker_service.py::TestDockerServiceContainerLifecycle::test_create_container_with_resource_limits -v
+docker compose exec backend pytest tests/test_services/test_docker_service.py::TestDockerServiceContainerLifecycle::test_create_container_with_resource_limits -v
 ```
 
 ### 실패한 테스트만 재실행
 ```bash
-docker-compose exec backend pytest tests/test_services/ tests/test_api/test_terminal_api.py --lf
+docker compose exec backend pytest tests/test_services/ tests/test_api/test_terminal_api.py --lf
 ```
 
 ---

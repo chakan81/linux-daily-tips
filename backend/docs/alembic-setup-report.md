@@ -40,7 +40,7 @@ Linux Daily Tips 백엔드 프로젝트에 Alembic 데이터베이스 마이그�
 ### 1. Alembic 초기화
 
 ```bash
-docker-compose exec backend alembic init alembic
+docker compose exec backend alembic init alembic
 ```
 
 생성된 파일:
@@ -101,7 +101,7 @@ target_metadata = Base.metadata
 Alembic은 `psycopg2` 드라이버를 사용하므로 설치:
 
 ```bash
-docker-compose exec backend uv pip install --system psycopg2-binary
+docker compose exec backend uv pip install --system psycopg2-binary
 ```
 
 `pyproject.toml`에 영구 추가:
@@ -122,10 +122,10 @@ dependencies = [
 
 ```bash
 # 빈 baseline 마이그레이션 생성
-docker-compose exec backend alembic revision -m "Baseline: Existing 6 models from init-db scripts"
+docker compose exec backend alembic revision -m "Baseline: Existing 6 models from init-db scripts"
 
 # 현재 데이터베이스 상태를 baseline으로 기록
-docker-compose exec backend alembic stamp head
+docker compose exec backend alembic stamp head
 ```
 
 **생성된 마이그레이션**: `105f096d67eb_baseline_existing_6_models_from_init_db_.py`
@@ -148,10 +148,10 @@ def downgrade() -> None:
 ### 현재 마이그레이션 상태
 
 ```bash
-$ docker-compose exec backend alembic current
+$ docker compose exec backend alembic current
 105f096d67eb (head)
 
-$ docker-compose exec backend alembic history
+$ docker compose exec backend alembic history
 <base> -> 105f096d67eb (head), Baseline: Existing 6 models from init-db scripts
 ```
 
@@ -187,7 +187,7 @@ $ docker-compose exec backend alembic history
 ### 시딩 실행
 
 ```bash
-$ docker-compose exec backend python scripts/seed_tips.py
+$ docker compose exec backend python scripts/seed_tips.py
 
 ╔══════════════════════════════════════════════════════════╗
 ║  Linux Daily Tips - Test Data Seeding Script            ║
@@ -314,29 +314,29 @@ ORDER BY table_name;
 
 ```bash
 # 현재 마이그레이션 버전 확인
-docker-compose exec backend alembic current
+docker compose exec backend alembic current
 
 # 마이그레이션 히스토리 확인
-docker-compose exec backend alembic history
+docker compose exec backend alembic history
 
 # 새 마이그레이션 생성 (자동 감지)
-docker-compose exec backend alembic revision --autogenerate -m "설명"
+docker compose exec backend alembic revision --autogenerate -m "설명"
 
 # 마이그레이션 실행
-docker-compose exec backend alembic upgrade head
+docker compose exec backend alembic upgrade head
 
 # 롤백
-docker-compose exec backend alembic downgrade -1
+docker compose exec backend alembic downgrade -1
 ```
 
 ### 테스트 데이터 재시딩
 
 ```bash
 # 기존 데이터 삭제
-docker-compose exec postgres psql -U postgres -d linux_daily_tips -c "TRUNCATE TABLE linux_tips.tips RESTART IDENTITY CASCADE;"
+docker compose exec postgres psql -U postgres -d linux_daily_tips -c "TRUNCATE TABLE linux_tips.tips RESTART IDENTITY CASCADE;"
 
 # 새로 시딩
-docker-compose exec backend python scripts/seed_tips.py
+docker compose exec backend python scripts/seed_tips.py
 ```
 
 ---
@@ -402,7 +402,7 @@ ModuleNotFoundError: No module named 'psycopg2'
 
 **해결**:
 ```bash
-docker-compose exec backend uv pip install --system psycopg2-binary
+docker compose exec backend uv pip install --system psycopg2-binary
 ```
 
 `pyproject.toml`에 영구 추가:

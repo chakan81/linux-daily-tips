@@ -107,7 +107,7 @@ frontend/
 ### 🐳 **Docker vs 로컬 개발 전략**
 **현재 방식 (Day 1-25)**: **하이브리드 개발 환경**
 - **프론트엔드**: 로컬 Node.js 환경 (`npm run dev`)
-- **백엔드/DB**: Docker Compose (`docker-compose up`)
+- **백엔드/DB**: Docker Compose (`docker compose up`)
 - **프로덕션**: Docker 멀티스테이지 빌드
 
 **Phase 1 완료 (Day 26-27)**: **완전 도커화 전환**
@@ -120,7 +120,7 @@ frontend/
 **현재 방식 (Day 1-25)**:
 ```bash
 # 1. 백엔드 서비스 시작 (PostgreSQL + Redis + FastAPI)
-docker-compose up -d
+docker compose up -d
 
 # 2. 프론트엔드 개발 서버 실행 (별도 터미널)
 cd frontend
@@ -135,10 +135,10 @@ npm test
 **Phase 1 완료 후 (Day 26+)**:
 ```bash
 # 전체 스택 원클릭 실행 (프론트엔드 + 백엔드 + DB)
-docker-compose up
+docker compose up
 
 # 또는 개발 모드로 실행
-docker-compose up --build
+docker compose up --build
 ```
 
 ### 환경 변수 설정
@@ -418,7 +418,7 @@ ws.onmessage = (event) => {
 
 ### Day 28: 완전 도커화
 1. **프론트엔드 Docker**: 멀티스테이지 빌드
-2. **docker-compose 통합**: 원클릭 전체 스택 실행
+2. **Docker Compose 통합**: 원클릭 전체 스택 실행
 
 ## ⚠️ 주의사항
 

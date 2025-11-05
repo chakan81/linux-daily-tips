@@ -173,7 +173,7 @@ analytics_events: 0 rows
 ### pytest 실행 결과
 
 ```bash
-$ docker-compose exec backend pytest tests/ -v
+$ docker compose exec backend pytest tests/ -v
 
 ============================= test session starts ==============================
 collected 150 items

@@ -124,7 +124,7 @@ Cookie 보안 필드 추가:
 
 ### 서버 실행 확인
 ```bash
-docker-compose up -d backend
+docker compose up -d backend
 ```
 
 **출력 로그**:

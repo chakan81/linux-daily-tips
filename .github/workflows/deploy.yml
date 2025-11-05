@@ -134,7 +134,7 @@ jobs:
         cp docker-compose.yml deployment/
         cp docker-compose.prod.yml deployment/ || echo "Production compose file not found"
 
-        # Create environment-specific docker-compose override
+        # Create environment-specific docker compose override
         cat > deployment/docker-compose.staging.yml <<EOF
         version: '3.8'
 
@@ -166,10 +166,10 @@ jobs:
           cd /opt/linux-daily-tips
 
           # Pull latest images
-          docker-compose -f docker-compose.yml -f docker-compose.staging.yml pull
+          docker compose -f docker-compose.yml -f docker-compose.staging.yml pull
 
           # Restart services with zero downtime
-          docker-compose -f docker-compose.yml -f docker-compose.staging.yml up -d --remove-orphans
+          docker compose -f docker-compose.yml -f docker-compose.staging.yml up -d --remove-orphans
 
           # Clean up old images
           docker image prune -f
@@ -197,7 +197,7 @@ jobs:
         mkdir -p deployment
         cp docker-compose.yml deployment/
 
-        # Create production docker-compose override
+        # Create production docker compose override
         cat > deployment/docker-compose.production.yml <<EOF
         version: '3.8'
 
@@ -256,13 +256,13 @@ jobs:
           cd /opt/linux-daily-tips
 
           # Create backup
-          docker-compose -f docker-compose.yml -f docker-compose.production.yml exec postgres pg_dump -U postgres linux_daily_tips > backup-$(date +%Y%m%d-%H%M%S).sql || true
+          docker compose -f docker-compose.yml -f docker-compose.production.yml exec postgres pg_dump -U postgres linux_daily_tips > backup-$(date +%Y%m%d-%H%M%S).sql || true
 
           # Pull latest images
-          docker-compose -f docker-compose.yml -f docker-compose.production.yml pull
+          docker compose -f docker-compose.yml -f docker-compose.production.yml pull
 
           # Deploy with rolling update
-          docker-compose -f docker-compose.yml -f docker-compose.production.yml up -d --remove-orphans
+          docker compose -f docker-compose.yml -f docker-compose.production.yml up -d --remove-orphans
 
           # Health check with retries
           for i in {1..10}; do
@@ -274,7 +274,7 @@ jobs:
             sleep 30
             if [ $i -eq 10 ]; then
               echo "Health check failed after 10 attempts, rolling back"
-              docker-compose -f docker-compose.yml -f docker-compose.production.yml down
+              docker compose -f docker-compose.yml -f docker-compose.production.yml down
               exit 1
             fi
           done

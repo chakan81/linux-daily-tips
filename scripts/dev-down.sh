@@ -46,13 +46,13 @@ stop_services() {
     print_status "Stopping $PROJECT_NAME development services..."
 
     # Check if any services are running
-    if ! docker-compose $COMPOSE_FILES ps --services --filter "status=running" | head -1 >/dev/null 2>&1; then
+    if ! docker compose $COMPOSE_FILES ps --services --filter "status=running" | head -1 >/dev/null 2>&1; then
         print_warning "No running services found"
         return 0
     fi
 
     # Stop services with timeout
-    docker-compose $COMPOSE_FILES down --timeout 30
+    docker compose $COMPOSE_FILES down --timeout 30
 
     print_success "All services stopped successfully"
 }
@@ -97,7 +97,7 @@ cleanup_resources() {
         read -p "Are you sure you want to delete all database data? (y/N): " -n 1 -r
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
-            docker-compose $COMPOSE_FILES down --volumes
+            docker compose $COMPOSE_FILES down --volumes
             print_success "Volumes removed"
         else
             print_status "Volume cleanup cancelled"
@@ -113,7 +113,7 @@ cleanup_resources() {
     # Clean images if requested
     if [ "$clean_images" = true ]; then
         print_status "Removing project images..."
-        docker-compose $COMPOSE_FILES down --rmi local
+        docker compose $COMPOSE_FILES down --rmi local
         print_success "Local images removed"
     fi
 }
@@ -197,8 +197,8 @@ save_logs() {
 
         # Save logs for each service
         for service in postgres redis backend pgadmin redis-commander mailhog; do
-            if docker-compose $COMPOSE_FILES ps "$service" >/dev/null 2>&1; then
-                docker-compose $COMPOSE_FILES logs "$service" > "$log_dir/${service}.log" 2>&1
+            if docker compose $COMPOSE_FILES ps "$service" >/dev/null 2>&1; then
+                docker compose $COMPOSE_FILES logs "$service" > "$log_dir/${service}.log" 2>&1
                 print_status "Saved logs for $service"
             fi
         done

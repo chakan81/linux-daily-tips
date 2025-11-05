@@ -25,7 +25,7 @@
 - [x] 환경변수 및 설정 파일 템플릿 작성 → **backend-code-writer**
 - [x] CI/CD 파이프라인 기본 설정 (GitHub Actions) → **service-planner**
 
-**완료 기준**: `docker-compose up`으로 개발 환경 완전 실행
+**완료 기준**: `docker compose up`으로 개발 환경 완전 실행
 
 #### Day 3-4: Next.js 15 프로젝트 셋업 ✅
 **프론트엔드 초기화**

@@ -110,19 +110,19 @@ linux-daily-tips/
 ### 유용한 명령어
 ```bash
 # 서비스 상태 확인
-docker-compose ps
+docker compose ps
 
 # 실시간 로그 확인
-docker-compose logs -f
+docker compose logs -f
 
 # 특정 서비스 로그
-docker-compose logs postgres
+docker compose logs postgres
 
 # 데이터베이스 접속
-docker-compose exec postgres psql -U postgres -d linux_daily_tips
+docker compose exec postgres psql -U postgres -d linux_daily_tips
 
 # Redis 접속
-docker-compose exec redis redis-cli -a redis_dev_password
+docker compose exec redis redis-cli -a redis_dev_password
 
 # 전체 환경 재시작
 ./scripts/dev-down.sh && ./scripts/dev-up.sh
@@ -190,16 +190,16 @@ docker-compose exec redis redis-cli -a redis_dev_password
 **전체 CI 테스트 실행**
 ```bash
 # 백엔드 CI 테스트
-docker-compose -f docker-compose.ci.yml run --rm backend-test
-docker-compose -f docker-compose.ci.yml run --rm backend-lint
-docker-compose -f docker-compose.ci.yml run --rm backend-security
+docker compose -f docker-compose.ci.yml run --rm backend-test
+docker compose -f docker-compose.ci.yml run --rm backend-lint
+docker compose -f docker-compose.ci.yml run --rm backend-security
 
 # 프론트엔드 CI 테스트
-docker-compose -f docker-compose.ci.yml run --rm frontend-test
-docker-compose -f docker-compose.ci.yml run --rm frontend-lint
+docker compose -f docker-compose.ci.yml run --rm frontend-test
+docker compose -f docker-compose.ci.yml run --rm frontend-lint
 
 # CI 환경 정리
-docker-compose -f docker-compose.ci.yml down -v
+docker compose -f docker-compose.ci.yml down -v
 ```
 
 **개별 Docker 빌드 테스트**
@@ -218,11 +218,11 @@ docker build --target production -t linux-tips-frontend:prod ./frontend
 **로컬 컨테이너 개발 환경**
 ```bash
 # 백엔드 개발 컨테이너 실행
-docker-compose up -d postgres redis
-docker-compose up backend
+docker compose up -d postgres redis
+docker compose up backend
 
 # 프론트엔드 개발 컨테이너 실행
-docker-compose -f docker-compose.dev.yml up frontend
+docker compose -f docker-compose.dev.yml up frontend
 ```
 
 #### 🚀 Docker 기반 배포 트리거
@@ -491,10 +491,10 @@ main  - 안정 버전 (릴리즈용)
 2. **데이터베이스 연결 실패**
    ```bash
    # 서비스 상태 확인
-   docker-compose ps
+   docker compose ps
 
    # 헬스체크 상태 확인
-   docker-compose exec postgres pg_isready
+   docker compose exec postgres pg_isready
    ```
 
 3. **권한 문제**

@@ -88,26 +88,26 @@ tests/
 
 ### 전체 테스트 실행
 ```bash
-docker-compose exec backend pytest tests/
+docker compose exec backend pytest tests/
 ```
 
 ### 특정 디렉토리 테스트
 ```bash
 # 모델 테스트만 실행
-docker-compose exec backend pytest tests/test_models/
+docker compose exec backend pytest tests/test_models/
 
 # 스키마 테스트만 실행
-docker-compose exec backend pytest tests/test_schemas/
+docker compose exec backend pytest tests/test_schemas/
 ```
 
 ### 특정 파일 테스트
 ```bash
-docker-compose exec backend pytest tests/test_models/test_tip.py -v
+docker compose exec backend pytest tests/test_models/test_tip.py -v
 ```
 
 ### 커버리지 포함 실행
 ```bash
-docker-compose exec backend pytest tests/ --cov=app --cov-report=html
+docker compose exec backend pytest tests/ --cov=app --cov-report=html
 ```
 
 커버리지 리포트는 `htmlcov/index.html`에서 확인 가능합니다.
@@ -115,10 +115,10 @@ docker-compose exec backend pytest tests/ --cov=app --cov-report=html
 ### 테스트 마커 사용
 ```bash
 # unit 테스트만 실행
-docker-compose exec backend pytest -m unit
+docker compose exec backend pytest -m unit
 
 # slow 테스트 제외
-docker-compose exec backend pytest -m "not slow"
+docker compose exec backend pytest -m "not slow"
 ```
 
 ## Fixtures

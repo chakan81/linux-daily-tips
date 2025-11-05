@@ -43,27 +43,27 @@ jobs:
 
     - name: Build frontend test image
       run: |
-        docker-compose -f docker-compose.ci.yml build frontend-test
-        docker-compose -f docker-compose.ci.yml build frontend-lint
+        docker compose -f docker-compose.ci.yml build frontend-test
+        docker compose -f docker-compose.ci.yml build frontend-lint
 
     - name: Run ESLint
-      run: docker-compose -f docker-compose.ci.yml run --rm frontend-lint npm run lint
+      run: docker compose -f docker-compose.ci.yml run --rm frontend-lint npm run lint
 
     - name: Run Prettier format check
-      run: docker-compose -f docker-compose.ci.yml run --rm frontend-lint npm run format:check
+      run: docker compose -f docker-compose.ci.yml run --rm frontend-lint npm run format:check
 
     - name: Run TypeScript type checking
-      run: docker-compose -f docker-compose.ci.yml run --rm frontend-lint npm run type-check
+      run: docker compose -f docker-compose.ci.yml run --rm frontend-lint npm run type-check
 
     - name: Run unit tests with coverage
       run: |
-        docker-compose -f docker-compose.ci.yml run --rm frontend-test npm run test:coverage
+        docker compose -f docker-compose.ci.yml run --rm frontend-test npm run test:coverage
 
     - name: Extract test coverage reports
       run: |
         mkdir -p ./coverage/frontend
-        docker cp $(docker-compose -f docker-compose.ci.yml ps -q frontend-test):/app/coverage/lcov.info ./coverage/frontend/ || true
-        docker cp $(docker-compose -f docker-compose.ci.yml ps -q frontend-test):/app/coverage/clover.xml ./coverage/frontend/ || true
+        docker cp $(docker compose -f docker-compose.ci.yml ps -q frontend-test):/app/coverage/lcov.info ./coverage/frontend/ || true
+        docker cp $(docker compose -f docker-compose.ci.yml ps -q frontend-test):/app/coverage/clover.xml ./coverage/frontend/ || true
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
@@ -75,7 +75,7 @@ jobs:
 
     - name: Clean up
       if: always()
-      run: docker-compose -f docker-compose.ci.yml down -v
+      run: docker compose -f docker-compose.ci.yml down -v
 
   frontend-build-test:
     name: Frontend Build Test
@@ -179,7 +179,7 @@ jobs:
 
     - name: Build and start services for E2E
       run: |
-        docker-compose -f docker-compose.ci.yml up -d postgres-test redis-test
+        docker compose -f docker-compose.ci.yml up -d postgres-test redis-test
         docker build --target production -t linux-tips-frontend:e2e ./frontend
         docker build --target production -t linux-tips-backend:e2e ./backend
 
@@ -220,4 +220,4 @@ jobs:
       run: |
         docker stop frontend-e2e backend-e2e || true
         docker rm frontend-e2e backend-e2e || true
-        docker-compose -f docker-compose.ci.yml down -v
+        docker compose -f docker-compose.ci.yml down -v

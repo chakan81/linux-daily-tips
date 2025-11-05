@@ -45,23 +45,23 @@ NEXT_PUBLIC_BASE_URL=http://localhost:3000
 ### 3. Frontend 컨테이너 재빌드
 ```bash
 # ✅ 완료
-docker-compose stop frontend && docker-compose rm -f frontend && docker-compose up -d --build frontend
+docker compose stop frontend && docker compose rm -f frontend && docker compose up -d --build frontend
 ```
 
 ### 4. 환경 변수 검증
 ```bash
 # ✅ 컨테이너 내부에서 확인
-docker-compose exec -T frontend node -e "console.log('API_BACKEND_URL:', process.env.API_BACKEND_URL)"
+docker compose exec -T frontend node -e "console.log('API_BACKEND_URL:', process.env.API_BACKEND_URL)"
 # 출력: API_BACKEND_URL: http://backend:8000
 
-docker-compose exec -T frontend node -e "console.log('NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL)"
+docker compose exec -T frontend node -e "console.log('NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL)"
 # 출력: NEXT_PUBLIC_API_URL: (빈 문자열)
 ```
 
 ### 5. API 엔드포인트 테스트
 ```bash
 # ✅ 성공
-docker-compose exec -T frontend node -e "fetch('http://localhost:3000/api/v1/tips/daily').then(r => r.json()).then(d => console.log(d))"
+docker compose exec -T frontend node -e "fetch('http://localhost:3000/api/v1/tips/daily').then(r => r.json()).then(d => console.log(d))"
 # 출력: Status: 200, Data: {...}
 ```
 
@@ -127,7 +127,7 @@ env: {
 cd /Users/chakan/Dev/WebDev/linux-daily-tips
 
 # 컨테이너 완전 재빌드
-docker-compose stop frontend && docker-compose rm -f frontend && docker-compose up -d --build frontend
+docker compose stop frontend && docker compose rm -f frontend && docker compose up -d --build frontend
 
 # 개발 서버 시작 대기 (약 10초)
 sleep 10
@@ -137,7 +137,7 @@ sleep 10
 
 ```bash
 # 로그에서 환경 변수 확인
-docker-compose logs frontend --tail=50 | grep "Environment variables validated"
+docker compose logs frontend --tail=50 | grep "Environment variables validated"
 
 # 기대 출력:
 # ✅ Environment variables validated successfully: {
@@ -151,7 +151,7 @@ docker-compose logs frontend --tail=50 | grep "Environment variables validated"
 
 ```bash
 # Docker 내부에서 전체 테스트 실행
-docker-compose exec -T frontend npx playwright test --project=chromium
+docker compose exec -T frontend npx playwright test --project=chromium
 
 # 기대 결과: 22/22 통과 (100%)
 ```

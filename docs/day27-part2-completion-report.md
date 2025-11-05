@@ -63,9 +63,9 @@ env: {
 
 ### Step 2: Frontend 컨테이너 재빌드
 ```bash
-docker-compose stop frontend && \
-docker-compose rm -f frontend && \
-docker-compose up -d --build frontend
+docker compose stop frontend && \
+docker compose rm -f frontend && \
+docker compose up -d --build frontend
 ```
 
 **빌드 시간**: ~40초
@@ -73,16 +73,16 @@ docker-compose up -d --build frontend
 ### Step 3: 환경 변수 검증
 ```bash
 # 컨테이너 내부 환경 변수 확인
-$ docker-compose exec -T frontend node -e "console.log('NEXT_PUBLIC_API_URL:', JSON.stringify(process.env.NEXT_PUBLIC_API_URL))"
+$ docker compose exec -T frontend node -e "console.log('NEXT_PUBLIC_API_URL:', JSON.stringify(process.env.NEXT_PUBLIC_API_URL))"
 NEXT_PUBLIC_API_URL: ""  ✅
 
-$ docker-compose exec -T frontend node -e "console.log('API_BACKEND_URL:', process.env.API_BACKEND_URL)"
+$ docker compose exec -T frontend node -e "console.log('API_BACKEND_URL:', process.env.API_BACKEND_URL)"
 API_BACKEND_URL: http://backend:8000  ✅
 ```
 
 ### Step 4: E2E 테스트 재실행
 ```bash
-$ docker-compose exec -T frontend npx playwright test --project=chromium
+$ docker compose exec -T frontend npx playwright test --project=chromium
 
 Running 22 tests using 3 workers
 

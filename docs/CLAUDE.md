@@ -94,7 +94,7 @@ Before performing ANY file operations (read, write, edit, delete, create) in thi
 - [ ] 환경변수 및 설정 파일 템플릿 작성
 - [ ] CI/CD 파이프라인 기본 설정 (GitHub Actions)
 
-**완료 기준**: `docker-compose up`으로 개발 환경 완전 실행
+**완료 기준**: `docker compose up`으로 개발 환경 완전 실행
 **현재 상태**: PostgreSQL 연결 이슈로 50% 완료, 내일 해결 예정 <!-- 이런 식으로 진행 상황 메모 -->
 ```
 

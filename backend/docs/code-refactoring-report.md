@@ -460,7 +460,7 @@ class DraftTip(Base):
 ### 전체 테스트 통과 ✅
 
 ```bash
-$ docker-compose exec backend pytest tests/ -v
+$ docker compose exec backend pytest tests/ -v
 
 ============================= test session starts ==============================
 platform linux -- Python 3.12.11, pytest-8.4.2, pluggy-1.6.0

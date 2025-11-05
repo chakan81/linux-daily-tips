@@ -107,10 +107,10 @@ docker images | grep linux-tips
 ls -la backend/alembic/versions/
 
 # 현재 마이그레이션 상태 확인
-docker-compose exec backend alembic current
+docker compose exec backend alembic current
 
 # 최신 마이그레이션으로 업그레이드 테스트 (개발 환경)
-docker-compose exec backend alembic upgrade head
+docker compose exec backend alembic upgrade head
 ```
 
 ### 5. 보안 점검

@@ -119,7 +119,7 @@ Then: Google OAuth URL로 리다이렉트 (302 Found)
 ## 🎯 테스트 실행 결과 (RED 단계)
 
 ```bash
-$ docker-compose exec backend pytest tests/test_api/test_auth.py -v
+$ docker compose exec backend pytest tests/test_api/test_auth.py -v
 
 collected 33 items
 

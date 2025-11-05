@@ -19,31 +19,31 @@ Linux Daily Tips 백엔드 개발을 위한 Claude Code 가이드입니다.
 ### 기본 명령어
 ```bash
 # 전체 스택 실행 (백엔드 + DB + Redis)
-docker-compose up
+docker compose up
 
 # 백엔드만 실행
-docker-compose up backend
+docker compose up backend
 
 # 백그라운드 실행
-docker-compose up -d backend
+docker compose up -d backend
 
 # 로그 확인
-docker-compose logs -f backend
+docker compose logs -f backend
 
 # 컨테이너 종료
-docker-compose down
+docker compose down
 ```
 
 ### 패키지 관리
 ```bash
 # 새 패키지 추가 (pyproject.toml 수정 후)
-docker-compose build backend
+docker compose build backend
 
 # 또는 실행 중인 컨테이너에서
-docker-compose exec backend uv pip install --system [패키지명]
+docker compose exec backend uv pip install --system [패키지명]
 
 # 개발 의존성 추가 (pyproject.toml [project.optional-dependencies])
-docker-compose exec backend uv pip install --system -e ".[dev,test]"
+docker compose exec backend uv pip install --system -e ".[dev,test]"
 ```
 
 ### 개발 워크플로우
@@ -132,7 +132,7 @@ uv pip install -e ".[dev,test]"
 
 ```bash
 # Docker 환경에서 실행 (추천)
-docker-compose exec backend python scripts/add_test_tips.py
+docker compose exec backend python scripts/add_test_tips.py
 
 # 출력 예시
 🚀 테스트 팁 데이터 추가 시작...
@@ -260,17 +260,17 @@ tests/
 
 ```bash
 # 전체 테스트
-docker-compose exec backend pytest tests/ -v
+docker compose exec backend pytest tests/ -v
 
 # 특정 파일/테스트
-docker-compose exec backend pytest tests/test_api/test_tips_api.py -v
-docker-compose exec backend pytest tests/test_api/test_tips_api.py::test_get_daily_tip -v
+docker compose exec backend pytest tests/test_api/test_tips_api.py -v
+docker compose exec backend pytest tests/test_api/test_tips_api.py::test_get_daily_tip -v
 
 # 커버리지 확인
-docker-compose exec backend pytest tests/ --cov=app --cov-report=html
+docker compose exec backend pytest tests/ --cov=app --cov-report=html
 
 # 실패한 테스트만 재실행
-docker-compose exec backend pytest tests/ --lf
+docker compose exec backend pytest tests/ --lf
 ```
 
 ### 테스트 작성 가이드라인

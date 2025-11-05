@@ -43,39 +43,39 @@ jobs:
 
     - name: Build backend test image
       run: |
-        docker-compose -f docker-compose.ci.yml build backend-test
-        docker-compose -f docker-compose.ci.yml build backend-lint
+        docker compose -f docker-compose.ci.yml build backend-test
+        docker compose -f docker-compose.ci.yml build backend-lint
 
     - name: Start test services (PostgreSQL & Redis)
       run: |
-        docker-compose -f docker-compose.ci.yml up -d postgres-test redis-test
+        docker compose -f docker-compose.ci.yml up -d postgres-test redis-test
 
     - name: Wait for services to be ready
       run: |
-        timeout 60 bash -c 'until docker-compose -f docker-compose.ci.yml exec -T postgres-test pg_isready -U postgres -d linux_daily_tips_test; do sleep 2; done'
-        timeout 60 bash -c 'until docker-compose -f docker-compose.ci.yml exec -T redis-test redis-cli --raw incr ping; do sleep 2; done'
+        timeout 60 bash -c 'until docker compose -f docker-compose.ci.yml exec -T postgres-test pg_isready -U postgres -d linux_daily_tips_test; do sleep 2; done'
+        timeout 60 bash -c 'until docker compose -f docker-compose.ci.yml exec -T redis-test redis-cli --raw incr ping; do sleep 2; done'
 
     - name: Run code formatting check (Black)
-      run: docker-compose -f docker-compose.ci.yml run --rm backend-lint poetry run black --check .
+      run: docker compose -f docker-compose.ci.yml run --rm backend-lint poetry run black --check .
 
     - name: Run import sorting check (isort)
-      run: docker-compose -f docker-compose.ci.yml run --rm backend-lint poetry run isort --check-only .
+      run: docker compose -f docker-compose.ci.yml run --rm backend-lint poetry run isort --check-only .
 
     - name: Run linting (flake8)
-      run: docker-compose -f docker-compose.ci.yml run --rm backend-lint poetry run flake8 .
+      run: docker compose -f docker-compose.ci.yml run --rm backend-lint poetry run flake8 .
 
     - name: Run type checking (mypy)
-      run: docker-compose -f docker-compose.ci.yml run --rm backend-lint poetry run mypy .
+      run: docker compose -f docker-compose.ci.yml run --rm backend-lint poetry run mypy .
 
     - name: Run tests with coverage
       run: |
-        docker-compose -f docker-compose.ci.yml run --rm backend-test
+        docker compose -f docker-compose.ci.yml run --rm backend-test
 
     - name: Extract test coverage reports
       run: |
         mkdir -p ./coverage/backend
-        docker cp $(docker-compose -f docker-compose.ci.yml ps -q backend-test):/app/coverage/coverage.xml ./coverage/backend/ || true
-        docker cp $(docker-compose -f docker-compose.ci.yml ps -q backend-test):/app/coverage/html ./coverage/backend/ || true
+        docker cp $(docker compose -f docker-compose.ci.yml ps -q backend-test):/app/coverage/coverage.xml ./coverage/backend/ || true
+        docker cp $(docker compose -f docker-compose.ci.yml ps -q backend-test):/app/coverage/html ./coverage/backend/ || true
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
@@ -86,11 +86,11 @@ jobs:
         fail_ci_if_error: false
 
     - name: Run security check
-      run: docker-compose -f docker-compose.ci.yml run --rm backend-security || true
+      run: docker compose -f docker-compose.ci.yml run --rm backend-security || true
 
     - name: Clean up
       if: always()
-      run: docker-compose -f docker-compose.ci.yml down -v
+      run: docker compose -f docker-compose.ci.yml down -v
 
   backend-security-scan:
     name: Backend Security Scan

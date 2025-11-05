@@ -172,7 +172,7 @@ from app.config.redis.rate_limiter import RedisRateLimiter
 
 ✅ **All imports tested and working**:
 ```bash
-docker-compose exec backend python -c "
+docker compose exec backend python -c "
 from app.config.redis import (
     RedisConfig, RedisClient, RedisCache, RedisRateLimiter,
     get_redis_config, get_redis_client, get_redis_cache, get_redis_rate_limiter,
