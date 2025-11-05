@@ -105,6 +105,53 @@ services:
             - .pytest_cache
             - "*.pyc"
 
+  # Next.js Frontend (Development mode)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development
+    container_name: linux_tips_frontend
+    restart: unless-stopped
+    environment:
+      # Backend API URL (클라이언트 사이드)
+      # 빈 문자열 = Next.js rewrites 프록시 사용 (/api/* → backend:8000/api/*)
+      # 브라우저와 Playwright 모두 동일한 상대 경로 사용
+      NEXT_PUBLIC_API_URL: ""
+      # Backend API URL (서버 사이드 - Next.js rewrites용)
+      # Docker 네트워크 내부에서만 사용
+      API_BACKEND_URL: http://backend:8000
+      # App environment
+      NEXT_PUBLIC_APP_ENV: development
+      # Node.js environment
+      NODE_ENV: development
+      # Disable Next.js telemetry
+      NEXT_TELEMETRY_DISABLED: 1
+      # Enable hot reload
+      WATCHPACK_POLLING: "true"
+      # Playwright configuration
+      DOCKER_ENV: "true"
+      PLAYWRIGHT_BASE_URL: http://localhost:3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    networks:
+      - linux_tips_network
+    depends_on:
+      - backend
+    develop:
+      watch:
+        - action: sync
+          path: ./frontend
+          target: /app
+          ignore:
+            - node_modules
+            - .next
+            - .git
+
 # Persistent volumes for data
 volumes:
   postgres_data:

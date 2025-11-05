@@ -90,8 +90,10 @@ function TipsListContent() {
 
   // Trigger URL update when debounced query changes
   useEffect(() => {
-    if (debouncedQuery !== searchParams.get('q')) {
-      updateURL({ q: debouncedQuery, page: 1 }); // Reset to page 1 on new search
+    const currentQuery = searchParams.get('q') || '';
+
+    if (debouncedQuery !== currentQuery) {
+      updateURL({ q: debouncedQuery || undefined, page: 1 }); // Reset to page 1 on new search
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedQuery]);

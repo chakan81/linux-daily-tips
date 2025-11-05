@@ -1,8 +1,8 @@
 # Multi-stage Dockerfile for Next.js Frontend
 # Production and CI optimized
 
-# Base image with Node.js 20
-FROM node:20-alpine as base
+# Base image with Node.js 22 LTS
+FROM node:22-alpine as base
 
 # Set working directory
 WORKDIR /app
@@ -17,15 +17,28 @@ RUN apk add --no-cache libc6-compat
 # Copy package files
 COPY package.json package-lock.json* ./
 
-# Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+# Install dependencies (use --legacy-peer-deps for Storybook compatibility with Next.js 16)
+RUN npm ci --only=production --legacy-peer-deps && npm cache clean --force
 
 # Development stage
 FROM base as development
 
+# Install dependencies for Playwright (browsers need additional libs)
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont
+
+# Tell Playwright to use system Chromium
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
 # Install all dependencies including dev
 COPY package.json package-lock.json* ./
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 # Copy source code
 COPY . .
@@ -41,7 +54,7 @@ FROM base as testing
 
 # Install all dependencies including dev
 COPY package.json package-lock.json* ./
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 # Copy source code
 COPY . .

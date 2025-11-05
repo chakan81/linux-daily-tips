@@ -11,8 +11,12 @@ const envSchema = z.object({
    * Backend API URL
    * @example http://localhost:8000
    * @example https://api.linuxdailytips.com
+   * @example "" (empty string for Next.js rewrites proxy)
    */
-  NEXT_PUBLIC_API_URL: z.string().url('Invalid API URL format').min(1, 'API URL is required'),
+  NEXT_PUBLIC_API_URL: z.string().refine(
+    (val) => val === '' || z.string().url().safeParse(val).success,
+    'Invalid API URL format (must be empty string or valid URL)'
+  ),
 
   /**
    * Frontend base URL (used for canonical URLs, OG images, etc.)

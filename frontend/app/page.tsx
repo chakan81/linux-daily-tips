@@ -1,10 +1,7 @@
 import { Suspense } from 'react'
-import { Metadata } from 'next'
 import { HeroSection, TodayTipSection, RecentTipsSection, /* StatsSection, */ CTASection } from '@/components/sections'
 
-export const metadata: Metadata = {
-  title: 'Home',
-}
+// Use default title from layout.tsx
 
 function LoadingSkeleton() {
   return (

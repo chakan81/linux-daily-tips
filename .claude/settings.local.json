@@ -27,5 +27,29 @@
     "playwright",
     "shadcn-ui"
   ],
+  "hooks": {
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "say \"저기요?\""
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "say \"요청하신 작업이 완료되었습니다\""
+          }
+        ]
+      }
+    ]
+  },
   "outputStyle": "default"
 }

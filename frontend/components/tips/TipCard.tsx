@@ -35,6 +35,7 @@ export function TipCard({ tip, onClick }: TipCardProps) {
 
   return (
     <Card
+      data-testid="tip-card"
       className="group hover:scale-105 transition-transform duration-300 cursor-pointer h-full flex flex-col"
       onClick={onClick}
       role="button"

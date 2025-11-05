@@ -59,6 +59,7 @@ export function ActiveFiltersChips({
       {activeFilters.map(([key, value]) => (
         <Badge
           key={key}
+          data-testid="active-filter-chip"
           variant="secondary"
           className="gap-1 pr-1 cursor-pointer hover:bg-secondary/80 transition-colors"
           role="button"

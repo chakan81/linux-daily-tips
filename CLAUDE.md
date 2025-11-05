@@ -161,8 +161,8 @@ Backend API 서버
 - ✅ 성능: 모든 목표 초과 달성 (세션 생성 < 2초, 명령어 < 1초)
 - ⚠️ 제약: vim/nano 미지원, 실시간 입력 불가, 특수 키 미처리 → Phase 2에서 개선
 
-#### ✅ Week 4 진행 중 (Day 22-27 Part 1 완료) 🚀
-**프론트엔드-백엔드 통합 76% 완료**
+#### ✅ Week 4 완료 (Day 22-27) 🎉
+**프론트엔드-백엔드 통합 92% 완료**
 - ✅ Day 22-24: MSW 제거 및 API 통합 **[완료!]**
   - **MSW 완전 제거**: 596줄 Mock 코드 삭제, 33개 패키지 제거
   - **실제 백엔드 API 연동**: 홈페이지에서 실제 데이터 표시 확인
@@ -174,7 +174,7 @@ Backend API 서버
   - **Frontend cleanup**: 모든 `any` 타입 제거
   - **타입 안전성 100%**: TypeScript 컴파일 에러 없음
 
-- ✅ Day 26: Tips 페이지 구현 **[완료!]** (이전 세션)
+- ✅ Day 26: Tips 페이지 구현 **[완료!]**
   - 팁 상세/목록 페이지 완성 (`/tips`, `/tips/[id]`)
   - 검색/정렬/필터 기능 구현
   - URL 상태 관리 (query parameters)
@@ -188,18 +188,26 @@ Backend API 서버
   - **Next.js 16 Suspense**: useSearchParams() 감싸기 완료
   - 📊 완료 보고서: `backend/docs/day27-search-sort-completion-report.md`
 
+- ✅ Day 27 Part 2: E2E 테스트 & Docker 완전 통합 **[완료!]** (2025-11-05) 🎉
+  - **E2E 테스트**: 22/22 통과 (100%, 50.5초) - 이전 8/22 (36%)에서 개선
+  - **브라우저 API**: 오늘의 팁 + 최근 팁 5개 정상 표시
+  - **Next.js rewrites 프록시**: `/api/*` → `backend:8000/api/*` 완성
+  - **환경 변수 수정**: `next.config.js` env 섹션 (`!== undefined` 체크)
+  - **Docker 통합**: Frontend + Backend + DB 완전 작동
+  - 📊 완료 보고서: `docs/day27-part2-completion-report.md`
+
 **Week 4 성과 요약**:
 - ✅ MSW → 실제 백엔드 API 전환 완료
 - ✅ Tips 페이지 완전 구현 (검색/정렬/필터 포함)
 - ✅ 검색/정렬 백엔드 API TDD 구현
 - ✅ Node.js 22 LTS 업그레이드 완료
 - ✅ 터미널 시스템 WebSocket 완전 작동
+- ✅ **E2E 테스트 100% 통과** (22/22) ⭐
+- ✅ **Docker 환경 완전 통합** ⭐
 
-#### ⏳ Week 4 남은 작업 (Day 27 Part 2 - Day 28)
-- 프론트엔드 도커화 (Node.js 22-alpine) - Day 27 Part 2
-- E2E 테스트 작성 (Playwright) - Day 27 Part 2
-- 성능 최적화 (Lighthouse 90+) - Day 27 Part 2
-- 문서화 (사용자 가이드, API 문서, 배포 가이드) - Day 28
+#### ⏳ Week 4 남은 작업 (Day 28)
+- 성능 최적화 (Lighthouse 90+)
+- 문서화 (사용자 가이드, API 문서, 배포 가이드)
 
 ### 📂 주요 문서
 
@@ -217,13 +225,15 @@ Backend API 서버
 
 **완료 보고서**:
 - `frontend/docs/`: Day 7 완료 보고서
-- `backend/docs/`: Day 8-9, 10-11, 12-13, 14, 21, 27 완료 보고서
-- `backend/docs/day27-search-sort-completion-report.md`: 검색/정렬 API TDD 완료 ✨ 신규
+- `backend/docs/`: Day 8-9, 10-11, 12-13, 14, 21, 27 Part 1 완료 보고서
+- `backend/docs/day27-search-sort-completion-report.md`: 검색/정렬 API TDD 완료
 - `backend/docs/issue-fixes-completion-report.md`: 코드 품질 이슈 수정
 - `backend/docs/redis-module-architecture.md`: Redis 모듈 아키텍처
 - `backend/docs/code-refactoring-report.md`: 코드 리팩토링 보고서
 - `docs/tips-pages-implementation-plan.md`: Day 23-24 통합 완료 분석
-- `docs/framework-update-plan.md`: Node.js 22 LTS 업그레이드 ✨ 신규
+- `docs/framework-update-plan.md`: Node.js 22 LTS 업그레이드
+- `docs/day27-part2-completion-report.md`: E2E 테스트 & Docker 통합 완료 ✨ 신규
+- `docs/day27-part2-session-resume.md`: 세션 중단/재개 가이드
 
 ---
 

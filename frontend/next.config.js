@@ -29,8 +29,12 @@ const nextConfig = {
   }),
 
   // Environment variables validation
+  // NOTE: NEXT_PUBLIC_* variables are automatically exposed to the browser
+  // Empty string is allowed for NEXT_PUBLIC_API_URL (uses Next.js rewrites proxy)
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000',
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL !== undefined
+      ? process.env.NEXT_PUBLIC_API_URL
+      : 'http://localhost:8000',
     NEXT_PUBLIC_APP_ENV: process.env.NEXT_PUBLIC_APP_ENV || 'development',
   },
 
@@ -67,10 +71,14 @@ const nextConfig = {
 
   // API route rewrites
   async rewrites() {
+    // API_BACKEND_URL: 서버 사이드 전용 (Docker: backend:8000, 로컬: localhost:8000)
+    // NEXT_PUBLIC_API_URL: 클라이언트 사이드 (빈 문자열이면 rewrites 사용)
+    const apiBackendUrl = process.env.API_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
     return [
       {
         source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/:path*`,
+        destination: `${apiBackendUrl}/api/:path*`,
       },
       {
         source: '/health',
