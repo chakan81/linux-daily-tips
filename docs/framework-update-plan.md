@@ -49,6 +49,7 @@
 
 | 패키지                     | 현재 버전 | 최신 버전     | 차이                  | 우선순위 |
 | -------------------------- | --------- | ------------- | --------------------- | -------- |
+| **Node.js**                | 20.x      | 22.x LTS      | 메이저 업그레이드     | **중**   |
 | **Next.js**                | 15.5.4    | 16.0.0 (정식) | 메이저 업그레이드     | **중**   |
 | **React**                  | 19.1.1    | 19.2.0        | 마이너                | 중       |
 | **TypeScript**             | 5.2.2     | 5.9.3         | 마이너 (7단계 차이)   | **높음** |
@@ -120,6 +121,55 @@ npm run type-check  # 타입 체크 확인
 - `npm run type-check` 통과
 - `npm run build` 성공
 - 빌드 시간 비교 (개선 예상)
+
+---
+
+#### 1-2. Node.js 20 → 22 LTS ✅ (완료: 2025-11-05)
+
+**이유**:
+
+- **Node.js 22 LTS (2027년 4월까지 지원)**: 최신 장기 지원 버전
+- **더 긴 지원 기간**: Node.js 20은 2026년까지, 22는 2027년까지
+- **성능 향상**: 최신 V8 엔진, ES 모듈 개선
+- **Next.js 16 + React 19.2 완벽 호환**: 공식 지원 확인됨
+- **@types/node 22.x**: TypeScript 타입 정의 최신화
+
+**영향도**: 낮음 (런타임 업그레이드, 코드 수정 불필요)
+
+**실행 계획**:
+
+```bash
+cd frontend
+
+# 1. package.json 수정
+# engines.node: ">=20.0.0" → ">=22.0.0"
+# @types/node: "20.8.7" → "^22.0.0"
+
+# 2. 패키지 재설치
+npm install --legacy-peer-deps --ignore-scripts
+
+# 3. 호환성 테스트
+npm run type-check  # TypeScript 타입 체크
+npm run build       # 프로덕션 빌드
+
+# 4. Next.js 16 Suspense 이슈 수정
+# /tips/page.tsx에서 useSearchParams()를 Suspense로 감싸기
+```
+
+**검증 방법**:
+
+- ✅ @types/node 버전 확인: 22.19.0 설치됨
+- ✅ TypeScript 타입 체크 통과 (에러 0개)
+- ✅ 프로덕션 빌드 성공 (3.4초)
+- ✅ 개발 서버 정상 실행
+- ✅ 모든 페이지 정상 렌더링 (홈, /tips, /terminal)
+
+**추가 수정 사항**:
+
+- **Next.js 16 Suspense Boundary**: `/tips/page.tsx`에서 `useSearchParams()` 사용 시 Suspense로 감싸야 함 (Next.js 16 필수 요구사항)
+- 해결: `TipsListContent` 컴포넌트를 `Suspense`로 감싸서 해결
+
+**완료 일자**: 2025-11-05
 
 ---
 
@@ -687,6 +737,7 @@ docker compose up -d postgres
 ### Phase 0: 즉시 실행 ✅ (완료)
 
 - [x] TypeScript 5.9.3 업데이트
+- [x] Node.js 20 → 22 LTS 업데이트 ✅ (2025-11-05)
 - [x] Zod 4.1.12 업데이트
 - [x] Redis 7 → 8 업그레이드
 - [x] PostgreSQL 15 → 18 업그레이드

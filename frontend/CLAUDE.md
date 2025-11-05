@@ -11,20 +11,23 @@
 ## 🛠 기술 스택 및 설정
 
 ### 핵심 기술
+- **Node.js 22 LTS**: 최신 장기 지원 버전 (2027년까지 지원)
 - **Next.js 16**: App Router, Turbopack (stable), React Compiler 지원, React 19.2
-- **TypeScript**: Strict 모드 활성화
-- **Tailwind CSS**: 커스텀 테마 (Awwwards 스타일 적용)
+- **TypeScript 5.9.3**: Strict 모드 활성화
+- **Tailwind CSS 3.4.18**: 커스텀 테마 (Awwwards 스타일 적용)
 - **shadcn/ui**: 기본 UI 컴포넌트 시스템
 
 ### 주요 라이브러리
 ```json
 {
+  "node": ">=22.0.0",
   "next": "^16.0.0",
   "react": "^19.2.0",
   "typescript": "5.9.3",
   "tailwindcss": "^3.4.18",
   "lucide-react": "^0.548.0",
-  "@tailwindcss/typography": "^0.5.10"
+  "@tailwindcss/typography": "^0.5.10",
+  "@types/node": "^22.0.0"
 }
 ```
 

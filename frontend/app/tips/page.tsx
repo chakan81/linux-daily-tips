@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { useTipsList, useSearchTips } from '@/lib/hooks/useTips';
@@ -17,7 +18,7 @@ import {
 import { TipErrorState } from '@/components/tips';
 
 /**
- * Tips List Page
+ * Tips List Content Component
  *
  * Provides a complete tips browsing experience with:
  * - Search functionality (debounced 300ms)
@@ -29,7 +30,7 @@ import { TipErrorState } from '@/components/tips';
  * URL Structure:
  * /tips?page=2&difficulty=beginner&category=file-system&q=find&sort_by=publish_date&order=desc
  */
-export default function TipsListPage() {
+function TipsListContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -205,8 +206,8 @@ export default function TipsListPage() {
             <SearchBar
               value={searchQuery}
               onChange={handleSearchChange}
-              placeholder="Search (Coming soon)"
-              disabled={true}
+              placeholder="Search tips..."
+              disabled={false}
             />
             <TipsFilters
               difficulty={difficulty}
@@ -268,8 +269,8 @@ export default function TipsListPage() {
           <SearchBar
             value={searchQuery}
             onChange={handleSearchChange}
-            placeholder="Search (Coming soon)"
-            disabled={true}
+            placeholder="Search tips..."
+            disabled={false}
           />
           <TipsFilters
             difficulty={difficulty}
@@ -318,5 +319,31 @@ export default function TipsListPage() {
         </>
       )}
     </div>
+  );
+}
+
+/**
+ * Tips List Page (with Suspense boundary for useSearchParams)
+ *
+ * Wraps TipsListContent in a Suspense boundary to satisfy Next.js 16 requirements
+ * for using useSearchParams() in a page component.
+ */
+export default function TipsListPage() {
+  return (
+    <Suspense fallback={
+      <div className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+            Linux Tips
+          </h1>
+          <p className="text-xl text-muted-foreground">
+            Browse our collection of Linux tips and tricks
+          </p>
+        </div>
+        <TipsGridSkeleton count={12} />
+      </div>
+    }>
+      <TipsListContent />
+    </Suspense>
   );
 }
