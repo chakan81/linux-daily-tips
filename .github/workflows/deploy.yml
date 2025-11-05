@@ -23,6 +23,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      security-events: write
 
     outputs:
       backend-image: ${{ steps.meta-backend.outputs.tags }}
