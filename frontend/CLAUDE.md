@@ -343,6 +343,68 @@ export type ApiError = NetworkError | ValidationError | ...
 - terminal.spec.ts: 6.0/10 → **8.0+/10** (예상)
 - tips.spec.ts: 6.5/10 → **8.0+/10** (예상)
 
+### ⚠️ 리팩토링 부작용 및 해결 (Day 28)
+
+**발견된 문제**:
+Day 27 Part 3 리팩토링 후 터미널이 작동하지 않는 버그 발견:
+1. **프롬프트 미표시**: Welcome 메시지가 표시되지 않음
+2. **명령어 무반응**: ls 입력 후 아무 출력 없음
+
+**원인 분석**:
+```typescript
+// 리팩토링 전 (작동함)
+const handleMessage = useCallback((message) => {
+  if (!xtermRef.current) return;  // ref는 항상 최신 값
+}, []); // 의존성 없음, 재생성 안 됨
+
+// 리팩토링 후 (버그)
+const handleMessage = useCallback((message) => {
+  if (!terminal) return;  // terminal은 prop/state
+}, [terminal]); // terminal 변경 시 재생성 → 클로저 문제!
+```
+
+**문제 1: 레이스 컨디션**
+- WebSocket 메시지가 터미널 초기화보다 먼저 도착
+- `terminal === null` 상태에서 메시지 손실
+
+**문제 2: React 클로저**
+- WebSocket이 초기 `handleMessage(v1)` 캡처
+- 터미널 초기화 후 `handleMessage(v2)` 재생성
+- WebSocket은 여전히 `v1` 사용 → 메시지 처리 안 됨
+
+**해결책**:
+```typescript
+// 1. 메시지 버퍼링 (레이스 컨디션 해결)
+const messageBufferRef = useRef<any[]>([]);
+if (!terminal) {
+  messageBufferRef.current.push(message); // 버퍼 저장
+  return;
+}
+// 터미널 준비 시 버퍼 플러시
+
+// 2. useRef 패턴 (클로저 해결)
+const onMessageRef = useRef(mergedConfig.onMessage);
+useEffect(() => {
+  onMessageRef.current = mergedConfig.onMessage; // 최신 콜백 업데이트
+}, [mergedConfig.onMessage]);
+
+ws.onmessage = (event) => {
+  if (onMessageRef.current) {
+    onMessageRef.current(message); // 항상 최신 호출
+  }
+};
+```
+
+**교훈**:
+- ✅ 리팩토링 자체는 정당 (코드 품질 개선)
+- ⚠️ ref → prop/state 변경 시 클로저 주의
+- 🔧 WebSocket + React hooks는 useRef 패턴 필수
+- 📊 타이밍 의존 코드는 버퍼링으로 안정화
+
+**파일 변경**:
+- `lib/hooks/useTerminalWebSocketMessages.ts` - 버퍼링 추가
+- `lib/hooks/useTerminalWebSocket.ts` - useRef 패턴 적용
+
 ## 🚀 다음 단계 (Week 4: Day 25-28)
 
 ### Day 25-26: Tips 페이지 구현 (최우선)

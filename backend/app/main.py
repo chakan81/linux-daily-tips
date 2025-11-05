@@ -34,36 +34,42 @@ async def cleanup_expired_sessions_task():
 
     매 1분마다 실행되어 만료된 세션과 고아 컨테이너를 자동 삭제합니다.
     """
-    from app.config.database import async_session_maker
-    from app.services.docker_service import DockerService
-    from app.services.terminal import TerminalService
+    try:
+        from app.config.database import get_database
+        from app.services.docker_service import DockerService
+        from app.services.terminal import TerminalService
 
-    logger.info("🧹 컨테이너 정리 백그라운드 작업 시작 (1분 주기)")
+        logger.info("🧹 컨테이너 정리 백그라운드 작업 시작 (1분 주기)")
 
-    docker_service = DockerService()
-    terminal_service = TerminalService(docker_service=docker_service)
+        docker_service = DockerService()
+        terminal_service = TerminalService(docker_service=docker_service)
+        db_config = get_database()
 
-    while should_cleanup:
-        try:
-            # 만료된 세션 정리
-            async with async_session_maker() as db:
-                cleaned_count = await terminal_service.cleanup_expired_sessions(db)
-                if cleaned_count > 0:
-                    logger.info(f"🧹 만료된 세션 {cleaned_count}개 정리 완료")
-                await db.commit()
+        while should_cleanup:
+            try:
+                # 만료된 세션 정리
+                async with db_config.async_session_factory() as db:
+                    cleaned_count = await terminal_service.cleanup_expired_sessions(db)
+                    if cleaned_count > 0:
+                        logger.info(f"🧹 만료된 세션 {cleaned_count}개 정리 완료")
+                    await db.commit()
 
-            # 고아 컨테이너 정리 (Redis에 없는 컨테이너)
-            orphan_count = await docker_service.cleanup_all_containers(
-                label="app=linux-daily-tips"
-            )
-            if orphan_count > 0:
-                logger.info(f"🧹 고아 컨테이너 {orphan_count}개 정리 완료")
+                # 고아 컨테이너 정리 (Redis에 없는 컨테이너)
+                orphan_count = await docker_service.cleanup_all_containers(
+                    label="app=linux-daily-tips"
+                )
+                if orphan_count > 0:
+                    logger.info(f"🧹 고아 컨테이너 {orphan_count}개 정리 완료")
 
-        except Exception as e:
-            logger.error(f"❌ 세션 정리 중 오류 발생: {str(e)}", exc_info=True)
+            except Exception as e:
+                logger.error(f"❌ 세션 정리 중 오류 발생: {str(e)}", exc_info=True)
 
-        # 1분 대기
-        await asyncio.sleep(60)
+            # 1분 대기
+            await asyncio.sleep(60)
+
+    except Exception as e:
+        logger.error(f"❌ 컨테이너 정리 백그라운드 작업 초기화 실패: {str(e)}", exc_info=True)
+        raise
 
 
 @asynccontextmanager
@@ -90,6 +96,15 @@ async def lifespan(app: FastAPI):
     # 백그라운드 정리 작업 시작
     should_cleanup = True
     cleanup_task = asyncio.create_task(cleanup_expired_sessions_task())
+
+    # Task 예외를 명시적으로 로그에 기록
+    def task_exception_handler(task):
+        try:
+            task.result()
+        except Exception as e:
+            logger.error(f"❌ 백그라운드 작업 예외 발생: {str(e)}", exc_info=True)
+
+    cleanup_task.add_done_callback(task_exception_handler)
     logger.info("✅ 컨테이너 정리 백그라운드 작업 등록 완료")
 
     logger.info("✅ Application startup complete")

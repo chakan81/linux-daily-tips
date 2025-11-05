@@ -93,6 +93,12 @@ export function useTerminalWebSocket(
   const pingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttemptsRef = useRef(0);
   const isManualDisconnectRef = useRef(false);
+  const onMessageRef = useRef(mergedConfig.onMessage); // 최신 onMessage 콜백 참조
+
+  // Update onMessage ref when it changes
+  useEffect(() => {
+    onMessageRef.current = mergedConfig.onMessage;
+  }, [mergedConfig.onMessage]);
 
   /**
    * Clear ping interval
@@ -194,8 +200,9 @@ export function useTerminalWebSocket(
           console.log('[WS] Parsed message:', message);
 
           // Call onMessage callback immediately if provided
-          if (mergedConfig.onMessage) {
-            mergedConfig.onMessage(message);
+          // Use ref to always get the latest callback
+          if (onMessageRef.current) {
+            onMessageRef.current(message);
           }
 
           setLastMessage(message);
