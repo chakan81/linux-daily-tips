@@ -390,6 +390,64 @@ API 요청 → JWT 검증 → Redis 세션 확인 → 권한 체크
   - README.md 업데이트 (진행률 90%)
 - ✅ 빌드 이슈 분석 및 Phase 2 계획 수립
 
+#### Day 28 Part 2: 빌드 이슈 해결 및 API/UX 개선 ✅ (2025-11-06)
+
+**Next.js 16 빌드 이슈 해결** ✅ (100% 완료!)
+- [x] Providers Client Component 분리 → **frontend-code-writer** ✅
+  - `frontend/components/providers.tsx` 신규 생성
+  - ThemeProvider + QueryProvider + Toaster 통합
+- [x] layout.tsx 단순화 → **frontend-code-writer** ✅
+  - Provider 개별 import 제거
+  - Providers 컴포넌트 사용
+- [x] experimental.staticGenerationRetryCount 설정 추가 → **frontend-code-writer** ✅
+  - `next.config.js` experimental 섹션 추가
+  - Context Provider prerendering 에러 완전 해결
+- [x] 프로덕션 빌드 검증 → **frontend-code-writer** ✅
+  - `npm run build` 성공 확인
+
+**API 설계 개선: 최신 팁 반환 방식** ✅ (100% 완료!)
+- [x] get_daily_tip() 함수 수정 → **backend-code-writer** ✅
+  - 날짜 기반 (`publish_date == target_date`) → 최신 팁 (`publish_date <= target_date`)
+  - `ORDER BY publish_date DESC LIMIT 1` 추가
+- [x] 캐시 TTL 최적화 → **backend-code-writer** ✅
+  - 24시간 → 1시간 (빠른 업데이트 반영)
+- [x] 실전 테스트 → **backend-code-writer** ✅
+  - cat 명령어(2025-11-06) 삭제 후 테스트
+  - ls 명령어(2025-11-05)가 "오늘의 팁"으로 정상 표시
+  - 3가지 시나리오 검증 (오늘/미래/과거 날짜)
+
+**UX 개선: BackButton 브라우저 히스토리 사용** ✅ (100% 완료!)
+- [x] BackButton href prop 제거 → **frontend-code-writer** ✅
+  - `<BackButton href="/tips" />` → `<BackButton label="Back" />`
+  - `router.back()` 자동 사용
+- [x] 브라우저 테스트 → **frontend-code-writer** ✅
+  - 홈페이지 → 팁 상세 → Back → 홈페이지 복귀 ✅
+  - Tips 페이지 → 팁 상세 → Back → Tips 페이지 복귀 ✅
+
+**코드 스타일 통일** ✅ (100% 완료!)
+- [x] Dockerfile AS 키워드 대문자화 → **frontend-code-writer** ✅
+  - `FROM base as deps` → `FROM base AS deps`
+  - 6곳 수정 (base, deps, development, testing, builder, production)
+  - Docker 컨벤션 준수
+
+**완료 기준**: 빌드 이슈 해결 + API 안정성 개선 + UX 개선 ✅
+
+**현재 상태**: Day 28 Part 2 완료! (15/15 작업, 100%) 🎉
+- ✅ Next.js 16 프로덕션 빌드 성공
+- ✅ API 안정성 대폭 개선 (팁 업데이트 누락에도 안정적 동작)
+- ✅ 사용자 경험 개선 (자연스러운 뒤로 가기)
+- ✅ 코드 품질 향상 (Dockerfile 컨벤션 준수)
+- 📊 **완료 보고서**: `docs/day28-part2-completion-report.md`
+- 📊 **업데이트**: `CLAUDE.md`, `docs/phase1-tasks.md`, `README.md`
+
+**변경된 파일 (6개)**:
+1. `backend/app/services/tip/tip_query.py` - API 개선
+2. `frontend/Dockerfile` - 코드 스타일 통일
+3. `frontend/app/layout.tsx` - Providers 분리
+4. `frontend/app/tips/[id]/page.tsx` - BackButton 개선
+5. `frontend/components/providers.tsx` - 신규 생성
+6. `frontend/next.config.js` - experimental 설정 추가
+
 ---
 
 ## 🎯 기술 도메인별 작업 분류
@@ -644,11 +702,11 @@ API 요청 → JWT 검증 → Redis 세션 확인 → 권한 체크
 - **전체 진행률**: 52/52 작업 완료 (100%) 🎉🏆
 
 ### 📈 전체 Phase 1 진행률
-**현재 상태**: 111/111 작업 완료 (**100%**) 🎉🏆
+**현재 상태**: 126/126 작업 완료 (**100%**) 🎉🏆
 
 **최종 통계**:
-- 작업 수: 111개 (Day 27 Part 2: 5개, Day 27 Part 3: 11개, Day 28: 8개)
-- 완료 작업: 111개 ✅
+- 작업 수: 126개 (Day 27 Part 2: 5개, Day 27 Part 3: 11개, Day 28: 8개, Day 28 Part 2: 15개)
+- 완료 작업: 126개 ✅
 - 진행률: **100% 완료!** 🎉🏆
 - **Phase 1 MVP 개발 완전 완료**: 4주 28일 목표 달성 ✅
 
@@ -683,7 +741,23 @@ API 요청 → JWT 검증 → Redis 세션 확인 → 권한 체크
 10. ✅ ~~Week 4 Day 25: 코드 품질 개선~~ **완료!** 🎉 (API 네이밍 해결, any 타입 제거, 타입 안전성 100%)
 11. 🚀 **Week 4 Day 26-28: Tips 페이지 구현 + 테스트 + 도커화** **다음 작업**
 
-**최신 완료 사항** (Day 28 완료 - 2025-11-05): 🎉🏆
+**최신 완료 사항** (Day 28 Part 2 완료 - 2025-11-06): 🎉🏆
+- **Next.js 16 빌드 이슈 해결**: ✅
+  - Providers Client Component 분리 (`frontend/components/providers.tsx`)
+  - experimental.staticGenerationRetryCount 설정 추가
+  - 프로덕션 빌드 성공
+- **API 설계 개선**: ✅
+  - get_daily_tip() 함수 수정: 날짜 기반 → 최신 팁 반환 방식
+  - 캐시 TTL: 24시간 → 1시간
+  - 팁 업데이트 누락에도 안정적 동작
+- **UX 개선**: ✅
+  - BackButton 브라우저 히스토리 사용 (router.back)
+  - 원래 페이지로 정확히 복귀
+- **코드 스타일 통일**: ✅
+  - Dockerfile `as` → `AS` 대문자 변경 (6곳)
+- 📊 **완료 보고서**: `docs/day28-part2-completion-report.md`
+
+**이전 완료 사항** (Day 28 Part 1 완료 - 2025-11-05): 🎉🏆
 - **터미널 시스템 크론잡 수정**: ImportError 해결 (57개 컨테이너 정리) ✅
   - `async_session_maker` → `get_database().async_session_factory()` 수정
   - asyncio task 예외 핸들러 추가 (silent failure 방지)
@@ -699,8 +773,8 @@ API 요청 → JWT 검증 → Redis 세션 확인 → 권한 체크
   - day28-completion-report.md: Phase 1 완료 보고서
 - 📊 **업데이트**: `docs/phase1-tasks.md`, `frontend/CLAUDE.md`, `CLAUDE.md`
 
-**Phase 1 완료**: Week 1-4 **100% 완료 (111/111 작업)** ✅ 🏆🎉
-**다음 단계**: Phase 2 시작 (빌드 이슈 해결, LLM 연동, 관리자 대시보드) 🚀
+**Phase 1 완료**: Week 1-4 **100% 완료 (126/126 작업)** ✅ 🏆🎉
+**다음 단계**: Phase 2 시작 (LLM 연동, 관리자 대시보드, 고급 터미널) 🚀
 
 ---
 

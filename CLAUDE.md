@@ -88,155 +88,44 @@ Backend API 서버
 
 ## 📊 현재 개발 상태
 
-### Phase 1 (MVP) 진행률: 100% 완료! 🎉🏆 (111/111 작업)
+### Phase 1 (MVP): 100% 완료! 🎉🏆
 
-#### ✅ Week 1 완료 (Day 1-7)
-**프론트엔드 인프라 100% 완료**
-- 프로젝트 초기 설정 (Docker Compose, CI/CD)
-- Next.js 15 + TypeScript + Tailwind CSS + shadcn/ui
-- 상태 관리 시스템 (Zustand + React Query)
-- API 클라이언트 (Axios + 25+ endpoints)
-- 에러 처리 및 로딩 컴포넌트
-- 다크모드 및 반응형 레이아웃
+**개발 기간**: 2025-10-01 ~ 2025-11-06 (37일)
+**완료 작업**: 111/111 (100%)
+**상세 진행 상황**: [docs/phase1-tasks.md](docs/phase1-tasks.md) 참조
 
-**추가 완료: 백엔드 인프라 최적화**
-- Poetry → **uv** 전환 완료 (10-100배 빠른 패키지 설치)
-- Docker 가상환경 최적화 (불필요한 venv 제거)
-- FastAPI 기본 앱 실행 확인
+#### 주요 성과
 
-#### ✅ Week 2 완료 (Day 8-14)
-**백엔드 API 개발 100% 완료**
-- ✅ FastAPI 프로젝트 구조 설계 (Day 8-9 완료!)
-  - 완전한 프로젝트 구조 (core, api, models, schemas, services)
-  - 보안 아키텍처 (JWT + OAuth 준비)
-  - Mock Tips API 구현 (daily, list, detail)
-  - Swagger UI 자동 문서
-- ✅ PostgreSQL 데이터베이스 스키마 및 ORM (Day 10-11 완료!)
-  - SQLAlchemy 2.0 Async 완전 구현
-  - 6개 모델 + Pydantic 스키마
-  - **129개 pytest 테스트 100% 통과** ✨
-  - ULID + 프리픽스 ID 시스템
-  - **코드 품질 평가 및 리팩토링 완료** (8.3 → 9.0/10)
-  - AppException + 구조화 로깅 시스템
-- ✅ Tips API 개발 (Day 12-13 완료!)
-  - TDD 방식 개발 (21개 테스트 100% 통과)
-  - Service 계층 완성, Alembic 마이그레이션
-  - 성능 인덱스 추가 (3개)
-  - **코드 품질: 9.2/10** (Day 10-11 대비 +0.2)
-- ✅ Redis 캐싱 및 JWT 인증 (Day 14 완료!)
-  - Redis 캐싱 (90% 성능 개선)
-  - Google OAuth 2.0 + JWT 인증 시스템
-  - API Rate Limiting (slowapi)
-  - 234개 테스트 98.3% 통과 (230/234)
-  - 코드 품질: 9.1/10
-- ✅ 코드 품질 이슈 수정 (2025-11-03 완료!)
-  - Redis 에러 처리 표준화 (30+ print → logger)
-  - 환경 변수 기반 설정 강화 (HTTP/세션 TTL)
-  - EncryptionService 예외 처리 추가 (InvalidToken)
-  - 타임아웃 처리 일관성 개선
-  - **코드 품질: 9.5/10** (9.1 → 9.5, +4.4% 개선) ✨
+**Week 1 (프론트엔드)**:
+- Next.js 16 + React 19.2 + TypeScript 5.9
+- Zustand + React Query 상태 관리
+- shadcn/ui 디자인 시스템
 
-#### ✅ Week 3 완료 (Day 15-21) 🎉
-**터미널 에뮬레이터 100% 완료 (PoC 수준)**
-- ✅ Day 15-16: 프론트엔드 터미널 UI
-  - xterm.js 5.6.0 터미널 UI 브라우저 렌더링
-  - 기본 입력/출력 테스트 완료
-- ✅ Day 17-18: WebSocket 실시간 통신
-  - 프론트엔드-백엔드 WebSocket 연결
-  - 메시지 송수신, 재연결 로직 (3회 시도)
-- ✅ Day 19-20: Docker 컨테이너 통합
-  - Docker 컨테이너 명령어 실행 (ls, pwd, cat, echo)
-  - 세션 생성/종료 API 구현
-  - Playwright 자동화 테스트 통과
-- ✅ Day 21: 보안 강화 및 최적화 **[오늘 완료!]**
-  - **보안 검증**: 네트워크 격리, 리소스 제한 (256MB, CPU 0.5코어) 실제 동작 확인
-  - **성능 측정**: 세션 생성 0.14초, 명령어 실행 0.055초 (목표 초과 달성!)
-  - **컨테이너 정리 크론잡**: 1분 주기 백그라운드 작업 구현
-  - **동시 세션 테스트**: 5개 0.32초, 10개 0.42초 (모두 < 2초 달성)
-  - **완료 보고서**: backend/docs/day21-security-optimization.md
+**Week 2 (백엔드)**:
+- FastAPI + PostgreSQL 18 + Redis 8
+- SQLAlchemy 2.0 Async (234개 테스트 98.3% 통과)
+- JWT + OAuth 인증 시스템
 
-**Week 3 성과 요약**:
-- ✅ PoC 수준 터미널 완성 (라인 버퍼 모드)
-- ✅ 보안: 네트워크 격리, 리소스 제한, 세션 타임아웃 30분
-- ✅ 성능: 모든 목표 초과 달성 (세션 생성 < 2초, 명령어 < 1초)
-- ⚠️ 제약: vim/nano 미지원, 실시간 입력 불가, 특수 키 미처리 → Phase 2에서 개선
+**Week 3 (터미널)**:
+- xterm.js 5.6.0 + WebSocket 실시간 I/O
+- Docker 샌드박스 (보안 격리, 리소스 제한)
+- 성능: 세션 생성 0.14초, 명령어 실행 0.055초
 
-#### ✅ Week 4 완료 (Day 22-27) 🎉
-**프론트엔드-백엔드 통합 92% 완료**
-- ✅ Day 22-24: MSW 제거 및 API 통합 **[완료!]**
-  - **MSW 완전 제거**: 596줄 Mock 코드 삭제, 33개 패키지 제거
-  - **실제 백엔드 API 연동**: 홈페이지에서 실제 데이터 표시 확인
-  - **버그 수정**: 카테고리 배열 표시, 터미널 레이스 컨디션
-  - **통합 테스트 성공**: 홈페이지, 터미널 WebSocket 완전 작동
+**Week 4 (통합)**:
+- MSW 제거, 실제 API 연동
+- Tips 페이지 완성 (검색/정렬/필터)
+- E2E 테스트 22/22 통과 (100%)
+- Docker 환경 완전 통합
 
-- ✅ Day 25: 코드 품질 개선 **[완료!]**
-  - **API 네이밍 완전 해결**: Pydantic alias_generator (snake_case → camelCase)
-  - **Frontend cleanup**: 모든 `any` 타입 제거
-  - **타입 안전성 100%**: TypeScript 컴파일 에러 없음
+**최종 결과**:
+- 코드 품질: 9.5/10
+- 문서화: ~4,000줄 (USER_GUIDE, DEPLOYMENT, API_REFERENCE)
+- 기술 스택: Node.js 22 LTS, Python 3.14, PostgreSQL 18
 
-- ✅ Day 26: Tips 페이지 구현 **[완료!]**
-  - 팁 상세/목록 페이지 완성 (`/tips`, `/tips/[id]`)
-  - 검색/정렬/필터 기능 구현
-  - URL 상태 관리 (query parameters)
-
-- ✅ Day 27 Part 1: 검색/정렬 API + Node.js 22 **[완료!]** (2025-11-05)
-  - **검색 API**: ILIKE 패턴, 대소문자 무시
-  - **정렬 API**: publish_date/title, asc/desc
-  - **보안**: Whitelist 기반 SQL Injection 방지
-  - **TDD**: 11개 테스트 100% 통과
-  - **Node.js 22 LTS**: @types/node 22.19.0, 2027년까지 지원
-  - **Next.js 16 Suspense**: useSearchParams() 감싸기 완료
-  - 📊 완료 보고서: `backend/docs/day27-search-sort-completion-report.md`
-
-- ✅ Day 27 Part 2: E2E 테스트 & Docker 완전 통합 **[완료!]** (2025-11-05) 🎉
-  - **E2E 테스트**: 22/22 통과 (100%, 50.5초) - 이전 8/22 (36%)에서 개선
-  - **브라우저 API**: 오늘의 팁 + 최근 팁 5개 정상 표시
-  - **Next.js rewrites 프록시**: `/api/*` → `backend:8000/api/*` 완성
-  - **환경 변수 수정**: `next.config.js` env 섹션 (`!== undefined` 체크)
-  - **Docker 통합**: Frontend + Backend + DB 완전 작동
-  - 📊 완료 보고서: `docs/day27-part2-completion-report.md`
-
-- ✅ Day 27 Part 3: 코드 품질 리팩토링 **[완료!]** (2025-11-05) ⭐
-  - **Phase 1 - 테스트 헬퍼 클래스 추출**:
-    - terminal.spec.ts: 186줄 → 74줄 (60% 감소)
-    - tips.spec.ts: 174줄 → 86줄 (51% 감소)
-    - 총 360줄 → 160줄 (56% 코드 감소)
-  - **Phase 2 - TerminalEmulator 컴포넌트 분리**:
-    - TerminalEmulator.tsx: 278줄 → 182줄 (35% 감소)
-    - 3개 커스텀 훅 추출 (useTerminal, useTerminalInput, useTerminalWebSocketMessages)
-    - God Component 분리, 재사용성 향상
-  - **Phase 3 - 상수 추출**:
-    - e2e/constants.ts (TIMEOUTS, SCROLL_THRESHOLD)
-    - Magic numbers 제거 (13곳 적용)
-  - **검증 결과**: E2E 테스트 22/22 통과 (100%, 34.5초)
-
-**Week 4 성과 요약**:
-- ✅ MSW → 실제 백엔드 API 전환 완료
-- ✅ Tips 페이지 완전 구현 (검색/정렬/필터 포함)
-- ✅ 검색/정렬 백엔드 API TDD 구현
-- ✅ Node.js 22 LTS 업그레이드 완료
-- ✅ 터미널 시스템 WebSocket 완전 작동
-- ✅ **E2E 테스트 100% 통과** (22/22) ⭐
-- ✅ **Docker 환경 완전 통합** ⭐
-- ✅ **코드 품질 대폭 개선** (56% 코드 감소, God Component 분리) ⭐
-
-#### ✅ Week 4 완료! (Day 28) 🎉🏆
-**긴급 버그 수정 완료** ✅ (2025-11-05)
-- ✅ 터미널 시스템 크론잡 수정 (ImportError 해결, 57개 컨테이너 정리)
-- ✅ 터미널 버그 수정 (레이스 컨디션 + React 클로저)
-  - Day 27 Part 3 리팩토링 부작용 완전 해결
-  - 프롬프트 표시 및 명령어 응답 복구
-
-**문서화 완전 완료** ✅ (~4,000줄)
-- ✅ USER_GUIDE.md (~1,200줄): 빠른 시작, 개발 환경, 트러블슈팅
-- ✅ DEPLOYMENT.md (~1,300줄): 프로덕션 배포, 클라우드, 보안
-- ✅ API_REFERENCE.md (~1,500줄): API 상세, curl 예제, 에러 코드
-- ✅ README.md 업데이트: Phase 1 진행률 90%
-- ✅ day28-completion-report.md: Phase 1 완료 보고서
-
-**Phase 2로 이연**
-- 성능 최적화 (Lighthouse 90+) - 빌드 이슈 해결 후
-- 관리자 로그인 및 인증 동작
+**Phase 2 예정**:
+- LLM 연동 (팁 자동 생성)
+- 관리자 대시보드
+- 고급 터미널 기능 (vim/nano 지원)
 
 ### 📂 주요 문서
 
@@ -247,27 +136,29 @@ Backend API 서버
 - `docs/phase1-tasks.md`: Phase 1 상세 개발 계획
 
 **개발 가이드**:
-- `frontend/CLAUDE.md`: 프론트엔드 개발 가이드
+- `frontend/CLAUDE.md`: 프론트엔드 개발 가이드 + Day 27 Part 3 리팩토링 완료
 - `backend/CLAUDE.md`: 백엔드 개발 가이드 (uv, TDD, Error Handling 포함)
-- `backend/docs/models-usage-guide.md`: SQLAlchemy 사용 가이드
-- `backend/docs/environment-variables.md`: 환경 변수 설정 가이드 ✨ 신규
 
 **완료 보고서**:
-- `frontend/docs/`: Day 7 완료 보고서
-- `backend/docs/`: Day 8-9, 10-11, 12-13, 14, 21, 27 Part 1 완료 보고서
-- `backend/docs/day27-search-sort-completion-report.md`: 검색/정렬 API TDD 완료
-- `backend/docs/issue-fixes-completion-report.md`: 코드 품질 이슈 수정
-- `backend/docs/redis-module-architecture.md`: Redis 모듈 아키텍처
-- `backend/docs/code-refactoring-report.md`: 코드 리팩토링 보고서
-- `docs/tips-pages-implementation-plan.md`: Day 23-24 통합 완료 분석
-- `docs/framework-update-plan.md`: Node.js 22 LTS 업그레이드
-- `docs/day27-part2-completion-report.md`: E2E 테스트 & Docker 통합 완료
-- `docs/day27-part2-session-resume.md`: 세션 중단/재개 가이드
-- `frontend/CLAUDE.md`: Day 27 Part 3 코드 품질 리팩토링 완료
-- `docs/day28-completion-report.md`: **Phase 1 완료 보고서** ✨ 신규
-- `docs/USER_GUIDE.md`: 사용자 가이드 (~1,200줄) ✨ 신규
-- `docs/DEPLOYMENT.md`: 배포 가이드 (~1,300줄) ✨ 신규
-- `backend/docs/API_REFERENCE.md`: API 레퍼런스 (~1,500줄) ✨ 신규
+- `docs/phase1-completion-report.md`: **Phase 1 MVP 완료 보고서** (Day 1-28, 전체 요약) ⭐
+- `frontend/docs/DAY7_COMPLETION_REPORT.md`: Week 1 프론트엔드 완료 (17KB)
+- `backend/docs/issue-fixes-completion-report.md`: 코드 품질 개선 (18KB)
+- `backend/docs/redis-module-architecture.md`: Redis 아키텍처 (14KB)
+
+**사용 가이드**:
+- `docs/USER_GUIDE.md`: 사용자 가이드 (~1,200줄)
+- `docs/DEPLOYMENT.md`: 배포 가이드 (~1,300줄)
+- `backend/docs/API_REFERENCE.md`: API 레퍼런스 (~1,500줄)
+- `backend/docs/models-usage-guide.md`: SQLAlchemy 모델 사용 가이드 (20KB)
+- `backend/docs/environment-variables.md`: 환경 변수 설정 (11KB)
+- `frontend/docs/DAY_7_STATE_MANAGEMENT_GUIDE.md`: 상태 관리 가이드 (9.4KB)
+- `frontend/docs/USAGE_EXAMPLES.md`: React Query/Zustand 예제 (23KB)
+
+**최근 작업 (2025-11-06)**:
+- Next.js 16 빌드 이슈 해결 (Providers Client Component 분리)
+- API 설계 개선 (최신 팁 반환 방식)
+- UX 개선 (BackButton 브라우저 히스토리 사용)
+- Dockerfile 코드 스타일 통일
 
 ---
 
@@ -319,6 +210,91 @@ Backend API 서버
 ---
 
 **핵심 원칙**: 효율과 품질의 균형. 백엔드는 엄격한 TDD, 프론트엔드는 실용적 접근.
+
+---
+
+## 📚 Git 워크플로우
+
+### 브랜치 전략
+
+| 브랜치 | 역할 | 사용 시점 |
+|--------|------|-----------|
+| **dev** | 개발 브랜치 | 모든 개발 작업 (일상적 커밋) |
+| **main** | 배포 브랜치 | MVP/Phase 완성 후 병합 |
+
+**핵심 원칙**:
+- ✅ 개발은 항상 `dev` 브랜치에서
+- ✅ `main`은 완성된 안정 버전만
+- ✅ 혼자 개발 시 PR 불필요 (바로 푸시)
+
+### 일상 워크플로우
+
+```bash
+# 1. 작업 시작
+git checkout dev
+git pull origin dev
+
+# 2. 개발 후 커밋
+git add .
+git commit -m "타입: 간결한 제목
+
+- 상세 내용 1
+- 상세 내용 2
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+
+# 3. 푸시 (PR 없이 바로)
+git push origin dev
+```
+
+### 커밋 타입
+
+- `feat`: 새 기능
+- `fix`: 버그 수정
+- `docs`: 문서 변경
+- `refactor`: 리팩토링
+- `test`: 테스트 추가
+- `chore`: 빌드/설정 변경
+
+### Phase 완료 시 (Main 병합)
+
+```bash
+# 1. Dev 최종 테스트 완료 후
+git checkout main
+git merge dev
+
+# 2. 버전 태그 생성
+git tag -a v1.0.0-mvp -m "Phase 1 MVP Release
+
+- 주요 기능 목록
+- 테스트 결과
+- 성능 지표"
+
+# 3. Main 푸시
+git push origin main
+git push origin v1.0.0-mvp
+
+# 4. Dev로 복귀
+git checkout dev
+```
+
+### 자주 사용하는 명령어
+
+```bash
+# 상태 확인
+git status
+git log --oneline -10
+
+# 브랜치 확인
+git branch
+git branch -vv
+
+# 실수 복구 (푸시 전)
+git reset --soft HEAD~1  # 커밋 취소 (변경사항 유지)
+git commit --amend       # 커밋 메시지 수정
+```
 
 ---
 
