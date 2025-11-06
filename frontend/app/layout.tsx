@@ -1,11 +1,9 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { Inter } from 'next/font/google'
-import { Toaster } from 'react-hot-toast'
-import { ThemeProvider } from '@/components/theme-provider'
 import { Header, Footer } from '@/components/layout'
-import { QueryProvider } from '@/lib/providers'
 import { ErrorBoundary } from '@/components/common'
+import { Providers } from '@/components/providers'
 import { env } from '@/lib/env'
 
 const inter = Inter({
@@ -84,51 +82,15 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} antialiased min-h-screen gradient-bg`}>
         <ErrorBoundary>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            <QueryProvider>
-              <div className="relative flex min-h-screen flex-col">
-                <Header />
-                <main className="flex-1">
-                  {children}
-                </main>
-                <Footer />
-              </div>
-              <Toaster
-                position="bottom-right"
-                toastOptions={{
-                  duration: 4000,
-                  style: {
-                    background: '#363636',
-                    color: '#fff',
-                    borderRadius: '8px',
-                  },
-                  success: {
-                    style: {
-                      background: '#10b981',
-                    },
-                    iconTheme: {
-                      primary: '#fff',
-                      secondary: '#10b981',
-                    },
-                  },
-                  error: {
-                    style: {
-                      background: '#ef4444',
-                    },
-                    iconTheme: {
-                      primary: '#fff',
-                      secondary: '#ef4444',
-                    },
-                  },
-                }}
-              />
-            </QueryProvider>
-          </ThemeProvider>
+          <Providers>
+            <div className="relative flex min-h-screen flex-col">
+              <Header />
+              <main className="flex-1">
+                {children}
+              </main>
+              <Footer />
+            </div>
+          </Providers>
         </ErrorBoundary>
       </body>
     </html>

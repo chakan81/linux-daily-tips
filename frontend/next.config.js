@@ -6,6 +6,12 @@ const nextConfig = {
   // Enable standalone build for Docker
   output: 'standalone',
 
+  // Experimental: Skip static generation bailout (fixes Next.js 16 Context error)
+  experimental: {
+    // This disables static bailout for dynamic errors
+    staticGenerationRetryCount: 0,
+  },
+
   // Optimize images
   images: {
     domains: [],

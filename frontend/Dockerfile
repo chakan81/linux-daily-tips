@@ -2,13 +2,13 @@
 # Production and CI optimized
 
 # Base image with Node.js 22 LTS
-FROM node:22-alpine as base
+FROM node:22-alpine AS base
 
 # Set working directory
 WORKDIR /app
 
 # Install dependencies only when needed
-FROM base as deps
+FROM base AS deps
 
 # Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine
 # to understand why libc6-compat might be needed.
@@ -21,7 +21,7 @@ COPY package.json package-lock.json* ./
 RUN npm ci --only=production --legacy-peer-deps && npm cache clean --force
 
 # Development stage
-FROM base as development
+FROM base AS development
 
 # Install dependencies for Playwright (browsers need additional libs)
 RUN apk add --no-cache \
@@ -50,7 +50,7 @@ EXPOSE 3000
 CMD ["npm", "run", "dev"]
 
 # Testing stage (for CI)
-FROM base as testing
+FROM base AS testing
 
 # Install all dependencies including dev
 COPY package.json package-lock.json* ./
@@ -66,7 +66,7 @@ ENV NODE_ENV=test
 RUN npm run build
 
 # Production builder stage
-FROM base as builder
+FROM base AS builder
 
 # Copy all dependencies
 COPY --from=deps /app/node_modules ./node_modules
@@ -80,7 +80,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
 # Production stage
-FROM base as production
+FROM base AS production
 
 # Set environment
 ENV NODE_ENV=production

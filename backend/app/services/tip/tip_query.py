@@ -27,26 +27,29 @@ async def get_daily_tip(
     cache: Optional[CacheService] = None,
 ) -> Tip | None:
     """
-    특정 날짜의 활성화된 팁 조회 (캐싱 적용)
+    가장 최근의 활성화된 팁 조회 (캐싱 적용)
+
+    날짜 기반이 아니라 publish_date가 오늘 이전인 팁 중 가장 최근 팁을 반환합니다.
+    이렇게 하면 팁 업데이트를 건너뛰어도 항상 최신 팁을 보여줄 수 있습니다.
 
     캐싱 전략:
     - Key: "tip:daily:{YYYY-MM-DD}"
-    - TTL: 86400초 (24시간)
-    - 이유: 일일 팁은 하루에 한 번만 바뀜
+    - TTL: 3600초 (1시간)
+    - 이유: 하루에 여러 번 팁이 추가될 수 있으므로 짧은 TTL
 
     Args:
         db: 데이터베이스 세션
-        target_date: 조회할 날짜
+        target_date: 기준 날짜 (이 날짜 이전의 가장 최근 팁 반환)
         cache: Redis 캐시 서비스 (선택적)
 
     Returns:
-        Tip | None: 해당 날짜의 팁 또는 None (팁이 없는 경우)
+        Tip | None: 가장 최근의 팁 또는 None (팁이 없는 경우)
 
     Example:
         ```python
         tip = await get_daily_tip(db, date.today(), cache)
         if tip:
-            print(f"Today's tip: {tip.title}")
+            print(f"Latest tip: {tip.title}")
         ```
     """
     try:
@@ -60,20 +63,29 @@ async def get_daily_tip(
             logger.info(f"캐시 MISS for daily tip: {cache_key}")
 
         # 2. 캐시 MISS 또는 캐시 비활성 → DB 조회
-        stmt = select(Tip).where(
-            and_(Tip.publish_date == target_date, Tip.is_active == True)  # noqa: E712
+        # publish_date가 target_date 이하인 팁 중 가장 최근 것
+        stmt = (
+            select(Tip)
+            .where(
+                and_(
+                    Tip.publish_date <= target_date,
+                    Tip.is_active == True  # noqa: E712
+                )
+            )
+            .order_by(Tip.publish_date.desc())
+            .limit(1)
         )
         result = await db.execute(stmt)
         tip = result.scalar_one_or_none()
 
         if tip:
-            logger.info(f"Retrieved daily tip for {target_date}: {tip.id}")
-            # 3. 캐싱 (24시간 TTL)
+            logger.info(f"Retrieved latest tip (publish_date: {tip.publish_date}): {tip.id}")
+            # 3. 캐싱 (1시간 TTL - 짧게 설정하여 새 팁이 추가되면 빠르게 반영)
             if cache:
                 tip_dict = TipSchema.model_validate(tip).model_dump(mode='json')
-                await cache.set(cache_key, tip_dict, ttl=86400)
+                await cache.set(cache_key, tip_dict, ttl=3600)
         else:
-            logger.info(f"No active tip found for {target_date}")
+            logger.info(f"No active tip found before {target_date}")
 
         return tip
 

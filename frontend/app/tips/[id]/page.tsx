@@ -54,7 +54,7 @@ export default function TipDetailPage({ params }: TipDetailPageProps) {
     <div className="container-awwwards max-w-4xl mx-auto px-4 sm:px-8 lg:px-12 py-12">
       {/* Back Navigation */}
       <div className="mb-8">
-        <BackButton href="/tips" label="Back to Tips" />
+        <BackButton label="Back" />
       </div>
 
       {/* Main Content Card with Gradient Border */}
