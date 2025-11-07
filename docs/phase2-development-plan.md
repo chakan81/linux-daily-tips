@@ -45,7 +45,7 @@
 **백엔드 작업**:
 - [ ] LLM 설정 환경 변수 추가
   - `OPENAI_API_KEY` - OpenAI API 키
-  - `ANTHROPIC_API_KEY` - Claude API 키
+  - `BACKEND_ANTHROPIC_API_KEY` - Claude API 키
   - `LLM_PROVIDER` - 사용할 LLM 제공자 (openai/anthropic)
   - `LLM_MODEL` - 모델 이름 (gpt-4, claude-3-sonnet 등)
   - `LLM_MAX_TOKENS` - 최대 토큰 수

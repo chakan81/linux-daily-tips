@@ -35,14 +35,14 @@ services:
       DEBUG: "true"
       RELOAD: "true"
       LOG_LEVEL: DEBUG
-      CORS_ORIGINS: "http://localhost:3000,http://127.0.0.1:3000"
+      CORS_ORIGINS: '["http://localhost:3000","http://127.0.0.1:3000"]'
       # Database connection with detailed logging
-      DATABASE_URL: postgresql+asyncpg://postgres:postgres_dev_password@postgres:5432/linux_daily_tips?echo=true
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres_dev_password@postgres:5432/linux_daily_tips
       # Redis with detailed logging
       REDIS_URL: redis://:redis_dev_password@redis:6379/0
       # LLM API keys (for development testing)
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
-      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      BACKEND_ANTHROPIC_API_KEY: ${BACKEND_ANTHROPIC_API_KEY:-}
       # Terminal sandbox settings
       DOCKER_HOST: unix:///var/run/docker.sock
       TERMINAL_TIMEOUT: 30
@@ -58,7 +58,7 @@ services:
       # Expose debugger port
       - "5678:5678"
     command: >
-      uvicorn main:app
+      uvicorn app.main:app
       --host 0.0.0.0
       --port 8000
       --reload

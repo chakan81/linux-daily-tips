@@ -170,9 +170,9 @@ class Settings(BaseSettings):
     openai_temperature: float = Field(default=0.7)
 
     # Anthropic Configuration
-    anthropic_api_key: Optional[str] = Field(default=None)
-    anthropic_model: str = Field(default="claude-3-sonnet-20240229")
-    anthropic_max_tokens: int = Field(default=2000)
+    backend_anthropic_api_key: Optional[str] = Field(default=None)
+    backend_anthropic_model: str = Field(default="claude-3-sonnet-20240229")
+    backend_anthropic_max_tokens: int = Field(default=2000)
 
     @field_validator("openai_temperature")
     @classmethod
